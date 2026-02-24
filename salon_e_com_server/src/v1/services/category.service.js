@@ -1,8 +1,15 @@
 import Category from '../models/Category.js';
 
 export const listCategories = async (filters = {}) => {
-  // For now just return all categories sorted by name
-  return Category.find(filters).sort({ name: 1 }).lean();
+  const query = { ...filters };
+
+  if (query.status === 'all') {
+    delete query.status;
+  } else if (!query.status) {
+    query.status = 'ACTIVE';
+  }
+
+  return Category.find(query).sort({ name: 1 }).lean();
 };
 
 export const createCategory = async (data) => {
@@ -16,10 +23,39 @@ export const createCategory = async (data) => {
   return cat.toObject();
 };
 
+export const updateCategory = async (id, updateData) => {
+  const cat = await Category.findById(id);
+  if (!cat) throw new Error('Category not found');
+
+  // If status is being updated, handle children recursively
+  if (updateData.status && updateData.status !== cat.status) {
+    await updateStatusRecursively(id, updateData.status);
+  }
+
+  const updated = await Category.findByIdAndUpdate(id, updateData, { new: true });
+  return updated.toObject();
+};
+
+const updateStatusRecursively = async (parentId, newStatus) => {
+  const children = await Category.find({ parent: parentId });
+  for (const child of children) {
+    child.status = newStatus;
+    await child.save();
+    await updateStatusRecursively(child._id, newStatus);
+  }
+};
+
 export const deleteCategory = async (id) => {
   const cat = await Category.findById(id);
   if (!cat) throw new Error('Category not found');
-  await cat.remove();
+
+  // Check if it has children
+  const childrenCount = await Category.countDocuments({ parent: id });
+  if (childrenCount > 0) {
+    throw new Error('Cannot delete category with subcategories. Remove subcategories first.');
+  }
+
+  await Category.deleteOne({ _id: id });
   return cat.toObject();
 };
 

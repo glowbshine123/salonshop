@@ -65,6 +65,14 @@ export const createProduct = async (req, res) => {
             }
         }
 
+        if (productData.contentSections && typeof productData.contentSections === 'string') {
+            try {
+                productData.contentSections = JSON.parse(productData.contentSections);
+            } catch (error) {
+                console.error('[createProduct] Error parsing contentSections:', error);
+            }
+        }
+
         const product = await productService.createProduct(productData);
 
         // Admin Notification for New Product
@@ -126,6 +134,14 @@ export const updateProduct = async (req, res) => {
             if (imagePaths.length > 0) {
                 const existingImages = updateData.images ? (Array.isArray(updateData.images) ? updateData.images : [updateData.images]) : [];
                 updateData.images = [...existingImages, ...imagePaths];
+            }
+        }
+
+        if (updateData.contentSections && typeof updateData.contentSections === 'string') {
+            try {
+                updateData.contentSections = JSON.parse(updateData.contentSections);
+            } catch (error) {
+                console.error('[updateProduct] Error parsing contentSections:', error);
             }
         }
 

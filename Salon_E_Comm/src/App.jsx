@@ -113,7 +113,7 @@ const App = () => {
           </BrowserRouter>
         </CartProvider>
       </SocketProvider>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="bottom-right" reverseOrder={false} />
     </AuthProvider>
   );
 };

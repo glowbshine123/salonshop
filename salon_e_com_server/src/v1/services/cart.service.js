@@ -10,11 +10,13 @@ export const getCart = async (userId) => {
         return cart;
     }
 
-    // Enhance items with current stock info from Product collection
+    // Enhance items with current stock info and status from Product collection
     const enhancedItems = await Promise.all(cart.items.map(async (item) => {
         const product = await Product.findById(item.productId) || await Product.findOne({ slug: item.productId });
         const itemObj = item.toObject();
-        itemObj.availableStock = product ? product.inventoryCount : 0;
+        itemObj.inventoryCount = product ? product.inventoryCount : 0;
+        itemObj.status = product ? product.status : 'ACTIVE';
+        itemObj.expiryDate = product ? product.expiryDate : null;
         return itemObj;
     }));
 
@@ -173,19 +175,21 @@ export const updateCartItem = async (userId, productId, quantity) => {
     return await getCart(userId);
 };
 
-export const clearCart = async (userId) => {
+export const clearCart = async (userId, isPurchase = false) => {
     const cart = await Cart.findOne({ userId });
 
     if (!cart) {
         throw new Error('Cart not found');
     }
 
-    // Restore stock for all items
-    for (const item of cart.items) {
-        const product = await Product.findById(item.productId) || await Product.findOne({ slug: item.productId });
-        if (product) {
-            product.inventoryCount += item.quantity;
-            await product.save();
+    // Restore stock for all items ONLY if it's NOT a purchase
+    if (!isPurchase) {
+        for (const item of cart.items) {
+            const product = await Product.findById(item.productId) || await Product.findOne({ slug: item.productId });
+            if (product) {
+                product.inventoryCount += item.quantity;
+                await product.save();
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { Loader2, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Zap, LogIn } from 'lucide-react';
+import { Loader2, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Zap, LogIn, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from '@/context/AuthContext';
@@ -12,6 +12,8 @@ export default function CartPage() {
   const navigate = useNavigate();
   const { totalPrice, totalItems } = getCartTotal();
   const [updatingId, setUpdatingId] = useState(null);
+
+  const hasInvalidItems = items.some(item => (item.inventoryCount <= 0) || (item.quantity > item.inventoryCount) || (item.status === 'EXPIRED'));
 
   if (cartLoading || authLoading) {
     return (
@@ -153,26 +155,37 @@ export default function CartPage() {
                   </div>
 
                   <div className="flex items-center justify-between pt-4">
-                    {/* Qty Selector */}
-                    <div className="flex items-center bg-neutral-50 rounded-xl p-1 border border-neutral-100 w-fit">
-                      <button
-                        onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
-                        disabled={updatingId === item.productId}
-                        className="w-8 h-8 flex items-center justify-center hover:bg-white hover:rounded-lg transition-all text-neutral-600 disabled:opacity-30"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <span className="w-10 text-center text-xs font-black">
-                        {updatingId === item.productId ? <Loader2 size={12} className="animate-spin mx-auto text-blue-600" /> : item.quantity}
-                      </span>
-                      <button
-                        onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                        disabled={updatingId === item.productId || item.quantity >= (item.availableStock || 0)}
-                        title={item.quantity >= (item.availableStock || 0) ? "Maximum stock reached" : "Add one"}
-                        className="w-8 h-8 flex items-center justify-center hover:bg-white hover:rounded-lg transition-all text-neutral-600 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
-                      >
-                        <Plus size={14} />
-                      </button>
+                    {/* Stock Warning */}
+                    <div className="flex flex-col gap-1">
+                      {item.inventoryCount <= 0 ? (
+                        <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-lg">Out of Stock</span>
+                      ) : item.quantity > item.inventoryCount ? (
+                        <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-2 py-1 rounded-lg">Only {item.inventoryCount} left</span>
+                      ) : item.status === 'EXPIRED' ? (
+                        <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-lg">Product Expired</span>
+                      ) : null}
+
+                      {/* Qty Selector */}
+                      <div className="flex items-center bg-neutral-50 rounded-xl p-1 border border-neutral-100 w-fit">
+                        <button
+                          onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
+                          disabled={updatingId === item.productId}
+                          className="w-8 h-8 flex items-center justify-center hover:bg-white hover:rounded-lg transition-all text-neutral-600 disabled:opacity-30"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="w-10 text-center text-xs font-black">
+                          {updatingId === item.productId ? <Loader2 size={12} className="animate-spin mx-auto text-blue-600" /> : item.quantity}
+                        </span>
+                        <button
+                          onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
+                          disabled={updatingId === item.productId || item.quantity >= (item.inventoryCount || 0)}
+                          title={item.quantity >= (item.inventoryCount || 0) ? "Maximum stock reached" : "Add one"}
+                          className="w-8 h-8 flex items-center justify-center hover:bg-white hover:rounded-lg transition-all text-neutral-600 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
                     </div>
 
                     <button
@@ -217,12 +230,20 @@ export default function CartPage() {
 
             <Button
               asChild
-              className="w-full h-16 bg-neutral-900 text-white rounded-[24px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-neutral-900/20 active:scale-[0.98] group"
+              disabled={hasInvalidItems}
+              className={`w-full h-16 bg-neutral-900 text-white rounded-[24px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-neutral-900/20 active:scale-[0.98] group ${hasInvalidItems ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
             >
-              <Link to="/checkout" className="flex items-center justify-center">
-                PROCEED TO SECURE CHECKOUT
-                <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              {hasInvalidItems ? (
+                <div className="flex items-center justify-center gap-2">
+                  <AlertCircle size={20} className="text-rose-500" />
+                  REMOVE UNAVAILABLE ITEMS
+                </div>
+              ) : (
+                <Link to="/checkout" className="flex items-center justify-center">
+                  PROCEED TO SECURE CHECKOUT
+                  <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              )}
             </Button>
 
             <div className="space-y-4 pt-4">

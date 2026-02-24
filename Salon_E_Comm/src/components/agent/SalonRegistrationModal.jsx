@@ -16,7 +16,7 @@ export default function SalonRegistrationModal({ isOpen, onClose, onSuccess }) {
         city: '',
         state: '',
         pincode: '',
-        sellingCategories: '',
+        categories: '',
         password: ''
     });
 
@@ -49,11 +49,7 @@ export default function SalonRegistrationModal({ isOpen, onClose, onSuccess }) {
         setLoading(true);
 
         try {
-            const payload = {
-                ...formData,
-                sellingCategories: formData.sellingCategories.split(',').map(c => c.trim()).filter(Boolean)
-            };
-            await agentAPI.registerSalonOwner(payload);
+            await agentAPI.registerSalonOwner(formData);
             toast.success('Salon partner onboarded successfully!');
             onSuccess?.();
             onClose();
@@ -102,6 +98,16 @@ export default function SalonRegistrationModal({ isOpen, onClose, onSuccess }) {
                                         onChange={handleChange}
                                         className="w-full h-11 px-4 rounded-xl border border-neutral-200 bg-neutral-50/30 text-sm font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-neutral-300"
                                         placeholder="e.g. Luxe Hair Studio"
+                                    />
+                                </div>
+                                <div className="space-y-1.5 md:col-span-2">
+                                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Categories (What you are selling, comma separated)</label>
+                                    <input
+                                        name="categories"
+                                        value={formData.categories}
+                                        onChange={handleChange}
+                                        className="w-full h-11 px-4 rounded-xl border border-neutral-200 bg-neutral-50/30 text-sm font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-neutral-300"
+                                        placeholder="e.g. Chair, hair brush, etc."
                                     />
                                 </div>
                             </div>

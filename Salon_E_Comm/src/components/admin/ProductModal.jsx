@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Package, AlertCircle, CheckCircle2, Loader2, IndianRupee } from 'lucide-react';
+import { X, Upload, Package, AlertCircle, CheckCircle2, Loader2, IndianRupee, Plus, Trash2, AlignLeft, Table as TableIcon, ChevronUp, ChevronDown } from 'lucide-react';
 import { productAPI } from '../../services/apiService';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +19,8 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
         returnable: true,
         hsnCode: '',
         expiryDate: '',
-        weight: ''
+        weight: '',
+        contentSections: []
     });
     const [imageFiles, setImageFiles] = useState([]);
     const [imagePreviews, setImagePreviews] = useState([]);
@@ -44,7 +45,8 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                 returnable: product.returnable !== undefined ? product.returnable : true,
                 hsnCode: product.hsnCode || '',
                 expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : '',
-                weight: product.weight || ''
+                weight: product.weight || '',
+                contentSections: product.contentSections || []
             });
             // Handle existing images
             const existing = product.images && product.images.length > 0 ? product.images :
@@ -67,7 +69,8 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                 returnable: true,
                 hsnCode: '',
                 expiryDate: '',
-                weight: ''
+                weight: '',
+                contentSections: []
             });
             setImagePreviews([]);
         }
@@ -127,6 +130,58 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
         }
     };
 
+    const addSection = () => {
+        setFormData(prev => ({
+            ...prev,
+            contentSections: [
+                ...prev.contentSections,
+                { heading: '', sectionType: 'PARAGRAPH', content: '', specs: [] }
+            ]
+        }));
+    };
+
+    const removeSection = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            contentSections: prev.contentSections.filter((_, i) => i !== index)
+        }));
+    };
+
+    const updateSection = (index, updates) => {
+        setFormData(prev => ({
+            ...prev,
+            contentSections: prev.contentSections.map((s, i) => i === index ? { ...s, ...updates } : s)
+        }));
+    };
+
+    const addSpec = (sectionIndex) => {
+        const sections = [...formData.contentSections];
+        sections[sectionIndex].specs = [...(sections[sectionIndex].specs || []), { label: '', value: '' }];
+        setFormData(prev => ({ ...prev, contentSections: sections }));
+    };
+
+    const updateSpec = (sectionIndex, specIndex, updates) => {
+        const sections = [...formData.contentSections];
+        sections[sectionIndex].specs[specIndex] = { ...sections[sectionIndex].specs[specIndex], ...updates };
+        setFormData(prev => ({ ...prev, contentSections: sections }));
+    };
+
+    const removeSpec = (sectionIndex, specIndex) => {
+        const sections = [...formData.contentSections];
+        sections[sectionIndex].specs = sections[sectionIndex].specs.filter((_, i) => i !== specIndex);
+        setFormData(prev => ({ ...prev, contentSections: sections }));
+    };
+
+    const moveSection = (index, direction) => {
+        if ((direction === -1 && index === 0) || (direction === 1 && index === formData.contentSections.length - 1)) return;
+        const sections = [...formData.contentSections];
+        const temp = sections[index];
+        sections[index] = sections[index + direction];
+        sections[index + direction] = temp;
+        setFormData(prev => ({ ...prev, contentSections: sections }));
+    };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -136,7 +191,11 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
         try {
             const data = new FormData();
             Object.keys(formData).forEach(key => {
-                data.append(key, formData[key]);
+                if (key === 'contentSections') {
+                    data.append(key, JSON.stringify(formData[key]));
+                } else {
+                    data.append(key, formData[key]);
+                }
             });
 
             // Send kept existing images
@@ -186,9 +245,9 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
             />
 
             {/* Modal */}
-            <div className="relative bg-white w-full max-w-4xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row max-h-[90vh] border border-neutral-100">
+            <div className="relative bg-white w-full max-w-7xl rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 flex flex-col md:flex-row max-h-[92vh] border border-neutral-100/50">
                 {/* Left: Image Upload Zone */}
-                <div className="w-full md:w-2/5 bg-neutral-50/50 p-6 flex flex-col items-center justify-start border-b md:border-b-0 md:border-r border-neutral-100 overflow-y-auto custom-scrollbar">
+                <div className="w-full md:w-1/5 bg-neutral-50/50 p-6 flex flex-col items-center justify-start border-b md:border-b-0 md:border-r border-neutral-100 overflow-y-auto custom-scrollbar min-w-0">
                     <div className="w-full aspect-4/5 rounded-lg border-2 border-dashed border-neutral-200 bg-white relative group overflow-hidden flex flex-col items-center justify-center text-center p-5 mb-4 transition-all hover:border-emerald-500/50 hover:bg-emerald-50/10">
                         <label className="cursor-pointer w-full h-full flex flex-col items-center justify-center z-10">
                             <div className="w-16 h-16 bg-neutral-50 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-emerald-50 transition-all duration-500">
@@ -220,8 +279,8 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                     )}
                 </div>
 
-                {/* Right: Form Section */}
-                <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white">
+                {/* Center: Main Form Section */}
+                <div className="w-full md:w-2/5 p-6 overflow-y-auto custom-scrollbar bg-white border-r border-neutral-100 min-w-0">
                     <div className="flex justify-between items-start mb-6">
                         <div>
                             <div className="flex items-center gap-2 mb-0.5">
@@ -346,19 +405,19 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                                                 type="radio"
                                                 name="status"
                                                 value="ACTIVE"
-                                                checked={formData.status === 'ACTIVE'}
+                                                checked={formData.status === 'ACTIVE' || !formData.status}
                                                 onChange={handleChange}
                                                 className="hidden"
                                             />
                                             <div className={cn(
                                                 "w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all",
-                                                formData.status === 'ACTIVE' ? "border-emerald-500 bg-emerald-500" : "border-neutral-200"
+                                                (formData.status === 'ACTIVE' || !formData.status) ? "border-emerald-500 bg-emerald-500" : "border-neutral-200"
                                             )}>
-                                                {formData.status === 'ACTIVE' && <div className="w-1 h-1 bg-white rounded-full" />}
+                                                {(formData.status === 'ACTIVE' || !formData.status) && <div className="w-1 h-1 bg-white rounded-full" />}
                                             </div>
                                             <span className={cn(
                                                 "text-[9px] font-black uppercase tracking-widest",
-                                                formData.status === 'ACTIVE' ? "text-neutral-900" : "text-neutral-400"
+                                                (formData.status === 'ACTIVE' || !formData.status) ? "text-neutral-900" : "text-neutral-400"
                                             )}>Active</span>
                                         </label>
                                         <label className="flex items-center gap-2 cursor-pointer group">
@@ -372,7 +431,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                                             />
                                             <div className={cn(
                                                 "w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all",
-                                                formData.status === 'DRAFT' ? "border-rose-500 bg-rose-500" : "border-neutral-200"
+                                                formData.status === 'DRAFT' ? "border-sky-500 bg-sky-500" : "border-neutral-200"
                                             )}>
                                                 {formData.status === 'DRAFT' && <div className="w-1 h-1 bg-white rounded-full" />}
                                             </div>
@@ -380,6 +439,26 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                                                 "text-[9px] font-black uppercase tracking-widest",
                                                 formData.status === 'DRAFT' ? "text-neutral-900" : "text-neutral-400"
                                             )}>Draft</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="radio"
+                                                name="status"
+                                                value="EXPIRED"
+                                                checked={formData.status === 'EXPIRED'}
+                                                onChange={handleChange}
+                                                className="hidden"
+                                            />
+                                            <div className={cn(
+                                                "w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all",
+                                                formData.status === 'EXPIRED' ? "border-amber-500 bg-amber-500" : "border-neutral-200"
+                                            )}>
+                                                {formData.status === 'EXPIRED' && <div className="w-1 h-1 bg-white rounded-full" />}
+                                            </div>
+                                            <span className={cn(
+                                                "text-[9px] font-black uppercase tracking-widest",
+                                                formData.status === 'EXPIRED' ? "text-neutral-900" : "text-neutral-400"
+                                            )}>Expired</span>
                                         </label>
                                     </div>
                                 </div>
@@ -485,35 +564,181 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-neutral-400 ml-1">Technical Specification (Description)</label>
+                                <label className="text-[9px] font-black uppercase tracking-widest text-neutral-400 ml-1">Short Summary (Optional)</label>
                                 <textarea
                                     name="description"
                                     value={formData.description}
                                     onChange={handleChange}
-                                    placeholder="Enter exhaustive product details..."
-                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-md focus:border-emerald-500 outline-none transition-all font-bold text-sm min-h-[100px] resize-none shadow-sm placeholder:text-neutral-300"
+                                    placeholder="Brief overview..."
+                                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-md focus:border-emerald-500 outline-none transition-all font-bold text-sm min-h-[80px] resize-none shadow-sm placeholder:text-neutral-300"
                                 />
                             </div>
                         </div>
+                    </form>
+                </div>
 
-                        <div className="flex items-center gap-3 pt-4">
+                {/* Right: Dynamic Content Sections */}
+                <div className="w-full md:w-2/5 p-6 overflow-y-auto custom-scrollbar bg-neutral-50/30 flex flex-col min-w-0">
+                    <div className="flex-1">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+                                    <h2 className="text-lg font-black text-neutral-900 tracking-tighter uppercase">Content Blocks</h2>
+                                </div>
+                                <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-4">Detailed specs & descriptions</p>
+                            </div>
                             <button
                                 type="button"
-                                onClick={onClose}
-                                className="flex-1 py-3.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 font-black text-[10px] uppercase tracking-widest rounded-md transition-all active:scale-95"
+                                onClick={addSection}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-600 transition-all shadow-lg shadow-neutral-900/10 active:scale-95"
                             >
-                                Abort
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="flex-2 py-3.5 bg-neutral-900 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-md shadow-xl shadow-neutral-900/10 transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-50"
-                            >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 group-hover:scale-110 transition-transform" />}
-                                {product ? 'Update Inventory' : 'Finalize Registry'}
+                                <Plus size={14} /> Add Block
                             </button>
                         </div>
-                    </form>
+
+                        <div className="space-y-6">
+                            {formData.contentSections.length === 0 ? (
+                                <div className="py-20 text-center border-2 border-dashed border-neutral-200 rounded-2xl bg-white/50">
+                                    <Package className="mx-auto text-neutral-200 mb-3" size={32} />
+                                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest px-10">No content blocks added yet. Use structured sections for better presentation.</p>
+                                </div>
+                            ) : (
+                                formData.contentSections.map((section, sIndex) => (
+                                    <div key={sIndex} className="bg-white border border-neutral-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all animate-in slide-in-from-right-4">
+                                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex flex-col gap-1">
+                                                    <button type="button" onClick={() => moveSection(sIndex, -1)} className="text-neutral-300 hover:text-neutral-900 transition-colors disabled:opacity-0" disabled={sIndex === 0}><ChevronUp size={14} /></button>
+                                                    <button type="button" onClick={() => moveSection(sIndex, 1)} className="text-neutral-300 hover:text-neutral-900 transition-colors disabled:opacity-0" disabled={sIndex === formData.contentSections.length - 1}><ChevronDown size={14} /></button>
+                                                </div>
+                                                <div className="w-8 h-8 rounded-lg bg-neutral-50 flex items-center justify-center text-neutral-400 font-black text-xs">
+                                                    {sIndex + 1}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => updateSection(sIndex, { sectionType: 'PARAGRAPH' })}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                                                        section.sectionType === 'PARAGRAPH' ? "bg-neutral-900 text-white" : "bg-neutral-50 text-neutral-400 hover:bg-neutral-100"
+                                                    )}
+                                                >
+                                                    <AlignLeft size={12} className="inline mr-1" /> Para
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => updateSection(sIndex, { sectionType: 'TABLE' })}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                                                        section.sectionType === 'TABLE' ? "bg-neutral-900 text-white" : "bg-neutral-50 text-neutral-400 hover:bg-neutral-100"
+                                                    )}
+                                                >
+                                                    <TableIcon size={12} className="inline mr-1" /> Specs
+                                                </button>
+                                                <div className="w-px h-6 bg-neutral-100 mx-1" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeSection(sIndex)}
+                                                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-neutral-400 ml-1">Section Heading</label>
+                                                <input
+                                                    type="text"
+                                                    value={section.heading}
+                                                    onChange={(e) => updateSection(sIndex, { heading: e.target.value })}
+                                                    placeholder="e.g. Overview, Key Features, Specs..."
+                                                    className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-100 rounded-lg focus:border-emerald-500 outline-none transition-all font-bold text-sm"
+                                                />
+                                            </div>
+
+                                            {section.sectionType === 'PARAGRAPH' ? (
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest text-neutral-400 ml-1">Para Content</label>
+                                                    <textarea
+                                                        value={section.content}
+                                                        onChange={(e) => updateSection(sIndex, { content: e.target.value })}
+                                                        placeholder="Enter descriptive content..."
+                                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-lg focus:border-emerald-500 outline-none transition-all font-bold text-sm min-h-[120px] resize-none"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between ml-1">
+                                                        <label className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Specification Pairs</label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => addSpec(sIndex)}
+                                                            className="text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:underline"
+                                                        >
+                                                            + Add Row
+                                                        </button>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {section.specs.map((spec, spIndex) => (
+                                                            <div key={spIndex} className="flex gap-2 items-center group/spec">
+                                                                <input
+                                                                    type="text"
+                                                                    value={spec.label}
+                                                                    onChange={(e) => updateSpec(sIndex, spIndex, { label: e.target.value })}
+                                                                    placeholder="Label"
+                                                                    className="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-100 rounded-lg focus:border-emerald-500 outline-none transition-all font-bold text-[11px]"
+                                                                />
+                                                                <input
+                                                                    type="text"
+                                                                    value={spec.value}
+                                                                    onChange={(e) => updateSpec(sIndex, spIndex, { value: e.target.value })}
+                                                                    placeholder="Value"
+                                                                    className="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-100 rounded-lg focus:border-emerald-500 outline-none transition-all font-bold text-[11px]"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeSpec(sIndex, spIndex)}
+                                                                    className="p-1.5 text-neutral-300 hover:text-rose-500 transition-colors opacity-0 group-hover/spec:opacity-100"
+                                                                >
+                                                                    <X size={12} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        {section.specs.length === 0 && (
+                                                            <p className="text-[9px] font-bold text-neutral-300 italic text-center py-4 bg-neutral-50/50 rounded-lg border border-dashed">No specs added yet</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-neutral-100 flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 py-4 bg-white border border-neutral-200 text-neutral-600 font-black text-[10px] uppercase tracking-widest rounded-xl transition-all active:scale-95 shadow-sm hover:bg-neutral-50"
+                        >
+                            Abort
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            className="flex-2 py-4 bg-neutral-900 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl shadow-neutral-900/10 transition-all flex items-center justify-center gap-2 group active:scale-95 disabled:opacity-50"
+                        >
+                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 group-hover:scale-110 transition-transform" />}
+                            {product ? 'Update Inventory' : 'Finalize Registry'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

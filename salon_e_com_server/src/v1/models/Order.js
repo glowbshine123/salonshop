@@ -17,7 +17,11 @@ const orderSchema = new mongoose.Schema({
         enum: ['UNPAID', 'PAID', 'FAILED'],
         default: 'UNPAID'
     },
-    paymentMethod: { type: String },
+    paymentMethod: {
+        type: String,
+        enum: ['COD', 'UPI', 'CARD', 'ONLINE', 'POSTPAID'],
+        default: 'ONLINE'
+    },
 
     items: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },

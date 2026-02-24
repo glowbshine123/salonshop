@@ -23,6 +23,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [categories, setCategories] = useState('');
   const [userType, setUserType] = useState('SALON_OWNER');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -76,6 +77,7 @@ export default function SignupPage() {
         email,
         password,
         phone,
+        categories,
         role: userType,
       });
 
@@ -96,8 +98,8 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 p-2 flex flex-col relative">
-        <div className="flex-1 bg-neutral-50/50 p-4 md:p-12 flex flex-col justify-center relative overflow-hidden">
+      <div className="w-full lg:w-1/2 p-2 h-screen sticky top-0">
+        <div className="h-full bg-neutral-50/50 p-4 md:p-12 flex flex-col justify-center relative overflow-y-auto scrollbar-hide">
 
           {/* Back Button */}
           <Link to="/" className="absolute top-4 left-4">
@@ -107,7 +109,7 @@ export default function SignupPage() {
             </Button>
           </Link>
 
-          <div className="max-w-xs w-full mx-auto relative z-10 space-y-4 pt-4">
+          <div className="max-w-xs w-full mx-auto relative z-10 space-y-4 pt-128">
             {/* Branding */}
             <AuthHeader title="Get Started." subtitle="Create your account to get started." />
 
@@ -132,6 +134,11 @@ export default function SignupPage() {
               <div className="space-y-1">
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input id="phone" type="tel" placeholder="+91 00000 00000" className="h-12 bg-white border-neutral-200 rounded-sm" value={phone} onChange={e => setPhone(e.target.value)} required />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="categories">Categories (What you are selling, comma separated)</Label>
+                <Input id="categories" placeholder="Chair, hair brush, etc." className="h-12 bg-white border-neutral-200 rounded-sm" value={categories} onChange={e => setCategories(e.target.value)} />
               </div>
 
               <div className="space-y-1">

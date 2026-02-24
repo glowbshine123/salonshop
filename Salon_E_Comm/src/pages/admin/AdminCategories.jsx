@@ -15,6 +15,7 @@ import {
 import { categoryAPI } from '../../services/apiService';
 import { toast } from 'react-hot-toast';
 import AdminCardSkeleton from '../../components/common/AdminCardSkeleton';
+import { cn } from '@/lib/utils';
 
 export default function AdminCategories() {
     const [categories, setCategories] = useState([]);
@@ -26,7 +27,7 @@ export default function AdminCategories() {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const res = await categoryAPI.getAll();
+            const res = await categoryAPI.getAll({ status: 'all' });
             setCategories(res.data || []);
         } catch (err) {
             console.error('Failed to fetch categories:', err);
@@ -62,6 +63,18 @@ export default function AdminCategories() {
         }
     };
 
+    const handleStatusToggle = async (cat) => {
+        const newStatus = cat.status === 'ACTIVE' ? 'DEACTIVE' : 'ACTIVE';
+        try {
+            await categoryAPI.update(cat._id, { status: newStatus });
+            toast.success(`${cat.name} and its children are now ${newStatus}`);
+            fetchCategories();
+        } catch (err) {
+            console.error('Failed to update status:', err);
+            toast.error('Status sync failed');
+        }
+    };
+
     const handleDelete = async (id) => {
         if (window.confirm('Confirm permanent deletion of this classification tier? Assets may be affected.')) {
             try {
@@ -69,7 +82,8 @@ export default function AdminCategories() {
                 toast.success('Classification Tier purged');
                 fetchCategories();
             } catch (err) {
-                toast.error('Failed to purge classification');
+                console.error('Delete failed:', err);
+                toast.error(err.response?.data?.message || 'Failed to purge category');
             }
         }
     };
@@ -178,17 +192,42 @@ export default function AdminCategories() {
                                                 <Layers size={20} />
                                             </div>
                                             <div>
-                                                <h4 className="text-lg font-bold text-neutral-900">{cat.name}</h4>
+                                                <div className="flex items-center gap-3">
+                                                    <h4 className="text-lg font-bold text-neutral-900">{cat.name}</h4>
+                                                    <span className={cn(
+                                                        "text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border",
+                                                        cat.status === 'ACTIVE'
+                                                            ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                                                            : "bg-neutral-100 text-neutral-400 border-neutral-200"
+                                                    )}>
+                                                        {cat.status || 'ACTIVE'}
+                                                    </span>
+                                                </div>
                                                 <span className="text-xs text-neutral-500 font-medium">{getSubcategories(cat._id).length} Subcategories</span>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => handleDelete(cat._id)}
-                                            className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                                            title="Delete Category"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleStatusToggle(cat)}
+                                                className={cn(
+                                                    "relative w-10 h-5 rounded-full transition-all duration-300 flex items-center px-1",
+                                                    cat.status === 'ACTIVE' ? "bg-emerald-500" : "bg-neutral-200"
+                                                )}
+                                                title={cat.status === 'ACTIVE' ? "Deactivate" : "Activate"}
+                                            >
+                                                <div className={cn(
+                                                    "w-3 h-3 bg-white rounded-full shadow-sm transition-all duration-300",
+                                                    cat.status === 'ACTIVE' ? "translate-x-5" : "translate-x-0"
+                                                )} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(cat._id)}
+                                                className="p-2 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                title="Delete Category"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </div>
 
 
@@ -197,16 +236,37 @@ export default function AdminCategories() {
                                             {getSubcategories(cat._id).map(sub => (
                                                 <div key={sub._id} className="flex items-center justify-between p-3 bg-white border border-neutral-100 rounded-xl group hover:border-emerald-200 transition-colors">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
-                                                        <span className="text-sm font-semibold text-neutral-700">{sub.name}</span>
+                                                        <div className={cn(
+                                                            "w-1.5 h-1.5 rounded-full",
+                                                            sub.status === 'ACTIVE' ? "bg-emerald-400" : "bg-neutral-300"
+                                                        )} />
+                                                        <span className={cn(
+                                                            "text-sm font-semibold transition-colors",
+                                                            sub.status === 'ACTIVE' ? "text-neutral-700" : "text-neutral-400"
+                                                        )}>{sub.name}</span>
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleDelete(sub._id)}
-                                                        className="text-neutral-300 hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                        title="Delete Subcategory"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleStatusToggle(sub)}
+                                                            className={cn(
+                                                                "relative w-8 h-4 rounded-full transition-all duration-300 flex items-center px-0.5",
+                                                                sub.status === 'ACTIVE' ? "bg-emerald-500" : "bg-neutral-200"
+                                                            )}
+                                                            title={sub.status === 'ACTIVE' ? "Deactivate" : "Activate"}
+                                                        >
+                                                            <div className={cn(
+                                                                "w-2.5 h-2.5 bg-white rounded-full shadow-sm transition-all duration-300",
+                                                                sub.status === 'ACTIVE' ? "translate-x-4" : "translate-x-0"
+                                                            )} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(sub._id)}
+                                                            className="text-neutral-300 hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                            title="Delete Subcategory"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

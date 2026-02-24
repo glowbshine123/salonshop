@@ -37,6 +37,8 @@ const userSchema = new mongoose.Schema({
         totalEarnings: { type: Number, default: 0 },
         currentMonthEarnings: { type: Number, default: 0 },
         lastSettlementDate: { type: Date },
+        panCard: { type: String },
+        aadharCard: { type: String },
         wallet: {
             pending: { type: Number, default: 0 },
             available: { type: Number, default: 0 }
@@ -65,6 +67,7 @@ const userSchema = new mongoose.Schema({
             totalLifetimeEarned: { type: Number, default: 0 }
         },
         salonName: { type: String },
+        categories: [String],
         sellingCategories: [String],
         // rewardHistory moved to RewardLedger model for scalability
         shippingAddresses: [{

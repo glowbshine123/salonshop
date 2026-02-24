@@ -62,15 +62,15 @@ export const updateStatus = async (req, res) => {
         const order = await orderService.updateOrderStatus(req.params.id, status);
 
         // Trigger Notification
-        await notificationService.createNotification({
-            userId: order.customerId,
-            title: 'Order Status Updated',
-            description: `Your order #${order.orderNumber?.split('-')[2] || order._id.slice(-6).toUpperCase()} is now ${status}.`,
-            type: 'ORDER',
-            actionText: 'View Order',
-            actionLink: '/my-orders',
-            metadata: { orderId: order._id }
-        });
+        // await notificationService.createNotification({
+        //     userId: order.customerId,
+        //     title: 'Order Status Updated',
+        //     description: `Your order #${order.orderNumber?.split('-')[2] || order._id.slice(-6).toUpperCase()} is now ${status}.`,
+        //     type: 'ORDER',
+        //     actionText: 'View Order',
+        //     actionLink: '/my-orders',
+        //     metadata: { orderId: order._id }
+        // });
 
         res.json(order);
     } catch (error) {

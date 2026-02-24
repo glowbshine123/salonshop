@@ -11,11 +11,14 @@ import {
     navigationMenuTriggerStyle,
 } from '../components/ui/navigation-menu';
 
+import { useSearchParams } from 'react-router-dom';
 import SecuritySettings from '../components/common/SecuritySettings';
 
 export default function ProfilePage() {
     const { user, setUser } = useAuth();
-    const [activeTab, setActiveTab] = useState('PROFILE');
+    const [searchParams] = useSearchParams();
+    const initialTab = searchParams.get('tab')?.toUpperCase();
+    const [activeTab, setActiveTab] = useState(initialTab === 'SECURITY' ? 'SECURITY' : 'PROFILE');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({

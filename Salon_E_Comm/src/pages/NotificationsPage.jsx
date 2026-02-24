@@ -10,16 +10,18 @@ import {
     Trash2,
     ChevronRight,
     Sparkles,
-    Loader2
+    Loader2,
+    Shield
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { notificationAPI } from '../services/apiService';
 import { useSocket } from '../context/SocketContext';
 import { toast } from 'react-hot-toast';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export default function NotificationsPage() {
+    const navigate = useNavigate();
     const { setUnreadCount } = useSocket();
     const location = useLocation();
     const isDashboard = location.pathname.startsWith('/admin') || location.pathname.startsWith('/agent-dashboard');
@@ -65,11 +67,16 @@ export default function NotificationsPage() {
         }
     };
 
-    const markSingleRead = async (id) => {
+    const markSingleRead = async (notif) => {
         try {
-            await notificationAPI.markAsRead(id);
-            setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
-            setUnreadCount(prev => Math.max(0, prev - 1));
+            if (!notif.isRead) {
+                await notificationAPI.markAsRead(notif._id);
+                setNotifications(notifications.map(n => n._id === notif._id ? { ...n, isRead: true } : n));
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }
+            if (notif.actionLink) {
+                navigate(notif.actionLink);
+            }
         } catch (error) {
             console.error('Failed to mark as read');
         }
@@ -87,6 +94,7 @@ export default function NotificationsPage() {
             case 'REWARD': return Sparkles;
             case 'COMMISSION': return CreditCard;
             case 'REGISTRATION': return CheckCircle2;
+            case 'SECURITY': return Shield;
             default: return Bell;
         }
     };
@@ -96,6 +104,7 @@ export default function NotificationsPage() {
             case 'ORDER': return 'blue';
             case 'PAYMENT': return 'emerald';
             case 'REWARD': return 'amber';
+            case 'SECURITY': return 'red';
             default: return 'emerald';
         }
     };
@@ -149,8 +158,8 @@ export default function NotificationsPage() {
                                 return (
                                     <div
                                         key={notif._id}
-                                        className={`group relative bg-white p-6 rounded-[32px] border ${notif.isRead ? 'border-neutral-100' : 'border-emerald-100 bg-emerald-50/10'} shadow-sm hover:shadow-xl hover:shadow-neutral-900/5 transition-all duration-500`}
-                                        onClick={() => !notif.isRead && markSingleRead(notif._id)}
+                                        className={`group relative bg-white p-6 rounded-[32px] border ${notif.isRead ? 'border-neutral-100' : 'border-emerald-100 bg-emerald-50/10'} shadow-sm hover:shadow-xl hover:shadow-neutral-900/5 transition-all duration-500 cursor-pointer`}
+                                        onClick={() => markSingleRead(notif)}
                                     >
                                         {!notif.isRead && (
                                             <div className="absolute top-6 right-6 w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -180,9 +189,9 @@ export default function NotificationsPage() {
 
                                                 <div className="mt-4 flex items-center gap-4">
                                                     {notif.actionLink && (
-                                                        <Link to={notif.actionLink} className="text-[10px] font-black text-neutral-900 uppercase tracking-widest flex items-center gap-1 hover:text-emerald-600 transition-colors">
+                                                        <div className="px-5 py-2.5 bg-neutral-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-600 transition-all flex items-center gap-2">
                                                             {notif.actionText || 'View Details'} <ChevronRight size={14} />
-                                                        </Link>
+                                                        </div>
                                                     )}
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); deleteNotification(notif._id); }}

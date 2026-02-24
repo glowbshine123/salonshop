@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/common/ProductCard';
 import { productAPI } from '../services/apiService';
 import { Button } from '../components/ui/button';
-import { ArrowRight, Sparkles, ShieldCheck, Zap, Heart, TrendingUp, Star, Search, Truck, Coins } from 'lucide-react';
+import { ArrowRight, Sparkles, ShieldCheck, Zap, Heart, TrendingUp, Star, Search, Truck, Coins, Lock } from 'lucide-react';
 import ProductCardSkeleton from '../components/common/ProductCardSkeleton';
 import DotGrid from '../components/ui/dot-grid';
 
@@ -234,11 +234,11 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-emerald-50 rounded-[40px] translate-x-3 translate-y-3 group-hover:translate-x-1 group-hover:translate-y-1 transition-transform -z-10" />
               <div className="p-10 bg-white rounded-[40px] border border-neutral-100 h-full hover:border-emerald-100 transition-colors">
                 <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6 text-emerald-600">
-                  <Coins size={32} />
+                  <Lock size={32} />
                 </div>
-                <h3 className="text-3xl font-black mb-3 -tracking-tight text-neutral-900">Earn With Us</h3>
+                <h3 className="text-3xl font-black mb-3 -tracking-tight text-neutral-900">Secure Payments</h3>
                 <p className="text-neutral-500 text-base leading-relaxed font-medium">
-                  Become an agent and earn commission on every order you facilitate.
+                  Pay safely with trusted and encrypted payment methods.
                 </p>
               </div>
             </div>

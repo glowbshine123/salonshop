@@ -111,6 +111,10 @@ export default function ProductDetailPage() {
       navigate("/auth/signin");
       return;
     }
+    if (product.status === 'EXPIRED') {
+      toast.error("This product has expired and cannot be purchased.");
+      return;
+    }
     setAddingToCart(true);
     try {
       await addToCart(product._id, quantity);
@@ -201,7 +205,7 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-medium text-neutral-900 leading-tight">{product.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-medium text-neutral-900 leading-tight capitalize">{product.name}</h1>
 
               <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
                 <span className="px-3 py-1 bg-neutral-100 text-neutral-600 rounded-lg">{product.category}</span>
@@ -241,8 +245,8 @@ export default function ProductDetailPage() {
 
                 <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-neutral-500">
                   <span>Quantity</span>
-                  <span className={product.inventoryCount < 10 ? "text-rose-500" : "text-emerald-600"}>
-                    {product.inventoryCount > 0 ? `${product.inventoryCount} Available` : "Out of Stock"}
+                  <span className={product.status === 'EXPIRED' ? "text-rose-500" : (product.inventoryCount < 10 ? "text-rose-500" : "text-emerald-600")}>
+                    {product.status === 'EXPIRED' ? "Product Expired" : (product.inventoryCount > 0 ? `${product.inventoryCount} Available` : "Out of Stock")}
                   </span>
                 </div>
 
@@ -273,13 +277,14 @@ export default function ProductDetailPage() {
 
                   <Button
                     onClick={handleAddToCart}
-                    disabled={addingToCart || product.inventoryCount <= 0}
+                    disabled={addingToCart || product.inventoryCount <= 0 || product.status === 'EXPIRED'}
                     className={cn(
-                      "flex-1 h-14 rounded-2xl bg-neutral-900 hover:bg-black text-white font-bold text-lg uppercase tracking-wide transition-all shadow-xl shadow-neutral-900/20"
+                      "flex-1 h-14 rounded-2xl bg-neutral-900 hover:bg-black text-white font-bold text-lg uppercase tracking-wide transition-all shadow-xl shadow-neutral-900/20",
+                      (product.inventoryCount <= 0 || product.status === 'EXPIRED') && "opacity-50 cursor-not-allowed"
                     )}
                   >
                     {addingToCart ? <Loader2 className="animate-spin mr-2" /> : <ShoppingCart className="mr-2" size={20} />}
-                    {'Add to Basket'}
+                    {product.status === 'EXPIRED' ? 'Item Expired' : (product.inventoryCount <= 0 ? 'Out of Stock' : 'Add to Basket')}
                   </Button>
                 </div>
               </div>
@@ -288,10 +293,42 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="mt-20 border-t border-neutral-100 pt-16">
-          <h3 className="text-2xl font-black text-neutral-900 mb-6">Product Details</h3>
-          <div className="prose prose-neutral max-w-none text-neutral-500">
-            <p>{product.description}</p>
-            {/* You can parse HTML here if description contains it, or list specs */}
+          <h3 className="text-2xl font-black text-neutral-900 mb-8 uppercase tracking-tighter">System Specifications & Content</h3>
+
+          <div className="space-y-12">
+            {product.contentSections && product.contentSections.length > 0 ? (
+              product.contentSections.map((section, idx) => (
+                <div key={idx} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-1.5 h-6 bg-neutral-900 rounded-full"></div>
+                    <h4 className="text-lg font-black text-neutral-900 uppercase tracking-tight">{section.heading}</h4>
+                  </div>
+
+                  {section.sectionType === 'PARAGRAPH' ? (
+                    <div className="prose prose-neutral max-w-none">
+                      <p className="text-neutral-500 leading-relaxed font-medium whitespace-pre-wrap">
+                        {section.content}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1 rounded-3xl p-8 border border-neutral-100">
+                      {section.specs?.map((spec, sIdx) => (
+                        <div key={sIdx} className="flex items-center gap-4 py-2.5 group border-b border-neutral-100/50 last:border-0 border-dashed">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/10 group-hover:bg-emerald-500 transition-all shrink-0" />
+                          <span className="text-[11px] font-black uppercase tracking-widest text-neutral-400 min-w-[160px]">{spec.label}</span>
+                          <span className="text-neutral-300 font-black">:</span>
+                          <span className="text-sm font-black text-neutral-800 group-hover:text-emerald-600 transition-all uppercase tracking-tight">{spec.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="prose prose-neutral max-w-none text-neutral-500">
+                <p className="font-medium leading-relaxed">{product.description}</p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -2,7 +2,7 @@ import * as categoryService from '../services/category.service.js';
 
 export const getCategories = async (req, res) => {
   try {
-    const categories = await categoryService.listCategories();
+    const categories = await categoryService.listCategories(req.query);
     res.json(categories);
   } catch (err) {
     console.error('[getCategories] Error:', err.message);
@@ -33,4 +33,14 @@ export const deleteCategory = async (req, res) => {
   }
 };
 
-export default { getCategories, createCategory, deleteCategory };
+export const updateCategory = async (req, res) => {
+  try {
+    const category = await categoryService.updateCategory(req.params.id, req.body);
+    res.json(category);
+  } catch (err) {
+    console.error('[updateCategory] Error:', err.message);
+    res.status(400).json({ message: err.message });
+  }
+};
+
+export default { getCategories, createCategory, deleteCategory, updateCategory };

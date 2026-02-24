@@ -2,10 +2,20 @@ import CommissionTransaction from '../models/CommissionTransaction.js';
 import User from '../models/User.js';
 
 export const calculateCommission = async (order) => {
-    // Condition: Order must be > 1000 and NOT COD
-    const isPrepaid = order.paymentMethod !== 'COD' && order.paymentMethod !== 'cod';
+    if (!order.agentId || order.commissionCalculated || (order.status !== 'COMPLETED' && order.status !== 'DELIVERED' && order.status !== 'PAID')) {
+        return null;
+    }
 
-    if (!order.agentId || order.commissionCalculated || (order.status !== 'COMPLETED' && order.status !== 'DELIVERED' && order.status !== 'PAID') || order.total <= 1000 || !isPrepaid) {
+    const rewardService = await import('./reward.service.js');
+    const deliveredCount = await rewardService.getDeliveredOrderCount(order.customerId, order._id);
+    const isFirstOrder = deliveredCount === 0;
+
+    const normalizedPaymentMethod = (order.paymentMethod || '').toUpperCase();
+    const isCodOrPostPaid = normalizedPaymentMethod === 'COD' || normalizedPaymentMethod === 'POSTPAID' || normalizedPaymentMethod === 'POST PAID';
+    const isPrepaid = !isCodOrPostPaid;
+
+    // Condition: Must be > 1000 and Prepaid, unless it's the first order
+    if (!isFirstOrder && (order.total <= 1000 || !isPrepaid)) {
         return null;
     }
 

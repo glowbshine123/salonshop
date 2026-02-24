@@ -55,29 +55,40 @@ export const getRewardTransactions = async (userId, page = 1, limit = 20) => {
 };
 
 // --- HELPER: Get Delivered Order Count (Eligible Orders Only) ---
-export const getDeliveredOrderCount = async (userId) => {
-    // UPDATED: Only count orders that actually earned rewards (have a Ledger entry)
-    return await RewardLedger.countDocuments({ userId });
+export const getDeliveredOrderCount = async (userId, excludeOrderId = null) => {
+    const query = {
+        customerId: userId,
+        status: { $nin: ['CANCELLED', 'REFUNDED'] }
+    };
+    if (excludeOrderId) {
+        query._id = { $ne: excludeOrderId };
+    }
+    return await Order.countDocuments(query);
 };
 
 // --- 1. CALCULATE POINTS (Preview) ---
-export const calculatePoints = async (userId, orderTotal, paymentMethod, pointsRedeemed = 0) => {
+export const calculatePoints = async (userId, orderTotal, paymentMethod, pointsRedeemed = 0, currentOrderId = null) => {
     // Global Rule: No Rewards if Points were Redeemed
     if (pointsRedeemed > 0) return 0;
 
-    const deliveredCount = await getDeliveredOrderCount(userId);
+    const deliveredCount = await getDeliveredOrderCount(userId, currentOrderId);
+    const isFirstOrder = deliveredCount === 0;
 
-    // Rule: Order must be PREPAID (enforced above)
-    // First Order: Min > 300
-    if (deliveredCount === 0) {
+    const normalizedPaymentMethod = (paymentMethod || '').toUpperCase();
+    const isCodOrPostPaid = normalizedPaymentMethod === 'COD' || normalizedPaymentMethod === 'POSTPAID' || normalizedPaymentMethod === 'POST PAID';
+    const isPrepaid = !isCodOrPostPaid;
+
+    // First Order: Bypasses both conditions (Min 1000 and Prepaid)
+    if (isFirstOrder) {
+        // Keep a reasonable minimum of 300 for the very first order to earn points
         if (orderTotal > 300) {
             return Math.floor(orderTotal * 0.10);
         }
         return 0;
     }
 
-    // Subsequent Orders: Min > 1000
-    if (orderTotal > 1000) {
+    // Subsequent Orders: Must be > 1000 AND Prepaid
+    if (orderTotal > 1000 && isPrepaid) {
         return Math.floor(orderTotal * 0.10);
     }
 
@@ -93,12 +104,8 @@ export const processOrderDeliveryRewards = async (orderId) => {
     const existingLedger = await RewardLedger.findOne({ orderId: order._id });
     if (existingLedger) return;
 
-    // paymentMethod validation
-    let paymentMethod = 'ONLINE';
-    if (order.paymentMethod === 'COD') paymentMethod = 'COD';
-
     // Calculate points based on the rules
-    const pointsToEarn = await calculatePoints(order.customerId, order.total, paymentMethod, order.pointsUsed);
+    const pointsToEarn = await calculatePoints(order.customerId, order.total, order.paymentMethod, order.pointsUsed, order._id);
 
     if (pointsToEarn > 0) {
         // Expiry: 4 months from NOW (Delivery time)
@@ -170,7 +177,8 @@ export const validateRedemption = async (userId, pointsRequested, orderTotal, pa
     if (!isUnlocked) return { pointsToRedeem: 0, error: "Reward redemption is locked until you complete 3 delivered orders." };
 
     // 2. Check Order Type (Prepaid only)
-    if (paymentMethod !== 'ONLINE' && paymentMethod !== 'upi' && paymentMethod !== 'card') {
+    const normalizedPaymentMethod = (paymentMethod || '').toUpperCase();
+    if (normalizedPaymentMethod !== 'ONLINE' && normalizedPaymentMethod !== 'UPI' && normalizedPaymentMethod !== 'CARD') {
         return { pointsToRedeem: 0, error: "Rewards can only be redeemed on prepaid orders (UPI or Card)." };
     }
 

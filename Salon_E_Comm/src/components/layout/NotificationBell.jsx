@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCircle2, Package, CreditCard, Sparkles, Clock, ChevronRight } from 'lucide-react';
+import { Bell, CheckCircle2, Package, CreditCard, Sparkles, Clock, ChevronRight, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../../context/SocketContext';
 import { notificationAPI } from '../../services/apiService';
 import {
@@ -14,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export default function NotificationBell() {
+    const navigate = useNavigate();
     const { notifications, setNotifications, unreadCount, setUnreadCount } = useSocket();
     const [loading, setLoading] = useState(false);
 
@@ -47,11 +49,16 @@ export default function NotificationBell() {
         }
     };
 
-    const handleRead = async (id) => {
+    const handleRead = async (notif) => {
         try {
-            await notificationAPI.markAsRead(id);
-            setUnreadCount(prev => Math.max(0, prev - 1));
-            setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+            if (!notif.isRead) {
+                await notificationAPI.markAsRead(notif._id);
+                setUnreadCount(prev => Math.max(0, prev - 1));
+                setNotifications(prev => prev.map(n => n._id === notif._id ? { ...n, isRead: true } : n));
+            }
+            if (notif.actionLink) {
+                navigate(notif.actionLink);
+            }
         } catch (error) {
             console.error('Failed to mark as read:', error);
         }
@@ -64,6 +71,7 @@ export default function NotificationBell() {
             case 'REWARD': return <Sparkles size={16} />;
             case 'COMMISSION': return <CreditCard size={16} />;
             case 'REGISTRATION': return <CheckCircle2 size={16} />;
+            case 'SECURITY': return <Shield size={16} />;
             default: return <Bell size={16} />;
         }
     };
@@ -73,6 +81,7 @@ export default function NotificationBell() {
             case 'ORDER': return 'text-blue-600 bg-blue-50';
             case 'PAYMENT': return 'text-emerald-600 bg-emerald-50';
             case 'REWARD': return 'text-amber-600 bg-amber-50';
+            case 'SECURITY': return 'text-red-600 bg-red-50';
             default: return 'text-neutral-600 bg-neutral-50';
         }
     };
@@ -111,7 +120,7 @@ export default function NotificationBell() {
                                     "p-3 rounded-2xl cursor-pointer transition-all mb-1 mx-1",
                                     !notif.isRead ? "bg-emerald-50/30 hover:bg-emerald-50/50" : "hover:bg-neutral-50"
                                 )}
-                                onSelect={() => handleRead(notif._id)}
+                                onSelect={() => handleRead(notif)}
                             >
                                 <div className="flex gap-4">
                                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", getColor(notif.type))}>

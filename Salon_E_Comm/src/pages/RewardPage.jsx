@@ -46,8 +46,8 @@ export default function RewardPage() {
     if (!wallet) return null;
 
     return (
-        <div className="min-h-screen bg-neutral-50 lg:pl-64 py-8 px-4 lg:px-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen bg-neutral-50 py-8 px-4 lg:px-8">
+            <div className="max-w-7xl mx-auto space-y-8 px-8">
                 {/* Header */}
                 <div>
                     <h1 className="text-3xl font-black text-neutral-900 tracking-tight">My Rewards</h1>
@@ -167,9 +167,9 @@ export default function RewardPage() {
                                         </td>
                                         <td className="p-6">
                                             <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${trx.type === 'REWARD_EARNED' ? 'bg-emerald-50 text-emerald-600' :
-                                                    trx.type === 'REWARD_REDEEMED' ? 'bg-blue-50 text-blue-600' :
-                                                        trx.type === 'REWARD_EXPIRED' ? 'bg-red-50 text-red-600' :
-                                                            'bg-neutral-100 text-neutral-600'
+                                                trx.type === 'REWARD_REDEEMED' ? 'bg-blue-50 text-blue-600' :
+                                                    trx.type === 'REWARD_EXPIRED' ? 'bg-red-50 text-red-600' :
+                                                        'bg-neutral-100 text-neutral-600'
                                                 }`}>
                                                 {trx.type.replace('REWARD_', '')}
                                             </span>

@@ -12,7 +12,7 @@ const generateToken = (id, role) => {
 
 // Internal helper for user creation without token generation
 export const baseCreateUser = async (userData) => {
-    const { email, password, firstName, lastName, role, phone, agentId } = userData;
+    const { email, password, firstName, lastName, role, phone, agentId, categories, panCard, aadharCard, address } = userData;
 
     // Check if user exists
     const normalizedEmail = email.toLowerCase();
@@ -40,13 +40,17 @@ export const baseCreateUser = async (userData) => {
     if (newUserObj.role === 'SALON_OWNER') {
         newUserObj.salonOwnerProfile = {
             agentId: agentId || null,
-            rewardPoints: { locked: 0, available: 0 }
+            rewardPoints: { locked: 0, available: 0 },
+            categories: categories ? categories.split(',').map(c => c.trim()).filter(Boolean) : []
         };
     } else if (newUserObj.role === 'AGENT') {
         newUserObj.agentProfile = {
             commissionRate: 0.10,
             referralCode: `REF-${firstName.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`,
-            wallet: { pending: 0, available: 0 }
+            wallet: { pending: 0, available: 0 },
+            panCard: panCard || '',
+            aadharCard: aadharCard || '',
+            address: address || {}
         };
     }
 
@@ -70,11 +74,23 @@ export const baseCreateUser = async (userData) => {
         });
     }
 
+    // 1.1 Security Notification for new users
+    await notificationService.createNotification({
+        userId: user._id,
+        title: 'Security Recommendation',
+        description: 'For better security, we recommend changing your password. Go to My Profile > Security > Change Password.',
+        type: 'SECURITY',
+        priority: 'MEDIUM',
+        actionText: 'Change Password',
+        actionLink: '/profile?tab=SECURITY'
+    });
+
     // 2. Admin Notification for New Registration
     const referringAgent = agentId ? await User.findById(agentId) : null;
+    const roleLabel = user.role === 'AGENT' ? 'Agent' : 'Salon Owner';
     await notificationService.notifyAdmins({
-        title: 'New Account Registered',
-        description: `A new ${user.role.replace('_', ' ')} (${user.firstName} ${user.lastName}) has joined the platform${referringAgent ? ` via Agent ${referringAgent.firstName} ${referringAgent.lastName}` : ''}.`,
+        title: `New ${roleLabel} Registered`,
+        description: `A new ${roleLabel} (${user.firstName} ${user.lastName}) has joined the platform${referringAgent ? ` via Agent ${referringAgent.firstName} ${referringAgent.lastName}` : ''}.`,
         type: 'REGISTRATION',
         priority: user.role === 'AGENT' ? 'HIGH' : 'MEDIUM',
         metadata: { userId: user._id, agentId }

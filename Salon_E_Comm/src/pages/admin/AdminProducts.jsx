@@ -226,6 +226,7 @@ export default function AdminProducts() {
                                 <SelectItem value="all" className="text-[10px] font-bold uppercase tracking-widest cursor-pointer">ALL STATUS</SelectItem>
                                 <SelectItem value="ACTIVE" className="text-[10px] font-bold uppercase tracking-widest cursor-pointer">ACTIVE</SelectItem>
                                 <SelectItem value="DEACTIVE" className="text-[10px] font-bold uppercase tracking-widest cursor-pointer">DEACTIVE</SelectItem>
+                                <SelectItem value="EXPIRED" className="text-[10px] font-bold uppercase tracking-widest cursor-pointer">EXPIRED</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -365,13 +366,14 @@ export default function AdminProducts() {
                                                     "w-28 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-sm ring-1 ring-inset",
                                                     (p.status || 'ACTIVE') === 'ACTIVE'
                                                         ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-                                                        : "bg-rose-50 text-rose-700 ring-rose-600/20"
+                                                        : (p.status === 'EXPIRED' ? "bg-amber-50 text-amber-700 ring-amber-600/20" : "bg-rose-50 text-rose-700 ring-rose-600/20")
                                                 )}>
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
                                                     <SelectItem value="ACTIVE" className="text-[9px] font-black uppercase tracking-widest cursor-pointer">ACTIVE</SelectItem>
                                                     <SelectItem value="DEACTIVE" className="text-[9px] font-black uppercase tracking-widest cursor-pointer">DEACTIVE</SelectItem>
+                                                    <SelectItem value="EXPIRED" className="text-[9px] font-black uppercase tracking-widest cursor-pointer">EXPIRED</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </td>

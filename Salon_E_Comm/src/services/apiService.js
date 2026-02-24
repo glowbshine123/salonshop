@@ -95,8 +95,9 @@ export const orderAPI = {
 
 
 export const categoryAPI = {
-    getAll: () => api.get('/categories'),
+    getAll: (params) => api.get('/categories', { params }),
     create: (data) => api.post('/categories', data),
+    update: (id, data) => api.patch(`/categories/${id}`, data),
     delete: (id) => api.delete(`/categories/${id}`),
 };
 

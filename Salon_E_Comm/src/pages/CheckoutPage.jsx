@@ -26,7 +26,7 @@ import toast from 'react-hot-toast';
 export default function CheckoutPage() {
   const { user } = useAuth();
   const [shippingMethod, setShippingMethod] = useState('default');
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('ONLINE');
   const [agentId, setAgentId] = useState('');
   const [agents, setAgents] = useState([]);
   const [agentVerified, setAgentVerified] = useState(false);
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
         throw new Error('Failed to create order on server');
       }
 
-      if (paymentMethod === 'cod') {
+      if (paymentMethod === 'COD') {
         try { await clearCart(); } catch (clearErr) { }
 
         toast.success('Order placed successfully!');
@@ -401,34 +401,44 @@ export default function CheckoutPage() {
                 <h2 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Payment Protocol</h2>
               </div>
               <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {[
-                    { id: 'upi', label: 'UPI / QR', icon: Zap, sub: 'GPay, PhonePe' },
-                    { id: 'card', label: 'CARDS', icon: CreditCard, sub: 'Debit / Credit' },
-                    { id: 'cod', label: 'COD', icon: Truck, sub: 'Pay on arrival' }
+                    { id: 'ONLINE', label: 'ONLINE PAYMENT', icon: Zap, sub: 'UPI/QR, CARD' },
+                    { id: 'COD', label: 'COD', icon: Truck, sub: 'Pay on arrival' }
                   ].map((method) => (
                     <div
                       key={method.id}
-                      onClick={() => setPaymentMethod(method.id)}
-                      className={`cursor-pointer p-6 rounded-[32px] border-2 transition-all flex flex-col items-center text-center gap-3 ${paymentMethod === method.id
+                      onClick={() => {
+                        setPaymentMethod(method.id);
+                        if (method.id === 'COD') {
+                          setRedeemRewards(false);
+                          setPointsToRedeem(0);
+                        }
+                      }}
+                      className={`cursor-pointer p-6 rounded-[32px] border-2 transition-all flex items-center gap-6 ${paymentMethod === method.id
                         ? 'bg-emerald-50 border-emerald-500 shadow-lg shadow-emerald-500/10'
                         : 'bg-white border-neutral-100 hover:border-neutral-200'
                         }`}
                     >
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${paymentMethod === method.id ? 'bg-emerald-500 text-white' : 'bg-neutral-50 text-neutral-400'
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${paymentMethod === method.id ? 'bg-emerald-500 text-white' : 'bg-neutral-50 text-neutral-400'
                         }`}>
-                        <method.icon size={24} />
+                        <method.icon size={28} />
                       </div>
-                      <div>
-                        <p className={`text-xs font-black uppercase tracking-widest ${paymentMethod === method.id ? 'text-emerald-700' : 'text-neutral-900'
+                      <div className="text-left">
+                        <p className={`text-sm font-black uppercase tracking-widest ${paymentMethod === method.id ? 'text-emerald-700' : 'text-neutral-900'
                           }`}>{method.label}</p>
-                        <p className="text-[10px] font-bold text-neutral-400 mt-1 uppercase tracking-tighter">{method.sub}</p>
+                        <p className="text-[10px] font-bold text-neutral-400 mt-1 uppercase tracking-widest">{method.sub}</p>
                       </div>
+                      {paymentMethod === method.id && (
+                        <div className="ml-auto">
+                          <CheckCircle2 className="text-emerald-500" size={24} />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
 
-                {paymentMethod === 'cod' && (
+                {paymentMethod === 'COD' && (
                   <div className="mt-6 p-4 bg-amber-50/50 rounded-2xl border border-amber-100 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
                     <Info size={16} className="text-amber-600 mt-0.5 shrink-0" />
                     <div>
@@ -513,6 +523,7 @@ export default function CheckoutPage() {
                           <div className="flex items-center gap-3 mb-3">
                             <input
                               type="checkbox"
+                              disabled={paymentMethod === 'COD'}
                               checked={redeemRewards}
                               onChange={(e) => {
                                 const checked = e.target.checked;
@@ -525,9 +536,12 @@ export default function CheckoutPage() {
                                   setPointsToRedeem(0);
                                 }
                               }}
-                              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-gray-300"
+                              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-gray-300 disabled:opacity-50"
                             />
-                            <label className="text-xs font-black text-neutral-900 uppercase tracking-wide">Redeem Rewards</label>
+                            <label className={`text-xs font-black uppercase tracking-wide ${paymentMethod === 'COD' ? 'text-neutral-400' : 'text-neutral-900'}`}>
+                              Redeem Rewards
+                              {paymentMethod === 'COD' && <span className="ml-2 text-[8px] italic">(Prepaid Only)</span>}
+                            </label>
                           </div>
 
                           {redeemRewards && (

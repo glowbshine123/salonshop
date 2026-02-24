@@ -163,6 +163,7 @@ export default function AdminUsers() {
                             <tr className="bg-neutral-50/30">
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Salon Owner</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Contact</th>
+                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Categories</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Assigned Agent</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Status</th>
                                 {/* <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50 text-right">actions</th> */}
@@ -217,6 +218,34 @@ export default function AdminUsers() {
                                                     <Phone size={12} className="text-neutral-300 shrink-0" />
                                                     <span className="text-xs font-medium">{salon.phone || 'N/A'}</span>
                                                 </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex flex-wrap gap-1.5 max-w-[200px]">
+                                                {(salon.salonOwnerProfile?.categories || []).slice(0, 3).map((cat, i) => (
+                                                    <span key={i} className="px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md text-[9px] font-bold uppercase tracking-wider border border-neutral-200">
+                                                        {cat}
+                                                    </span>
+                                                ))}
+                                                {(salon.salonOwnerProfile?.categories || []).length > 3 && (
+                                                    <div className="relative group/tooltip">
+                                                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black uppercase tracking-wider border border-emerald-100 cursor-help">
+                                                            +{(salon.salonOwnerProfile?.categories || []).length - 3}
+                                                        </span>
+                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-neutral-900 text-white text-[10px] rounded-xl opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-neutral-800">
+                                                            <div className="font-black uppercase tracking-widest mb-2 border-b border-white/10 pb-1 text-emerald-400">All Categories</div>
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {salon.salonOwnerProfile.categories.map((cat, i) => (
+                                                                    <span key={i} className="bg-white/10 px-1.5 py-0.5 rounded uppercase tracking-wider">{cat}</span>
+                                                                ))}
+                                                            </div>
+                                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-neutral-900" />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {(salon.salonOwnerProfile?.categories || []).length === 0 && (
+                                                    <span className="text-[10px] text-neutral-300 italic font-medium">None specified</span>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">

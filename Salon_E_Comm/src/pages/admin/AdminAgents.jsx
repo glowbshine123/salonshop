@@ -22,7 +22,11 @@ import {
     ArrowUpRight,
     ChevronDown,
     UserPlus,
-    MapPin
+    MapPin,
+    Eye,
+    EyeOff,
+    RefreshCcw,
+    Copy
 } from 'lucide-react';
 import { userAPI, adminAPI } from '../../services/apiService';
 import StatCard from '../../components/admin/StatCard';
@@ -48,13 +52,42 @@ export default function AdminAgents() {
     // Registration Modal State
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [regLoading, setRegLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [regData, setRegData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         phone: '',
-        password: ''
+        password: '',
+        panCard: '',
+        aadharCard: '',
+        address: {
+            street: '',
+            city: '',
+            state: '',
+            zip: '',
+            country: 'India'
+        }
     });
+
+    const generatePassword = () => {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let password = "";
+        for (let i = 0; i < 12; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        setRegData(prev => ({ ...prev, password }));
+        setShowPassword(true);
+    };
+
+    const copyToClipboard = () => {
+        if (!regData.password) {
+            toast.error('No password to copy');
+            return;
+        }
+        navigator.clipboard.writeText(regData.password);
+        toast.success('Password copied to clipboard');
+    };
 
     const fetchAgents = async () => {
         try {
@@ -80,7 +113,22 @@ export default function AdminAgents() {
             await adminAPI.createAgent(regData);
             toast.success('Agent Executive created successfully!');
             setShowRegisterModal(false);
-            setRegData({ firstName: '', lastName: '', email: '', phone: '', password: '' });
+            setRegData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                phone: '',
+                password: '',
+                panCard: '',
+                aadharCard: '',
+                address: {
+                    street: '',
+                    city: '',
+                    state: '',
+                    zip: '',
+                    country: 'India'
+                }
+            });
             fetchAgents(); // Refresh list
         } catch (error) {
             toast.error(error.response?.data?.message || 'Creation failed');
@@ -338,8 +386,8 @@ export default function AdminAgents() {
             {/* Registration Modal */}
             {showRegisterModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/40 backdrop-blur-[2px] animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-xl rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-neutral-100">
-                        <div className="p-8 border-b border-neutral-50 flex items-center justify-between bg-neutral-50/30">
+                    <div className="bg-white w-full max-w-xl rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-neutral-100 flex flex-col max-h-[90vh]">
+                        <div className="p-8 border-b border-neutral-50 flex items-center justify-between bg-neutral-50/30 shrink-0">
                             <div>
                                 <h3 className="text-xl font-bold text-neutral-900 tracking-wide uppercase">Add New Agent</h3>
                                 <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Register a new agent executive</p>
@@ -352,99 +400,201 @@ export default function AdminAgents() {
                             </button>
                         </div>
 
-                        <form onSubmit={handleRegisterAgent} className="p-8 space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+                            <form onSubmit={handleRegisterAgent} className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">First Name</label>
+                                        <div className="relative">
+                                            <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="Jane"
+                                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                                value={regData.firstName}
+                                                onChange={e => setRegData({ ...regData, firstName: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Last Name</label>
+                                        <div className="relative">
+                                            <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="Doe"
+                                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                                value={regData.lastName}
+                                                onChange={e => setRegData({ ...regData, lastName: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">First Name</label>
+                                    <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Email Address</label>
                                     <div className="relative">
-                                        <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="agent@salon.com"
+                                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                            value={regData.email}
+                                            onChange={e => setRegData({ ...regData, email: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">PAN Card</label>
                                         <input
                                             type="text"
                                             required
-                                            placeholder="Jane"
-                                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
-                                            value={regData.firstName}
-                                            onChange={e => setRegData({ ...regData, firstName: e.target.value })}
+                                            placeholder="ABCDE1234F"
+                                            className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                            value={regData.panCard}
+                                            onChange={e => setRegData({ ...regData, panCard: e.target.value.toUpperCase() })}
                                         />
                                     </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Last Name</label>
-                                    <div className="relative">
-                                        <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Aadhar Card</label>
                                         <input
                                             type="text"
                                             required
-                                            placeholder="Doe"
-                                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
-                                            value={regData.lastName}
-                                            onChange={e => setRegData({ ...regData, lastName: e.target.value })}
+                                            placeholder="1234 5678 9012"
+                                            className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                            value={regData.aadharCard}
+                                            onChange={e => setRegData({ ...regData, aadharCard: e.target.value })}
                                         />
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Email Address</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
-                                    <input
-                                        type="email"
-                                        required
-                                        placeholder="agent@salon.com"
-                                        className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
-                                        value={regData.email}
-                                        onChange={e => setRegData({ ...regData, email: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Phone Number</label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                <div className="space-y-4 pt-2 border-t border-neutral-50">
+                                    <label className="text-[10px] font-black text-neutral-900 uppercase tracking-widest block">Address Details</label>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Street Address</label>
                                         <input
-                                            type="tel"
+                                            type="text"
                                             required
-                                            placeholder="+91..."
-                                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
-                                            value={regData.phone}
-                                            onChange={e => setRegData({ ...regData, phone: e.target.value })}
+                                            placeholder="Flat/House No, Building, Street"
+                                            className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                            value={regData.address.street}
+                                            onChange={e => setRegData({ ...regData, address: { ...regData.address, street: e.target.value } })}
                                         />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">City</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="City"
+                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                                value={regData.address.city}
+                                                onChange={e => setRegData({ ...regData, address: { ...regData.address, city: e.target.value } })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">State</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="State"
+                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                                value={regData.address.state}
+                                                onChange={e => setRegData({ ...regData, address: { ...regData.address, state: e.target.value } })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Zip Code</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="Zip"
+                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                                value={regData.address.zip}
+                                                onChange={e => setRegData({ ...regData, address: { ...regData.address, zip: e.target.value } })}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
+                                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-neutral-50">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Phone Number</label>
+                                        <div className="relative">
+                                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                            <input
+                                                type="tel"
+                                                required
+                                                placeholder="+91..."
+                                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                                value={regData.phone}
+                                                onChange={e => setRegData({ ...regData, phone: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                </div>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Password</label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
-                                        <input
-                                            type="password"
-                                            required
-                                            minLength={6}
-                                            placeholder="••••••••"
-                                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
-                                            value={regData.password}
-                                            onChange={e => setRegData({ ...regData, password: e.target.value })}
-                                        />
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                required
+                                                minLength={6}
+                                                placeholder="••••••••"
+                                                className="w-full pl-10 pr-10 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all placeholder:text-neutral-200"
+                                                value={regData.password}
+                                                onChange={e => setRegData({ ...regData, password: e.target.value })}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-neutral-500 transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                                            </button>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={copyToClipboard}
+                                            className="px-4 py-2 bg-neutral-50 hover:bg-emerald-50 border border-neutral-100 hover:border-emerald-200 rounded-xl transition-all text-neutral-400 hover:text-emerald-600"
+                                            title="Copy Password"
+                                        >
+                                            <Copy size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={generatePassword}
+                                            className="px-4 py-2 bg-neutral-50 hover:bg-emerald-50 border border-neutral-100 hover:border-emerald-200 rounded-xl transition-all text-neutral-400 hover:text-emerald-600"
+                                            title="Generate Password"
+                                        >
+                                            <RefreshCcw size={16} />
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <button
-                                type="submit"
-                                disabled={regLoading}
-                                className="w-full py-4 bg-neutral-900 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-neutral-900/10 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
-                            >
-                                {regLoading ? <Loader2 className="animate-spin" size={16} /> : (
-                                    <>
-                                        SAVE AGENT
-                                        <ArrowUpRight size={16} />
-                                    </>
-                                )}
-                            </button>
-                        </form>
+                                <button
+                                    type="submit"
+                                    disabled={regLoading}
+                                    className="w-full py-4 bg-neutral-900 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-neutral-900/10 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+                                >
+                                    {regLoading ? <Loader2 className="animate-spin" size={16} /> : (
+                                        <>
+                                            SAVE AGENT
+                                            <ArrowUpRight size={16} />
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

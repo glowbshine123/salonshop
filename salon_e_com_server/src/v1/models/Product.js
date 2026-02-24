@@ -20,9 +20,18 @@ const productSchema = new mongoose.Schema({
     weight: { type: String },
     tags: [String],
     images: [String],
+    contentSections: [{
+        heading: { type: String, required: true },
+        sectionType: { type: String, enum: ['PARAGRAPH', 'TABLE'], default: 'PARAGRAPH' },
+        content: { type: String }, // For PARAGRAPH
+        specs: [{ // For TABLE
+            label: String,
+            value: String
+        }]
+    }],
     status: {
         type: String,
-        enum: ['ACTIVE', 'DRAFT', 'ARCHIVED'],
+        enum: ['ACTIVE', 'DRAFT', 'ARCHIVED', 'EXPIRED'],
         default: 'DRAFT'
     }
 }, {
