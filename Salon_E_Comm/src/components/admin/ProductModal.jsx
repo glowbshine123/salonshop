@@ -346,19 +346,19 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                                                 type="radio"
                                                 name="status"
                                                 value="ACTIVE"
-                                                checked={formData.status === 'ACTIVE'}
+                                                checked={formData.status === 'ACTIVE' || !formData.status}
                                                 onChange={handleChange}
                                                 className="hidden"
                                             />
                                             <div className={cn(
                                                 "w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all",
-                                                formData.status === 'ACTIVE' ? "border-emerald-500 bg-emerald-500" : "border-neutral-200"
+                                                (formData.status === 'ACTIVE' || !formData.status) ? "border-emerald-500 bg-emerald-500" : "border-neutral-200"
                                             )}>
-                                                {formData.status === 'ACTIVE' && <div className="w-1 h-1 bg-white rounded-full" />}
+                                                {(formData.status === 'ACTIVE' || !formData.status) && <div className="w-1 h-1 bg-white rounded-full" />}
                                             </div>
                                             <span className={cn(
                                                 "text-[9px] font-black uppercase tracking-widest",
-                                                formData.status === 'ACTIVE' ? "text-neutral-900" : "text-neutral-400"
+                                                (formData.status === 'ACTIVE' || !formData.status) ? "text-neutral-900" : "text-neutral-400"
                                             )}>Active</span>
                                         </label>
                                         <label className="flex items-center gap-2 cursor-pointer group">
@@ -372,7 +372,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                                             />
                                             <div className={cn(
                                                 "w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all",
-                                                formData.status === 'DRAFT' ? "border-rose-500 bg-rose-500" : "border-neutral-200"
+                                                formData.status === 'DRAFT' ? "border-sky-500 bg-sky-500" : "border-neutral-200"
                                             )}>
                                                 {formData.status === 'DRAFT' && <div className="w-1 h-1 bg-white rounded-full" />}
                                             </div>
@@ -380,6 +380,26 @@ export default function ProductModal({ isOpen, onClose, product, categories, onS
                                                 "text-[9px] font-black uppercase tracking-widest",
                                                 formData.status === 'DRAFT' ? "text-neutral-900" : "text-neutral-400"
                                             )}>Draft</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="radio"
+                                                name="status"
+                                                value="EXPIRED"
+                                                checked={formData.status === 'EXPIRED'}
+                                                onChange={handleChange}
+                                                className="hidden"
+                                            />
+                                            <div className={cn(
+                                                "w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all",
+                                                formData.status === 'EXPIRED' ? "border-amber-500 bg-amber-500" : "border-neutral-200"
+                                            )}>
+                                                {formData.status === 'EXPIRED' && <div className="w-1 h-1 bg-white rounded-full" />}
+                                            </div>
+                                            <span className={cn(
+                                                "text-[9px] font-black uppercase tracking-widest",
+                                                formData.status === 'EXPIRED' ? "text-neutral-900" : "text-neutral-400"
+                                            )}>Expired</span>
                                         </label>
                                     </div>
                                 </div>

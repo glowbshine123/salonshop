@@ -22,7 +22,7 @@ const productSchema = new mongoose.Schema({
     images: [String],
     status: {
         type: String,
-        enum: ['ACTIVE', 'DRAFT', 'ARCHIVED'],
+        enum: ['ACTIVE', 'DRAFT', 'ARCHIVED', 'EXPIRED'],
         default: 'DRAFT'
     }
 }, {

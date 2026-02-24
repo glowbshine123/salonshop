@@ -29,13 +29,15 @@ export const createOrder = async (userId, orderData) => {
             throw new Error(`Product ${item.productId} not found`);
         }
 
-        if (typeof product.inventoryCount === 'number' && product.inventoryCount < item.quantity) {
-            // This is a safety check. Stock should have been reserved by cart logic already.
-            throw new Error(`Insufficient stock for product ${product.name}. Available: ${product.inventoryCount}`);
-        }
-
         const price = product.price;
         subtotal += price * item.quantity;
+
+        // Stock is already reserved by cart.service.js
+        // We just verify it here.
+        if (typeof product.inventoryCount === 'number' && product.inventoryCount < 0) {
+            // This shouldn't happen if reservation worked, but good for safety
+            throw new Error(`Insufficient stock for product ${product.name}`);
+        }
 
         orderItems.push({
             productId: product._id,
@@ -127,6 +129,14 @@ export const createOrder = async (userId, orderData) => {
     if (pointsUsed > 0) {
         const rewardService = await import('./reward.service.js');
         await rewardService.executeRedemption(userId, order._id, pointsUsed);
+    }
+
+    // Clear Cart (isPurchase = true to keep stock decremented)
+    try {
+        const cartService = await import('./cart.service.js');
+        await cartService.clearCart(userId, true);
+    } catch (cartErr) {
+        console.warn('Failed to clear cart after order creation:', cartErr.message);
     }
 
     await notificationService.createNotification({

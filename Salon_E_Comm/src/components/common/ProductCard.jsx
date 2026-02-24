@@ -49,14 +49,22 @@ export default function ProductCard({ product }) {
         <img
           src={product.images?.[0] || product.image || imgPlaceholder}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 ease-out"
+          className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 ease-out ${(product.inventoryCount <= 0 || product.status === 'EXPIRED') ? 'grayscale opacity-60' : ''}`}
         />
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+        <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
           {product.status === 'NEW' && (
             <span className="bg-neutral-900 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-lg">
               NEW
+            </span>
+          )}
+          {product.status === 'EXPIRED' ? (
+            <span className="bg-rose-600 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-lg">
+              EXPIRED
+            </span>
+          ) : product.inventoryCount <= 0 && (
+            <span className="bg-rose-500 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-lg">
+              OUT OF STOCK
             </span>
           )}
         </div>

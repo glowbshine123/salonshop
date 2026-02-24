@@ -2,6 +2,13 @@
 import Product from '../models/Product.js';
 
 export const listProducts = async (filters = {}) => {
+    // New: Check for expired products before listing
+    try {
+        await checkAndNotifyExpiredProducts();
+    } catch (err) {
+        console.error('Error auto-checking expiry:', err);
+    }
+
     const query = {};
 
     // Exclude Filter (for related products)
@@ -13,11 +20,14 @@ export const listProducts = async (filters = {}) => {
     if (filters.status && filters.status !== 'all') {
         query.status = filters.status;
     } else if (!filters.status) {
+        // Default for public homepage
         query.status = 'ACTIVE';
     }
 
-    // New: Hide expired products from users by default (unless specifically requested/admin view)
-    if (!filters.showExpired || filters.showExpired === 'false') {
+    // New: Hide expired products from users by default (unless specifically requested/all view/admin view)
+    const showingExpired = filters.showExpired === 'true' || filters.status === 'all' || filters.status === 'EXPIRED';
+
+    if (!showingExpired) {
         const now = new Date();
         query.$or = [
             { expiryDate: { $gt: now } },
@@ -219,8 +229,7 @@ export const checkAndNotifyExpiredProducts = async () => {
         });
 
         product.isExpiryNotified = true;
-        // Optionally auto-archive or just rely on the filter
-        // product.status = 'ARCHIVED'; 
+        product.status = 'EXPIRED';
         await product.save();
     }
 

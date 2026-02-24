@@ -111,6 +111,10 @@ export default function ProductDetailPage() {
       navigate("/auth/signin");
       return;
     }
+    if (product.status === 'EXPIRED') {
+      toast.error("This product has expired and cannot be purchased.");
+      return;
+    }
     setAddingToCart(true);
     try {
       await addToCart(product._id, quantity);
@@ -201,7 +205,7 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-medium text-neutral-900 leading-tight">{product.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-medium text-neutral-900 leading-tight capitalize">{product.name}</h1>
 
               <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
                 <span className="px-3 py-1 bg-neutral-100 text-neutral-600 rounded-lg">{product.category}</span>
@@ -241,8 +245,8 @@ export default function ProductDetailPage() {
 
                 <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-neutral-500">
                   <span>Quantity</span>
-                  <span className={product.inventoryCount < 10 ? "text-rose-500" : "text-emerald-600"}>
-                    {product.inventoryCount > 0 ? `${product.inventoryCount} Available` : "Out of Stock"}
+                  <span className={product.status === 'EXPIRED' ? "text-rose-500" : (product.inventoryCount < 10 ? "text-rose-500" : "text-emerald-600")}>
+                    {product.status === 'EXPIRED' ? "Product Expired" : (product.inventoryCount > 0 ? `${product.inventoryCount} Available` : "Out of Stock")}
                   </span>
                 </div>
 
@@ -273,13 +277,14 @@ export default function ProductDetailPage() {
 
                   <Button
                     onClick={handleAddToCart}
-                    disabled={addingToCart || product.inventoryCount <= 0}
+                    disabled={addingToCart || product.inventoryCount <= 0 || product.status === 'EXPIRED'}
                     className={cn(
-                      "flex-1 h-14 rounded-2xl bg-neutral-900 hover:bg-black text-white font-bold text-lg uppercase tracking-wide transition-all shadow-xl shadow-neutral-900/20"
+                      "flex-1 h-14 rounded-2xl bg-neutral-900 hover:bg-black text-white font-bold text-lg uppercase tracking-wide transition-all shadow-xl shadow-neutral-900/20",
+                      (product.inventoryCount <= 0 || product.status === 'EXPIRED') && "opacity-50 cursor-not-allowed"
                     )}
                   >
                     {addingToCart ? <Loader2 className="animate-spin mr-2" /> : <ShoppingCart className="mr-2" size={20} />}
-                    {'Add to Basket'}
+                    {product.status === 'EXPIRED' ? 'Item Expired' : (product.inventoryCount <= 0 ? 'Out of Stock' : 'Add to Basket')}
                   </Button>
                 </div>
               </div>
