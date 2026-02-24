@@ -87,7 +87,7 @@ export const updateUserProfile = async (userId, updateData) => {
 };
 
 export const createInternalUser = async (creatorRole, creatorId, userData) => {
-    const { email, password, firstName, lastName, role, phone, agentId, categories } = userData;
+    const { email, password, firstName, lastName, role, phone, agentId, categories, panCard, aadharCard, address } = userData;
 
     const userExists = await User.findOne({ email });
     if (userExists) throw new Error('User already exists');
@@ -119,7 +119,10 @@ export const createInternalUser = async (creatorRole, creatorId, userData) => {
         newUserObj.agentProfile = {
             referralCode: crypto.randomBytes(4).toString('hex').toUpperCase(),
             commissionRate: userData.commissionRate || 0.10,
-            wallet: { pending: 0, available: 0 }
+            wallet: { pending: 0, available: 0 },
+            panCard: panCard || '',
+            aadharCard: aadharCard || '',
+            address: address || {}
         };
     }
 
@@ -157,11 +160,23 @@ export const createInternalUser = async (creatorRole, creatorId, userData) => {
         priority: 'HIGH'
     });
 
+    // 1.1 Security Notification
+    await notificationService.createNotification({
+        userId: createdUser._id,
+        title: 'Security Recommendation',
+        description: 'For better security, we recommend changing your password. Go to My Profile > Security > Change Password.',
+        type: 'SECURITY',
+        priority: 'MEDIUM',
+        actionText: 'Change Password',
+        actionLink: '/profile?tab=SECURITY'
+    });
+
     // 2. Admin Notification
     const creator = creatorRole === 'AGENT' ? await User.findById(creatorId) : null;
+    const roleLabel = createdUser.role === 'AGENT' ? 'Agent' : 'Salon Owner';
     await notificationService.notifyAdmins({
-        title: 'New Salon Owner Added',
-        description: `A new Salon Owner (${createdUser.firstName} ${createdUser.lastName}) was added ${creator ? `by Agent ${creator.firstName} ${creator.lastName}` : 'internally'}.`,
+        title: `New ${roleLabel} Added`,
+        description: `A new ${roleLabel} (${createdUser.firstName} ${createdUser.lastName}) was added ${creator ? `by Agent ${creator.firstName} ${creator.lastName}` : 'internally'}.`,
         type: 'REGISTRATION',
         priority: 'MEDIUM',
         metadata: { userId: createdUser._id, creatorId }
