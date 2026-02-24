@@ -87,7 +87,7 @@ export const updateUserProfile = async (userId, updateData) => {
 };
 
 export const createInternalUser = async (creatorRole, creatorId, userData) => {
-    const { email, password, firstName, lastName, role, phone, agentId } = userData;
+    const { email, password, firstName, lastName, role, phone, agentId, categories } = userData;
 
     const userExists = await User.findOne({ email });
     if (userExists) throw new Error('User already exists');
@@ -128,6 +128,7 @@ export const createInternalUser = async (creatorRole, creatorId, userData) => {
             agentId: creatorRole === 'AGENT' ? creatorId : (agentId || null),
             rewardPoints: { locked: 0, available: 0 },
             salonName: userData.salonName || '',
+            categories: categories ? categories.split(',').map(c => c.trim()).filter(Boolean) : (userData.categories || []),
             sellingCategories: userData.sellingCategories || []
         };
 

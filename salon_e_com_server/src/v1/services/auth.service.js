@@ -12,7 +12,7 @@ const generateToken = (id, role) => {
 
 // Internal helper for user creation without token generation
 export const baseCreateUser = async (userData) => {
-    const { email, password, firstName, lastName, role, phone, agentId } = userData;
+    const { email, password, firstName, lastName, role, phone, agentId, categories } = userData;
 
     // Check if user exists
     const normalizedEmail = email.toLowerCase();
@@ -40,7 +40,8 @@ export const baseCreateUser = async (userData) => {
     if (newUserObj.role === 'SALON_OWNER') {
         newUserObj.salonOwnerProfile = {
             agentId: agentId || null,
-            rewardPoints: { locked: 0, available: 0 }
+            rewardPoints: { locked: 0, available: 0 },
+            categories: categories ? categories.split(',').map(c => c.trim()).filter(Boolean) : []
         };
     } else if (newUserObj.role === 'AGENT') {
         newUserObj.agentProfile = {

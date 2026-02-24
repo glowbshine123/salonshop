@@ -65,6 +65,7 @@ const userSchema = new mongoose.Schema({
             totalLifetimeEarned: { type: Number, default: 0 }
         },
         salonName: { type: String },
+        categories: [String],
         sellingCategories: [String],
         // rewardHistory moved to RewardLedger model for scalability
         shippingAddresses: [{
