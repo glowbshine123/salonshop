@@ -8,7 +8,11 @@ class SocketService {
     init(server) {
         this.io = new Server(server, {
             cors: {
-                origin: ["https://projectsalonshop.vercel.app", "http://localhost:5173"],
+                origin: [
+                    "https://projectsalonshop.vercel.app",
+                    "https://salonshop-weld.vercel.app",
+                    "http://localhost:5173"
+                ],
                 methods: ["GET", "POST"],
                 credentials: true
             }

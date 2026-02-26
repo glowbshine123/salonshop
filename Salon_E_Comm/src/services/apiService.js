@@ -1,7 +1,24 @@
 import axios from 'axios';
 
+// API Base URL derivation
+const getBaseURL = () => {
+    const envURL = import.meta.env.VITE_API_BASE_URL;
+    if (envURL) return envURL;
+
+    // If no env var, and we are on localhost, default to local backend
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        return 'http://localhost:5000/api/v1';
+    }
+
+    // Fallback for production if env var is missing
+    return '/api/v1';
+};
+
+const API_BASE_URL = getBaseURL();
+console.log(`[API Service] Initialized with baseURL: ${API_BASE_URL}`);
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
+    baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },

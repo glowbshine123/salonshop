@@ -179,7 +179,12 @@ export const getMyOrders = async (userId, filters = {}) => {
         .skip((page - 1) * limit)
         .limit(limit);
 
-    return { orders: orders, count: total, page: page, limit: limit };
+    return {
+        orders: orders, // Harmonized key
+        count: total,
+        page: page,
+        limit: limit
+    };
 };
 
 export const getAssignedOrders = async (agentId, filters = {}) => {
@@ -195,7 +200,13 @@ export const getAssignedOrders = async (agentId, filters = {}) => {
         .skip((page - 1) * limit)
         .limit(limit);
 
-    return { assignedOrders: orders, count: total, page: page, limit: limit };
+    return {
+        assignedOrders: orders,
+        orders: orders, // Harmonized key
+        count: total,
+        page: page,
+        limit: limit
+    };
 };
 
 export const assignAgent = async (orderId, agentId) => {
@@ -239,7 +250,13 @@ export const getAllOrders = async (filters = {}) => {
         .skip((page - 1) * limit)
         .limit(limit);
 
-    return { allOrders: orders, count: total, page: page, limit: limit };
+    return {
+        allOrders: orders,
+        orders: orders, // Harmonized key
+        count: total,
+        page: page,
+        limit: limit
+    };
 };
 
 export const updateOrderStatus = async (orderId, status) => {

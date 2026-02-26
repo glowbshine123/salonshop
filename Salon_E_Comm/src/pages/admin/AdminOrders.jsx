@@ -64,13 +64,19 @@ export default function AdminOrders() {
                 orderAPI.getAll(params),
                 userAPI.getAgents()
             ]);
-            setOrders(orderRes.data.allOrders || []);
-            setTotalResults(orderRes.data.count || 0);
-            setTotalPages(Math.ceil((orderRes.data.count || 0) / limit));
+
+            console.log('[AdminOrders] Fetch success:', orderRes.data);
+
+            const orders = orderRes.data?.allOrders || orderRes.data?.orders || orderRes.data?.items || [];
+            const totalCount = orderRes.data?.count || orderRes.data?.pagination?.total || orders.length;
+
+            setOrders(orders);
+            setTotalResults(totalCount);
+            setTotalPages(Math.ceil((totalCount || 0) / limit));
             setAgents(agentRes.data.users || []);
-        } catch (err) {
-            console.error('Failed to fetch orders/agents:', err);
-            toast.error('Failed to synchronize order registry');
+        } catch (error) {
+            console.error('[AdminOrders] Fetch failed:', error);
+            toast.error('Failed to fetch orders: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
