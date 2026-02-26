@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLoading } from '../context/LoadingContext';
 import './HelpCenter.css';
 
 export default function HelpCenter() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('general');
   const [searchQuery, setSearchQuery] = useState('');
+  const { finishLoading } = useLoading();
+
+  useEffect(() => {
+    finishLoading();
+  }, []);
 
   const faqCategories = {
     general: [
@@ -85,7 +91,7 @@ export default function HelpCenter() {
         <div className="container">
           <h1>Help Center</h1>
           <p>Find answers to your questions and get support</p>
-          
+
           <div className="search-box">
             <input
               type="text"

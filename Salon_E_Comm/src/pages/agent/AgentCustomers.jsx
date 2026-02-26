@@ -16,6 +16,7 @@ import {
     ExternalLink
 } from 'lucide-react';
 import { agentAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import { Button } from '../../components/ui/button';
 import { cn } from '@/lib/utils';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,7 @@ export default function AgentCustomers() {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const { startLoading, finishLoading } = useLoading();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [error, setError] = useState(null);
 
@@ -69,6 +71,7 @@ export default function AgentCustomers() {
             setError('Failed to load salon partners. Please try again later.');
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

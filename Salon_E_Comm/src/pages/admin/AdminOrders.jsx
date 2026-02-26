@@ -20,6 +20,7 @@ import {
     ChevronRight,
 } from 'lucide-react';
 import { orderAPI, userAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import { toast } from 'react-hot-toast';
 import { Skeleton } from "@/components/ui/skeleton";
 import TableRowSkeleton from '../../components/common/TableRowSkeleton';
@@ -38,6 +39,7 @@ export default function AdminOrders() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
+    const { startLoading, finishLoading } = useLoading();
     const limit = 10;
 
 
@@ -79,6 +81,7 @@ export default function AdminOrders() {
             toast.error('Failed to fetch orders: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

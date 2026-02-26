@@ -15,6 +15,7 @@ import {
     MapPin
 } from 'lucide-react';
 import { userAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import StatCard from '../../components/admin/StatCard';
 import AssignAgentModal from '../../components/admin/AssignAgentModal';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
@@ -34,6 +35,7 @@ export default function AdminUsers() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
     const [selectedSalon, setSelectedSalon] = useState(null);
+    const { startLoading, finishLoading } = useLoading();
     const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
     const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
@@ -51,6 +53,7 @@ export default function AdminUsers() {
             toast.error('Salon registry synchronization failed');
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

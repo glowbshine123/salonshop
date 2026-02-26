@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
+import { useLoading } from '../context/LoadingContext';
 import { productAPI, categoryAPI } from '../utils/apiClient';
 import ProductCard from '../components/common/ProductCard';
 import { Search, Filter, X, ChevronDown, SlidersHorizontal } from 'lucide-react';
@@ -61,6 +62,7 @@ export default function ProductsPage() {
     }, [currentSearch]);
 
     const [products, setProducts] = useState([]);
+    const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [categories, setCategories] = useState([]);
@@ -116,6 +118,7 @@ export default function ProductsPage() {
             setError('Failed to load products. Please try again.');
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { notificationAPI } from '../services/apiService';
+import { useLoading } from '../context/LoadingContext';
 import { useSocket } from '../context/SocketContext';
 import { toast } from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -27,6 +28,7 @@ export default function NotificationsPage() {
     const isDashboard = location.pathname.startsWith('/admin') || location.pathname.startsWith('/agent-dashboard');
 
     const [notifications, setNotifications] = useState([]);
+    const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -44,11 +46,12 @@ export default function NotificationsPage() {
             }
 
             setHasMore(newNotifs.length === 10);
-            setLoading(false);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
             toast.error('Failed to load notifications');
+        } finally {
             setLoading(false);
+            if (!append) finishLoading();
         }
     };
 
@@ -146,9 +149,9 @@ export default function NotificationsPage() {
 
                 <div className="space-y-4">
                     {loading && notifications.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[40px] border border-neutral-100">
-                            <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mb-4" />
-                            <p className="text-sm font-black text-neutral-400 uppercase tracking-widest">Loading notifications...</p>
+                        <div className="py-20 text-center">
+                            <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-4" />
+                            <p className="text-sm font-bold text-neutral-400 uppercase tracking-widest">Fetching Notifications...</p>
                         </div>
                     ) : notifications.length > 0 ? (
                         <>

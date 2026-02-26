@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { rewardAPI } from '../services/apiService';
+import { useLoading } from '../context/LoadingContext';
 import {
     Zap,
     History,
@@ -15,6 +16,7 @@ import {
 export default function RewardPage() {
     const [wallet, setWallet] = useState(null);
     const [transactions, setTransactions] = useState([]);
+    const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -30,6 +32,7 @@ export default function RewardPage() {
                 console.error("Error fetching rewards:", err);
             } finally {
                 setLoading(false);
+                finishLoading();
             }
         };
         fetchData();
@@ -37,8 +40,11 @@ export default function RewardPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-                <Loader2 className="animate-spin text-emerald-600" size={32} />
+            <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                    <p className="text-sm font-bold text-neutral-400 uppercase tracking-widest">Loading Rewards...</p>
+                </div>
             </div>
         );
     }

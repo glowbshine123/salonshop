@@ -13,6 +13,7 @@ import {
     TrendingUp
 } from 'lucide-react';
 import { categoryAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import { toast } from 'react-hot-toast';
 import AdminCardSkeleton from '../../components/common/AdminCardSkeleton';
 import { cn } from '@/lib/utils';
@@ -21,6 +22,7 @@ export default function AdminCategories() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newCatName, setNewCatName] = useState('');
+    const { startLoading, finishLoading } = useLoading();
     const [parentCategory, setParentCategory] = useState('');
     const [adding, setAdding] = useState(false);
 
@@ -34,6 +36,7 @@ export default function AdminCategories() {
             toast.error('Classification registry sync failed');
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

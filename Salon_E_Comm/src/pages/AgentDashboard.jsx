@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useLoading } from '../context/LoadingContext';
 import './AgentDashboard.css';
 import { authAPI, orderAPI, userAPI, commissionAPI } from '../utils/apiClient';
 
@@ -14,19 +15,23 @@ const AgentDashboard = () => {
     monthlyOrders: 0,
     commissionRate: '0%',
     activeReferrals: 0,
-    pendingCommission: 0
+    pendingCommission: 0,
+    points: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { startLoading, finishLoading } = useLoading();
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalOrders, setTotalOrders] = useState(0);
+  const [myCommissions, setMyCommissions] = useState({ commissions: [] });
 
   useEffect(() => {
     const loadData = async () => {
+      startLoading();
       setLoading(true);
       try {
-        const [meRes, myOrdersRes, myCommissions] = await Promise.all([
+        const [meRes, myOrdersRes, commissionsRes] = await Promise.all([
           authAPI.getMe(),
           orderAPI.getAssigned({ page, limit }),
           commissionAPI.getMy()
@@ -44,10 +49,11 @@ const AgentDashboard = () => {
 
         const myOrders = myOrdersRes?.assignedOrders || [];
         const count = myOrdersRes?.count || myOrders.length;
-        const commissionsList = myCommissions?.commissions || [];
+        const commissionsList = commissionsRes?.commissions || [];
 
         setRecentOrders(myOrders);
         setTotalOrders(count);
+        setMyCommissions(commissionsRes);
 
         // Calculate earnings
         const totalEarnings = commissionsList.reduce((s, c) => s + (c.amount || c.amountEarned || 0), 0);
@@ -72,8 +78,10 @@ const AgentDashboard = () => {
         }));
       } catch (err) {
         console.error('Failed loading agent dashboard data', err);
+        toast.error('Failed to load dashboard data.');
       } finally {
         setLoading(false);
+        finishLoading();
       }
     };
 
@@ -115,6 +123,16 @@ const AgentDashboard = () => {
     { label: 'Avg Order Value', value: `₹ ${avgOrderValue}`, change: '', positive: avgOrderValue > 0 }
   ];
 
+  if (loading && !agentData.name) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <h2 className="text-xl font-black text-neutral-900 tracking-tight">Syncing Dashboard...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="agent-dashboard">
@@ -179,8 +197,38 @@ const AgentDashboard = () => {
           </div>
         </div>
 
-        <div className="orders-title">
-          <h2>Recent Orders</h2>
+        {/* Tabs for navigation */}
+        <div className="dashboard-tabs">
+          <button
+            className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            Dashboard
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            Orders
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'referrals' ? 'active' : ''}`}
+            onClick={() => setActiveTab('referrals')}
+          >
+            Referrals
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            Users
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('settings')}
+          >
+            Settings
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -250,33 +298,39 @@ const AgentDashboard = () => {
             </div>
           )}
 
-          <div className="orders-content">
-            <div className="orders-table">
-              <div className="table-header">
-                <div className="col-id">Order ID</div>
-                <div className="col-product">Product(s)</div>
-                <div className="col-total">Total</div>
-                <div className="col-date">Date</div>
-                <div className="col-status">Status</div>
+          {/* Orders Tab */}
+          {activeTab === 'orders' && (
+            <div className="orders-content">
+              <div className="orders-title">
+                <h2>Recent Orders</h2>
               </div>
-              {(recentOrders || []).map((order) => {
-                const products = (order.items || []).map(i => i.name).join(', ');
-                return (
-                  <div key={order._id || order.orderNumber} className="table-row">
-                    <div className="col-id">{order.orderNumber || (order._id)}</div>
-                    <div className="col-product">{products}</div>
-                    <div className="col-total">₹{order.total || 0}</div>
-                    <div className="col-date">{new Date(order.createdAt).toLocaleDateString()}</div>
-                    <div className="col-status">
-                      <span className={`status-badge status-${(order.status || '').toLowerCase()}`}>
-                        {order.status}
-                      </span>
+              <div className="orders-table">
+                <div className="table-header">
+                  <div className="col-id">Order ID</div>
+                  <div className="col-product">Product(s)</div>
+                  <div className="col-total">Total</div>
+                  <div className="col-date">Date</div>
+                  <div className="col-status">Status</div>
+                </div>
+                {(recentOrders || []).map((order) => {
+                  const products = (order.items || []).map(i => i.name).join(', ');
+                  return (
+                    <div key={order._id || order.orderNumber} className="table-row">
+                      <div className="col-id">{order.orderNumber || (order._id)}</div>
+                      <div className="col-product">{products}</div>
+                      <div className="col-total">₹{order.total || 0}</div>
+                      <div className="col-date">{new Date(order.createdAt).toLocaleDateString()}</div>
+                      <div className="col-status">
+                        <span className={`status-badge status-${(order.status || '').toLowerCase()}`}>
+                          {order.status}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Referrals Tab */}
           {activeTab === 'referrals' && (
@@ -309,11 +363,11 @@ const AgentDashboard = () => {
                     <div className="link-stats">
                       <div className="stat">
                         <span className="stat-name">Total Commissions</span>
-                        <span className="stat-num">₹{(myCommissions?.commissions || []).reduce((s, c) => s + (c.amount || c.amountEarned || 0), 0)}</span>
+                        <span className="stat-num">₹{agentData.totalEarnings}</span>
                       </div>
                       <div className="stat">
                         <span className="stat-name">Pending</span>
-                        <span className="stat-num">₹{(myCommissions?.commissions || []).filter(c => c.status === 'PENDING').reduce((s, c) => s + (c.amount || c.amountEarned || 0), 0)}</span>
+                        <span className="stat-num">₹{agentData.pendingCommission}</span>
                       </div>
                     </div>
 
@@ -337,15 +391,7 @@ const AgentDashboard = () => {
                   <div className="col-role">Role</div>
                   <div className="col-status">Status</div>
                 </div>
-                {users.length === 0 && <div className="table-row"><div style={{ padding: '12px' }}>No users found</div></div>}
-                {users.map((u) => (
-                  <div key={u._id} className="table-row">
-                    <div className="col-name">{u.firstName} {u.lastName}</div>
-                    <div className="col-email">{u.email}</div>
-                    <div className="col-role">{u.role}</div>
-                    <div className="col-status">{u.isActive ? 'Active' : 'Inactive'}</div>
-                  </div>
-                ))}
+                <div className="table-row"><div style={{ padding: '12px' }}>User data not implemented for this tab.</div></div>
               </div>
             </div>
           )}

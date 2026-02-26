@@ -1,9 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLoading } from '../context/LoadingContext';
 import './AgentRewards.css';
 
 export default function AgentRewards() {
   const navigate = useNavigate();
+  const { finishLoading } = useLoading();
+
+  React.useEffect(() => {
+    finishLoading();
+  }, []);
 
   const rewards = [
     {

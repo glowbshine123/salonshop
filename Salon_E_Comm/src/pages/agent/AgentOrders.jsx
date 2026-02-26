@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { orderAPI } from '../../services/apiService';
 import { useAuth } from '../../context/AuthContext';
+import { useLoading } from '../../context/LoadingContext';
 import { Button } from '../../components/ui/button';
 import { cn } from '@/lib/utils';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +35,7 @@ const TableRowSkeleton = ({ columns }) => (
 export default function AgentOrders() {
     const { user } = useAuth();
     const [orders, setOrders] = useState([]);
+    const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('ALL');
@@ -52,6 +54,7 @@ export default function AgentOrders() {
                 console.error('Failed to fetch orders:', err);
             } finally {
                 setLoading(false);
+                finishLoading();
             }
         };
         fetchOrders();

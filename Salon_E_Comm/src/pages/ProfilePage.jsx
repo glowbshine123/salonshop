@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { userAPI, authAPI } from '../services/apiService';
+import { useLoading } from '../context/LoadingContext';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, MapPin, Camera, Shield, Bell, CreditCard, ChevronRight, Loader2, CheckCircle2, Zap, Upload } from 'lucide-react';
 import {
@@ -19,6 +20,7 @@ export default function ProfilePage() {
     const [searchParams] = useSearchParams();
     const initialTab = searchParams.get('tab')?.toUpperCase();
     const [activeTab, setActiveTab] = useState(initialTab === 'SECURITY' ? 'SECURITY' : 'PROFILE');
+    const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
@@ -152,6 +154,8 @@ export default function ProfilePage() {
                     });
                     setPreviewUrl(user.avatarUrl || '');
                 }
+            } finally {
+                finishLoading();
             }
         };
 

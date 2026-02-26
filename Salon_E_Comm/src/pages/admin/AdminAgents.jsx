@@ -29,6 +29,7 @@ import {
     Copy
 } from 'lucide-react';
 import { userAPI, adminAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import StatCard from '../../components/admin/StatCard';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import {
@@ -47,6 +48,7 @@ export default function AdminAgents() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
+    const { startLoading, finishLoading } = useLoading();
     const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
     // Registration Modal State
@@ -99,6 +101,7 @@ export default function AdminAgents() {
             toast.error('Registry synchronization failed');
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

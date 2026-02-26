@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/common/ProductCard';
 import { productAPI } from '../services/apiService';
+import { useLoading } from '../context/LoadingContext';
 import { ArrowLeft, LayoutGrid } from 'lucide-react';
 import ProductCardSkeleton from '../components/common/ProductCardSkeleton';
 import { Button } from '../components/ui/button';
@@ -10,6 +11,7 @@ export default function CategoryPage() {
   const { category } = useParams();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const { startLoading, finishLoading } = useLoading();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -26,6 +28,7 @@ export default function CategoryPage() {
         setError('Failed to load products for this category.');
       } finally {
         setLoading(false);
+        finishLoading();
       }
     };
 

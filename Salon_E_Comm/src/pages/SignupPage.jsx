@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useLoading } from '../context/LoadingContext';
 import { useAuth } from '../context/AuthContext';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +35,7 @@ export default function SignupPage() {
   const [logoUrl, setLogoUrl] = useState(null);
 
   const navigate = useNavigate();
+  const { finishLoading } = useLoading();
   const { register } = useAuth();
 
   useEffect(() => {
@@ -45,6 +47,8 @@ export default function SignupPage() {
         }
       } catch (err) {
         console.error("Failed to fetch settings:", err);
+      } finally {
+        finishLoading();
       }
     };
     fetchSettings();

@@ -27,6 +27,7 @@ import {
 } from '../../components/ui/select';
 import { cn } from '@/lib/utils';
 import { productAPI, categoryAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import ProductModal from '../../components/admin/ProductModal';
 import StatCard from '../../components/admin/StatCard';
 import { toast } from 'react-hot-toast';
@@ -47,6 +48,7 @@ export default function AdminProducts() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
+    const { startLoading, finishLoading } = useLoading();
 
     const [updatingStatusId, setUpdatingStatusId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,6 +87,7 @@ export default function AdminProducts() {
             setProducts([]); // Fallback to empty to prevent map crashes
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

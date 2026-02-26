@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { useLoading } from '../../context/LoadingContext';
 
 const PageLoader = () => {
-    const { isLoading, progress } = useLoading();
+    const { isLoading, progress, isFinished } = useLoading();
+    const location = useLocation();
+
+    // Only show on homepage and only once per session
+    const hasShownLoader = sessionStorage.getItem('hasShownLoader');
+    const shouldShow = location.pathname === '/' && !hasShownLoader;
+
+    useEffect(() => {
+        if (isFinished && shouldShow) {
+            sessionStorage.setItem('hasShownLoader', 'true');
+        }
+    }, [isFinished, shouldShow]);
+
+    if (!shouldShow) return null;
 
     // Note: We use static assets here to ensure the loader shows INSTANTLY
     // without waiting for any API calls (like settings check).

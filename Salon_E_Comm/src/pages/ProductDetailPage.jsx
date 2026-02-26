@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { productAPI, categoryAPI } from "../services/apiService";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useLoading } from "../context/LoadingContext";
 import { ShoppingCart, ShieldCheck, Truck, RefreshCcw, Star, ChevronRight, Plus, Minus, Heart, Share2, Loader2, ThumbsUp, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +23,7 @@ export default function ProductDetailPage() {
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
+  const { startLoading, finishLoading } = useLoading();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -66,6 +68,7 @@ export default function ProductDetailPage() {
         setError("Product not found or failed to load.");
       } finally {
         setLoading(false);
+        finishLoading();
       }
     };
 

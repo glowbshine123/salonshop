@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { categoryAPI } from '../utils/apiClient';
+import { useLoading } from '../context/LoadingContext';
 import './BecomeSeller.css';
 
 export default function BecomeSeller() {
@@ -13,7 +14,9 @@ export default function BecomeSeller() {
     category: '',
     businessType: 'individual'
   });
+  const { startLoading, finishLoading } = useLoading();
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -22,6 +25,9 @@ export default function BecomeSeller() {
         setCategories(Array.isArray(cats) ? cats : []);
       } catch (err) {
         console.error('[BecomeSeller] Failed to load categories', err.message || err);
+      } finally {
+        setLoading(false);
+        finishLoading();
       }
     };
     loadCategories();
@@ -46,6 +52,17 @@ export default function BecomeSeller() {
       businessType: 'individual'
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-bold text-neutral-400 uppercase tracking-widest">Loading Registration...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="become-seller">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useLoading } from '../context/LoadingContext';
 import { useAuth } from '../context/AuthContext';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,12 @@ export default function LoginPage() {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+  const { finishLoading } = useLoading();
   const { login } = useAuth();
+
+  React.useEffect(() => {
+    finishLoading();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -47,6 +53,7 @@ export default function LoginPage() {
       setError(err.response?.data?.message || err.message || 'Authentication failed.');
     } finally {
       setLoading(false);
+      finishLoading();
     }
   };
 

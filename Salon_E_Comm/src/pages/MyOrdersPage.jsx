@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLoading } from '../context/LoadingContext';
 import { orderAPI, productAPI } from '../services/apiService';
 import { ShoppingBag, Package, Calendar, ChevronRight, ChevronDown, CheckCircle2, Clock, XCircle, AlertCircle, ExternalLink, Star } from 'lucide-react';
 import OrderSkeleton from '../components/common/OrderSkeleton';
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast';
 
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState([]);
+  const { startLoading, finishLoading } = useLoading();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedOrder, setExpandedOrder] = useState(null);
@@ -47,6 +49,7 @@ export default function MyOrdersPage() {
       setError(err.message || 'Failed to load orders');
     } finally {
       setLoading(false);
+      finishLoading();
     }
   };
 
@@ -101,11 +104,10 @@ export default function MyOrdersPage() {
     return (
       <div className="bg-neutral-50/50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto space-y-8">
-          <div className="space-y-6">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <OrderSkeleton key={i} />
-            ))}
-          </div>
+          <div className="h-12 w-64 bg-neutral-200 animate-pulse rounded-xl mb-8" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <OrderSkeleton key={i} />
+          ))}
         </div>
       </div>
     );

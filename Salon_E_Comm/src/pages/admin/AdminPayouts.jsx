@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import { cn } from '@/lib/utils';
 import {
     Clock,
@@ -45,6 +46,7 @@ export default function AdminPayouts() {
         totalSettled: 0,
         thisMonthProjected: 0
     });
+    const { startLoading, finishLoading } = useLoading();
 
     const fetchSettlements = useCallback(async () => {
         setLoading(true);
@@ -71,6 +73,7 @@ export default function AdminPayouts() {
             toast.error('Capital ledger synchronization failed');
         } finally {
             setLoading(false);
+            finishLoading();
         }
     }, [currentPage, searchTerm, monthFilter]);
 

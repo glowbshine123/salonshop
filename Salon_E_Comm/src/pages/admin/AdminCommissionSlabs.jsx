@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import {
     Trophy,
     Settings,
@@ -22,6 +23,7 @@ import AdminCardSkeleton from '../../components/common/AdminCardSkeleton';
 
 export default function AdminCommissionSlabs() {
     const [slabs, setSlabs] = useState([]);
+    const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [editingSlab, setEditingSlab] = useState(null);
@@ -44,6 +46,7 @@ export default function AdminCommissionSlabs() {
             toast.error('Failed to synchronize commission logic');
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
 

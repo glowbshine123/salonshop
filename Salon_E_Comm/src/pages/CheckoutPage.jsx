@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { orderAPI, paymentAPI, userAPI, authAPI, rewardAPI } from '../services/apiService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useLoading } from '../context/LoadingContext';
 import {
   ShieldCheck,
   Truck,
@@ -30,6 +31,7 @@ export default function CheckoutPage() {
   const [agentId, setAgentId] = useState('');
   const [agents, setAgents] = useState([]);
   const [agentVerified, setAgentVerified] = useState(false);
+  const { startLoading, finishLoading } = useLoading();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [shippingAddress, setShippingAddress] = useState({ name: '', street: '', city: '', state: '', zip: '', phone: '' });
@@ -108,12 +110,14 @@ export default function CheckoutPage() {
         try {
           const walletRes = await rewardAPI.getRewardWallet();
           setRewardWallet(walletRes.data);
-        } catch (wErr) {
+        } catch (err) {
           console.error("Error fetching reward wallet:", wErr);
         }
 
       } catch (err) {
         console.error("Error fetching user data:", err);
+      } finally {
+        finishLoading();
       }
     };
 
