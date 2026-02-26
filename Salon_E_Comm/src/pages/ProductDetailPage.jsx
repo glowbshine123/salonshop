@@ -246,15 +246,15 @@ export default function ProductDetailPage() {
                   </div>}
                 </div>
 
-                <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-neutral-500">
+                {/* <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-neutral-500">
                   <span>Quantity</span>
                   <span className={product.status === 'EXPIRED' ? "text-rose-500" : (product.inventoryCount < 10 ? "text-rose-500" : "text-emerald-600")}>
                     {product.status === 'EXPIRED' ? "Product Expired" : (product.inventoryCount > 0 ? `${product.inventoryCount} Available` : "Out of Stock")}
                   </span>
-                </div>
+                </div> */}
 
                 <div className="flex gap-4">
-                  <div className={cn(
+                  {/* <div className={cn(
                     "flex items-center bg-neutral-100 rounded-2xl p-1 h-14 w-fit",
                     product.inventoryCount <= 0 ? "opacity-50 pointer-events-none" : ""
                   )}>
@@ -276,7 +276,7 @@ export default function ProductDetailPage() {
                     >
                       <Plus size={18} />
                     </button>
-                  </div>
+                  </div> */}
 
                   <Button
                     onClick={handleAddToCart}
@@ -296,31 +296,30 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="mt-20 border-t border-neutral-100 pt-16">
-          <h3 className="text-2xl font-black text-neutral-900 mb-8 uppercase tracking-tighter">System Specifications & Content</h3>
+          <h3 className="text-2xl font-black text-neutral-900 mb-8 uppercase tracking-tighter">Specifications & Content</h3>
 
-          <div className="space-y-12">
+          <div className="space-y-8 max-w-3xl">
             {product.contentSections && product.contentSections.length > 0 ? (
               product.contentSections.map((section, idx) => (
                 <div key={idx} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-2">
                     <div className="w-1.5 h-6 bg-neutral-900 rounded-full"></div>
                     <h4 className="text-lg font-black text-neutral-900 uppercase tracking-tight">{section.heading}</h4>
                   </div>
 
                   {section.sectionType === 'PARAGRAPH' ? (
-                    <div className="prose prose-neutral max-w-none">
-                      <p className="text-neutral-500 leading-relaxed font-medium whitespace-pre-wrap">
+                    <div className="prose prose-neutral max-w-full">
+                      <p className="text-neutral-500 leading-relaxed font-medium whitespace-pre-wrap text-base">
                         {section.content}
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-1 rounded-3xl p-8 border border-neutral-100">
+                    <div className="space-y-1">
                       {section.specs?.map((spec, sIdx) => (
-                        <div key={sIdx} className="flex items-center gap-4 py-2.5 group border-b border-neutral-100/50 last:border-0 border-dashed">
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/10 group-hover:bg-emerald-500 transition-all shrink-0" />
-                          <span className="text-[11px] font-black uppercase tracking-widest text-neutral-400 min-w-[160px]">{spec.label}</span>
+                        <div key={sIdx} className="flex items-center gap-4 py-0 group border-b border-neutral-300 last:border-0 border-dashed">
+                          <span className="text-sm font-bold capitalize tracking-wider text-neutral-400 min-w-fit">{spec.label}</span>
                           <span className="text-neutral-300 font-black">:</span>
-                          <span className="text-sm font-black text-neutral-800 group-hover:text-emerald-600 transition-all uppercase tracking-tight">{spec.value}</span>
+                          <span className="text-base font-bold text-neutral-800 capitalize tracking-wide">{spec.value}</span>
                         </div>
                       ))}
                     </div>
