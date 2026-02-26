@@ -34,18 +34,15 @@ try {
    console.warn(`⚠️ Could not create uploads directory (likely read-only filesystem): ${error.message}`);
 }
 
+import { corsOptions } from "./config/cors.js";
+
 /* =======================
    CORS (PRODUCTION ONLY)
 ======================= */
-app.use(
-   cors({
-      origin: ["https://projectsalonshop.vercel.app", "http://localhost:5173", "https://salonshop-weld.vercel.app"],        // for the developement
-      credentials: true
-   })
-);
+app.use(cors(corsOptions));
 
 // Preflight
-app.options("*", cors());
+// app.options("*", cors());
 
 
 

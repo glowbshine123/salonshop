@@ -1,4 +1,4 @@
-import { Server } from 'socket.io';
+import { corsOptions } from '../../config/cors.js';
 
 class SocketService {
     constructor() {
@@ -7,15 +7,7 @@ class SocketService {
 
     init(server) {
         this.io = new Server(server, {
-            cors: {
-                origin: [
-                    "https://projectsalonshop.vercel.app",
-                    "https://salonshop-weld.vercel.app",
-                    "http://localhost:5173"
-                ],
-                methods: ["GET", "POST"],
-                credentials: true
-            }
+            cors: corsOptions
         });
 
         this.io.on('connection', (socket) => {
