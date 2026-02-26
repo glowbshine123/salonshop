@@ -13,6 +13,7 @@ import AdminSettings from './AdminSettings';
 import AdminProfile from './AdminProfile';
 import NotificationsPage from '../NotificationsPage';
 import AdminDashboard from './AdminDashboard';
+import AddProductPage from './AddProductPage';
 
 export default function AdminRoutes() {
     return (
@@ -20,6 +21,7 @@ export default function AdminRoutes() {
             <Routes>
                 <Route index element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
+                <Route path="products/add" element={<AddProductPage />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="agents" element={<AdminAgents />} />

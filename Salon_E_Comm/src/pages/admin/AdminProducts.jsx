@@ -18,6 +18,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
     Select,
     SelectContent,
@@ -48,6 +49,7 @@ export default function AdminProducts() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
+    const navigate = useNavigate();
     const { startLoading, finishLoading } = useLoading();
 
     const [updatingStatusId, setUpdatingStatusId] = useState(null);
@@ -117,13 +119,11 @@ export default function AdminProducts() {
     };
 
     const handleAdd = () => {
-        setCurrentProduct(null);
-        setIsModalOpen(true);
+        navigate('/admin/products/add');
     };
 
     const handleEdit = (product) => {
-        setCurrentProduct(product);
-        setIsModalOpen(true);
+        navigate(`/admin/products/add?id=${product._id}`);
     };
 
     const handleDelete = async (id) => {
