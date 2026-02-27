@@ -14,6 +14,7 @@ const walletTransactionSchema = new mongoose.Schema({
         enum: ['PENDING', 'COMPLETED', 'CANCELLED'],
         default: 'PENDING'
     },
+    expiresAt: { type: Date },
     description: String
 }, { timestamps: true });
 

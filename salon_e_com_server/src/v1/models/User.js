@@ -64,7 +64,8 @@ const userSchema = new mongoose.Schema({
         rewardPoints: {
             locked: { type: Number, default: 0 },
             available: { type: Number, default: 0 },
-            totalLifetimeEarned: { type: Number, default: 0 }
+            totalLifetimeEarned: { type: Number, default: 0 },
+            ordersCountAtLastRedemption: { type: Number, default: 0 }
         },
         salonName: { type: String },
         categories: [String],

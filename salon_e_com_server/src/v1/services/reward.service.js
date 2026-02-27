@@ -18,14 +18,17 @@ export const getRewardWallet = async (userId) => {
 
     // Check unlocking status
     const isUnlocked = await isRedemptionUnlocked(userId);
-    const deliveredCount = await getDeliveredOrderCount(userId);
+    const eligibleCount = await getEligibleOrderCount(userId);
+    const lastRedemptionCount = user.salonOwnerProfile.rewardPoints.ordersCountAtLastRedemption || 0;
+    const ordersSinceLastRedemption = Math.max(0, eligibleCount - lastRedemptionCount);
 
     return {
         balance: user.salonOwnerProfile.rewardPoints.available,
         lifetimeEarned: user.salonOwnerProfile.rewardPoints.totalLifetimeEarned,
         isUnlocked,
-        deliveredOrdersCount: deliveredCount,
-        ordersNeededForUnlock: Math.max(0, 3 - deliveredCount),
+        deliveredOrdersCount: eligibleCount, // Frontend expects this for progress bar
+        ordersSinceLastRedemption,
+        ordersNeededForUnlock: Math.max(0, 3 - ordersSinceLastRedemption),
         expiringSoon: activeLedgers.slice(0, 3) // Return top 3 expiring batches
     };
 };
@@ -54,7 +57,7 @@ export const getRewardTransactions = async (userId, page = 1, limit = 20) => {
     };
 };
 
-// --- HELPER: Get Delivered Order Count (Eligible Orders Only) ---
+// --- HELPER: Get Delivered Order Count (Any active order - for first order detection) ---
 export const getDeliveredOrderCount = async (userId, excludeOrderId = null) => {
     const query = {
         customerId: userId,
@@ -64,6 +67,15 @@ export const getDeliveredOrderCount = async (userId, excludeOrderId = null) => {
         query._id = { $ne: excludeOrderId };
     }
     return await Order.countDocuments(query);
+};
+
+export const getEligibleOrderCount = async (userId) => {
+    return await Order.countDocuments({
+        customerId: userId,
+        status: { $in: [/delivered/i, /completed/i] },
+        total: { $gt: 1000 },
+        paymentMethod: { $nin: [/cod/i, /postpaid/i, /post paid/i] }
+    });
 };
 
 // --- 1. CALCULATE POINTS (Preview) ---
@@ -138,6 +150,7 @@ export const processOrderDeliveryRewards = async (orderId) => {
             type: 'REWARD_EARNED',
             amount: pointsToEarn,
             status: 'COMPLETED',
+            expiresAt: expiryDate,
             description: `Earned rewards for order #${order.orderNumber}`
         });
 
@@ -162,9 +175,15 @@ export const processOrderDeliveryRewards = async (orderId) => {
 
 // --- 3. CHECK UNLOCK STATUS ---
 export const isRedemptionUnlocked = async (userId) => {
-    const deliveredCount = await getDeliveredOrderCount(userId);
-    // "After 3rd delivered order -> user becomes eligible"
-    return deliveredCount >= 3;
+    const user = await User.findById(userId).select('salonOwnerProfile.rewardPoints');
+    if (!user) return false;
+
+    const eligibleCount = await getEligibleOrderCount(userId);
+    const lastRedemptionCount = user.salonOwnerProfile.rewardPoints.ordersCountAtLastRedemption || 0;
+
+    // "After 3 eligible orders since last redemption (or start) -> user becomes eligible"
+    const ordersSinceLastRedemption = Math.max(0, eligibleCount - lastRedemptionCount);
+    return ordersSinceLastRedemption >= 3;
 };
 
 // --- 4. REDEEM POINTS (Validation & Calculation) ---
@@ -204,9 +223,11 @@ export const validateRedemption = async (userId, pointsRequested, orderTotal, pa
 export const executeRedemption = async (userId, orderId, pointsUsed) => {
     if (pointsUsed <= 0) return;
 
-    // 1. Deduct from User Wallet
+    // 1. Deduct from User Wallet & Update Last Redemption Order Count
+    const eligibleCount = await getEligibleOrderCount(userId);
     await User.findByIdAndUpdate(userId, {
-        $inc: { 'salonOwnerProfile.rewardPoints.available': -pointsUsed }
+        $inc: { 'salonOwnerProfile.rewardPoints.available': -pointsUsed },
+        $set: { 'salonOwnerProfile.rewardPoints.ordersCountAtLastRedemption': eligibleCount }
     });
 
     // 2. Deduct from Ledgers (FIFO)

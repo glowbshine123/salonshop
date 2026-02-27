@@ -19,6 +19,23 @@ export default function RewardPage() {
     const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(true);
 
+    const formatExpiryDate = (dateString) => {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2);
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const strTime = String(hours).padStart(2, '0') + ':' + minutes + ' ' + ampm;
+
+        return `${day} ${month} ${year} and ${strTime}`;
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -99,11 +116,11 @@ export default function RewardPage() {
                                     <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-orange-500 transition-all duration-1000"
-                                            style={{ width: `${(wallet.deliveredOrdersCount / 3) * 100}%` }}
+                                            style={{ width: `${(Math.min(wallet.ordersSinceLastRedemption, 3) / 3) * 100}%` }}
                                         />
                                     </div>
                                     <p className="text-[10px] font-bold opacity-60">
-                                        {wallet.deliveredOrdersCount} / 3 Delivered Orders
+                                        {wallet.ordersSinceLastRedemption} / 3 Delivered Orders
                                     </p>
                                 </div>
                             )}
@@ -162,6 +179,7 @@ export default function RewardPage() {
                                     <th className="p-6 text-[10px] font-black text-neutral-400 uppercase tracking-widest">Date</th>
                                     <th className="p-6 text-[10px] font-black text-neutral-400 uppercase tracking-widest">Activity</th>
                                     <th className="p-6 text-[10px] font-black text-neutral-400 uppercase tracking-widest">Order</th>
+                                    <th className="p-6 text-[10px] font-black text-neutral-400 uppercase tracking-widest">Expiry Date</th>
                                     <th className="p-6 text-[10px] font-black text-neutral-400 uppercase tracking-widest text-right">Points</th>
                                 </tr>
                             </thead>
@@ -183,6 +201,9 @@ export default function RewardPage() {
                                         <td className="p-6 text-xs font-bold text-neutral-900">
                                             {trx.orderId ? trx.orderId.orderNumber : '-'}
                                         </td>
+                                        <td className="p-6 text-xs font-bold text-neutral-400">
+                                            {trx.expiresAt ? formatExpiryDate(trx.expiresAt) : '-'}
+                                        </td>
                                         <td className={`p-6 text-sm font-black text-right ${['REWARD_EARNED', 'REWARD_UNLOCKED', 'REWARD_LOCKED'].includes(trx.type) ? 'text-emerald-600' : 'text-red-500'
                                             }`}>
                                             {['REWARD_EARNED', 'REWARD_UNLOCKED', 'REWARD_LOCKED'].includes(trx.type) ? '+' : '-'}{trx.amount}
@@ -190,7 +211,7 @@ export default function RewardPage() {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="4" className="p-12 text-center text-xs font-bold text-neutral-400 italic">
+                                        <td colSpan="5" className="p-12 text-center text-xs font-bold text-neutral-400 italic">
                                             No reward history yet.
                                         </td>
                                     </tr>
