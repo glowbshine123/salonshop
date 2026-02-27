@@ -17,7 +17,8 @@ console.log(`[Socket Service] Initialized with URL: ${SOCKET_URL}`);
 
 const socket = io(SOCKET_URL, {
     autoConnect: false,
-    withCredentials: true
+    withCredentials: true,
+    transports: ['polling', 'websocket']
 });
 
 export default socket;

@@ -45,6 +45,10 @@ api.interceptors.response.use(
             localStorage.removeItem('user');
             window.location.href = '/auth/signin';
         }
+        if (error.response?.status === 403) {
+            console.warn('[API Service] 403 Forbidden Error:', error.config?.url);
+            window.dispatchEvent(new CustomEvent('authForbidden'));
+        }
         return Promise.reject(error);
     }
 );
