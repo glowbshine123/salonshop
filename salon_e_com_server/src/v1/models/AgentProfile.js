@@ -7,6 +7,8 @@ const agentProfileSchema = new mongoose.Schema({
         available: { type: Number, default: 0 }
     },
     totalEarnings: { type: Number, default: 0 },
+    currentMonthEarnings: { type: Number, default: 0 },
+    lastSettlementDate: { type: Date },
     razorpayContactId: { type: String },
     fundAccountId: { type: String },
     bankDetails: {

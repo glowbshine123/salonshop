@@ -74,7 +74,7 @@ app.get("/", (req, res) => {
 ======================= */
 // Run at 12:00 AM on the 1st of every month
 // Run at 12:00 AM on the 1st of every month
-cron.schedule("0 0 1 * *", () => {
+cron.schedule("0 2 1 * *", () => {
    processMonthlySettlement();
 });
 

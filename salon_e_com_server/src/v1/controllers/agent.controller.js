@@ -65,7 +65,7 @@ export const getSettlements = async (req, res) => {
 
         const [settlements, total] = await Promise.all([
             Settlement.find({ agentId: req.user._id })
-                .sort({ settledAt: -1 })
+                .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit),
             Settlement.countDocuments({ agentId: req.user._id })

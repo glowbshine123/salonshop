@@ -45,7 +45,7 @@ export const getAllSettlements = async (req, res) => {
         const [settlements, total] = await Promise.all([
             Settlement.find(query)
                 .populate('agentId', 'firstName lastName email')
-                .sort({ settledAt: -1 })
+                .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit),
             Settlement.countDocuments(query)
