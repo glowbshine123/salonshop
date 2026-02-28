@@ -197,11 +197,14 @@ const OrderInvoiceModal = ({ isOpen, onClose, order }) => {
                                             <>
                                                 {order.customerId.salonOwnerProfile.salonName}
                                                 <span className="block text-[10px] text-neutral-500 font-bold mt-0.5">
-                                                    ({order.customerId?.firstName} {order.customerId?.lastName})
+                                                    ({order.customerId?.firstName || ''} {order.customerId?.lastName || ''})
                                                 </span>
                                             </>
                                         ) : (
-                                            `${order.customerId?.firstName} ${order.customerId?.lastName}`
+                                            order.shippingAddress?.name ||
+                                            ((order.customerId?.firstName || order.customerId?.lastName) ?
+                                                `${order.customerId?.firstName || ''} ${order.customerId?.lastName || ''}`.trim() :
+                                                'Valued Customer')
                                         )}
                                     </p>
                                     <p className="text-[10px] text-neutral-500 font-medium leading-snug mt-1.5">
@@ -219,7 +222,9 @@ const OrderInvoiceModal = ({ isOpen, onClose, order }) => {
                                 {order.agentId ? (
                                     <div>
                                         <p className="text-[12px] font-black text-emerald-600 uppercase">
-                                            {order.agentId.firstName} {order.agentId.lastName}
+                                            {((order.agentId?.firstName || order.agentId?.lastName) ?
+                                                `${order.agentId?.firstName || ''} ${order.agentId?.lastName || ''}`.trim() :
+                                                'Assigned Agent')}
                                         </p>
                                         <p className="text-[9px] text-neutral-400 font-bold uppercase mt-1.5 leading-relaxed">
                                             Assigned agent for this procurement protocol.
