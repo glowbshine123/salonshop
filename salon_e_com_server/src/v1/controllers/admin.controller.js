@@ -218,10 +218,19 @@ export const getDashboardStats = async (req, res) => {
             .populate('agentId', 'firstName lastName email');
 
         // New Agents (Limit 5)
-        const newAgents = await User.find({ role: 'AGENT' })
+        const agentUsers = await User.find({ role: 'AGENT' })
             .sort({ createdAt: -1 })
             .limit(5)
-            .select('firstName lastName email createdAt agentProfile');
+            .select('firstName lastName email createdAt')
+            .lean();
+
+        const AgentProfile = (await import('../models/AgentProfile.js')).default;
+        const agentProfiles = await AgentProfile.find({ userId: { $in: agentUsers.map(u => u._id) } }).lean();
+
+        const newAgents = agentUsers.map(u => ({
+            ...u,
+            agentProfile: agentProfiles.find(p => p.userId.toString() === u._id.toString())
+        }));
 
         // New Users/Salon Owners (Limit 5)
         const newSalonOwners = await User.find({ role: { $in: ['CUSTOMER', 'SALON_OWNER'] } })

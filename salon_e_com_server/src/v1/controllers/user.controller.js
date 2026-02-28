@@ -73,13 +73,16 @@ export const updateProfile = async (req, res) => {
 export const getUsers = async (req, res) => {
     try {
         const { role, isActive, status } = req.query;
-        const query = {};
+        let query = {};
         if (role) query.role = role.toUpperCase();
         if (typeof isActive !== 'undefined') query.isActive = (isActive === 'true' || isActive === true);
         if (status) query.status = status.toUpperCase();
 
         if (req.user.role === 'AGENT') {
-            query['salonOwnerProfile.agentId'] = req.user._id;
+            const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+            const assignedSalons = await SalonOwnerProfile.find({ agentId: req.user._id }).select('userId').lean();
+            const salonUserIds = assignedSalons.map(s => s.userId);
+            query._id = { $in: salonUserIds };
             query.role = 'SALON_OWNER';
         }
 
@@ -88,14 +91,35 @@ export const getUsers = async (req, res) => {
 
         const total = await User.countDocuments(query);
         const users = await User.find(query)
-            .select('firstName lastName email role isActive status agentProfile salonOwnerProfile createdAt avatarUrl')
-            .populate('salonOwnerProfile.agentId', 'firstName lastName email role avatarUrl')
+            .select('firstName lastName email role isActive status createdAt avatarUrl')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
 
-        res.json({ users, count: total, page, limit });
+        // Fetch profiles separately
+        const AgentProfile = (await import('../models/AgentProfile.js')).default;
+        const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+
+        const agentIds = users.filter(u => u.role === 'AGENT').map(u => u._id);
+        const salonOwnerIds = users.filter(u => u.role === 'SALON_OWNER').map(u => u._id);
+
+        const agentProfiles = await AgentProfile.find({ userId: { $in: agentIds } }).lean();
+        const salonOwnerProfiles = await SalonOwnerProfile.find({ userId: { $in: salonOwnerIds } })
+            .populate('agentId', 'firstName lastName email role avatarUrl')
+            .lean();
+
+        const usersWithProfiles = users.map(user => {
+            const userObj = { ...user };
+            if (user.role === 'AGENT') {
+                userObj.agentProfile = agentProfiles.find(p => p.userId.toString() === user._id.toString());
+            } else if (user.role === 'SALON_OWNER') {
+                userObj.salonOwnerProfile = salonOwnerProfiles.find(p => p.userId.toString() === user._id.toString());
+            }
+            return userObj;
+        });
+
+        res.json({ users: usersWithProfiles, count: total, page, limit });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -134,7 +158,21 @@ export const assignAgent = async (req, res) => {
 
 export const getPublicAgents = async (req, res) => {
     try {
-        const agents = await User.find({ role: 'AGENT', isActive: true }).select('firstName lastName email agentProfile');
+        const users = await User.find({ role: 'AGENT', isActive: true })
+            .select('firstName lastName email')
+            .lean();
+
+        const agentIds = users.map(u => u._id);
+        const AgentProfile = (await import('../models/AgentProfile.js')).default;
+        const agentProfiles = await AgentProfile.find({ userId: { $in: agentIds } }).lean();
+
+        const agents = users.map(user => {
+            return {
+                ...user,
+                agentProfile: agentProfiles.find(p => p.userId.toString() === user._id.toString())
+            };
+        });
+
         res.json({ users: agents });
     } catch (error) {
         res.status(500).json({ message: error.message });

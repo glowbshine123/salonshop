@@ -6,18 +6,22 @@ export const creditOrderRewards = async (order) => {
     if (order.agentId && order.agentCommission && !order.agentCommission.isCredited) {
         const agent = await User.findById(order.agentId);
         if (agent) {
-            if (!agent.agentProfile) {
-                agent.agentProfile = {
+            const AgentProfile = (await import('../models/AgentProfile.js')).default;
+            let agentProfile = await AgentProfile.findOne({ userId: agent._id });
+
+            if (!agentProfile) {
+                agentProfile = new AgentProfile({
+                    userId: agent._id,
                     commissionRate: 0.10,
                     totalEarnings: 0,
                     wallet: { pending: 0, available: 0 },
                     points: 0
-                };
+                });
             }
-            if (!agent.agentProfile.wallet) agent.agentProfile.wallet = { pending: 0, available: 0 };
+            if (!agentProfile.wallet) agentProfile.wallet = { pending: 0, available: 0 };
 
-            agent.agentProfile.wallet.pending += order.agentCommission.amount;
-            await agent.save();
+            agentProfile.wallet.pending += order.agentCommission.amount;
+            await agentProfile.save();
 
             await WalletTransaction.create({
                 userId: agent._id,
@@ -50,20 +54,24 @@ export const unlockOrderRewards = async (order) => {
     if (order.agentId && order.agentCommission && order.agentCommission.isCredited) {
         const agent = await User.findById(order.agentId);
         if (agent) {
-            if (!agent.agentProfile) {
-                agent.agentProfile = {
+            const AgentProfile = (await import('../models/AgentProfile.js')).default;
+            let agentProfile = await AgentProfile.findOne({ userId: agent._id });
+
+            if (!agentProfile) {
+                agentProfile = new AgentProfile({
+                    userId: agent._id,
                     commissionRate: 0.10,
                     totalEarnings: 0,
                     wallet: { pending: 0, available: 0 },
                     points: 0
-                };
+                });
             }
-            if (!agent.agentProfile.wallet) agent.agentProfile.wallet = { pending: 0, available: 0 };
+            if (!agentProfile.wallet) agentProfile.wallet = { pending: 0, available: 0 };
 
-            if (agent.agentProfile.wallet.pending >= order.agentCommission.amount) {
-                agent.agentProfile.wallet.pending -= order.agentCommission.amount;
-                agent.agentProfile.wallet.available += order.agentCommission.amount;
-                await agent.save();
+            if (agentProfile.wallet.pending >= order.agentCommission.amount) {
+                agentProfile.wallet.pending -= order.agentCommission.amount;
+                agentProfile.wallet.available += order.agentCommission.amount;
+                await agentProfile.save();
 
                 await WalletTransaction.create({
                     userId: agent._id,

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { userAPI, authAPI } from '../services/apiService';
 import { useLoading } from '../context/LoadingContext';
 import toast from 'react-hot-toast';
-import { User, Mail, Phone, MapPin, Camera, Shield, Bell, CreditCard, ChevronRight, Loader2, CheckCircle2, Zap, Upload } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Shield, Bell, CreditCard, ChevronRight, Loader2, CheckCircle2, Zap, Upload, Wallet } from 'lucide-react';
 import {
     NavigationMenu,
     NavigationMenuList,
@@ -58,6 +58,8 @@ export default function ProfilePage() {
                     zip: ''
                 };
 
+                let extractedPhone = freshUser.phone || '';
+
                 if (freshUser.role === 'SALON_OWNER' && freshUser.salonOwnerProfile?.shippingAddresses?.length > 0) {
                     const defaultAddr = freshUser.salonOwnerProfile.shippingAddresses[0];
                     addressData = {
@@ -66,14 +68,7 @@ export default function ProfilePage() {
                         state: defaultAddr.state || '',
                         zip: defaultAddr.zip || ''
                     };
-                    setFormData({
-                        firstName: freshUser.firstName || '',
-                        lastName: freshUser.lastName || '',
-                        phone: defaultAddr.phone || '',
-                        email: freshUser.email || '',
-                        address: addressData
-                    });
-                    setPreviewUrl(freshUser.avatarUrl || '');
+                    if (defaultAddr.phone) extractedPhone = defaultAddr.phone;
                 } else if (freshUser.role === 'ADMIN' && freshUser.adminProfile?.address) {
                     const adminAddr = freshUser.adminProfile.address;
                     addressData = {
@@ -82,14 +77,6 @@ export default function ProfilePage() {
                         state: adminAddr.state || '',
                         zip: adminAddr.zip || ''
                     };
-                    setFormData({
-                        firstName: freshUser.firstName || '',
-                        lastName: freshUser.lastName || '',
-                        phone: freshUser.phone || '',
-                        email: freshUser.email || '',
-                        address: addressData
-                    });
-                    setPreviewUrl(freshUser.avatarUrl || '');
                 } else if (freshUser.role === 'AGENT' && freshUser.agentProfile?.address) {
                     const agentAddr = freshUser.agentProfile.address;
                     addressData = {
@@ -98,15 +85,16 @@ export default function ProfilePage() {
                         state: agentAddr.state || '',
                         zip: agentAddr.zip || ''
                     };
-                    setFormData({
-                        firstName: freshUser.firstName || '',
-                        lastName: freshUser.lastName || '',
-                        phone: freshUser.phone || '',
-                        email: freshUser.email || '',
-                        address: addressData
-                    });
-                    setPreviewUrl(freshUser.avatarUrl || '');
                 }
+
+                setFormData({
+                    firstName: freshUser.firstName || '',
+                    lastName: freshUser.lastName || '',
+                    phone: extractedPhone,
+                    email: freshUser.email || '',
+                    address: addressData
+                });
+                setPreviewUrl(freshUser.avatarUrl || '');
 
             } catch (error) {
                 console.error("Failed to fetch fresh user data:", error);
@@ -119,6 +107,8 @@ export default function ProfilePage() {
                         zip: ''
                     };
 
+                    let extractedPhone = user.phone || '';
+
                     if (user.role === 'SALON_OWNER' && user.salonOwnerProfile?.shippingAddresses?.length > 0) {
                         const defaultAddr = user.salonOwnerProfile.shippingAddresses[0];
                         addressData = {
@@ -127,6 +117,7 @@ export default function ProfilePage() {
                             state: defaultAddr.state || '',
                             zip: defaultAddr.zip || ''
                         };
+                        if (defaultAddr.phone) extractedPhone = defaultAddr.phone;
                     } else if (user.role === 'ADMIN' && user.adminProfile?.address) {
                         const adminAddr = user.adminProfile.address;
                         addressData = {
@@ -148,7 +139,7 @@ export default function ProfilePage() {
                     setFormData({
                         firstName: user.firstName || '',
                         lastName: user.lastName || '',
-                        phone: user.phone || '',
+                        phone: extractedPhone,
                         email: user.email || '',
                         address: addressData
                     });
@@ -295,24 +286,68 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-emerald-900 p-8 rounded-xl shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden group flex flex-col justify-center">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-800/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-700/50"></div>
-                                    <div className="relative z-10">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                                                <Zap size={20} className="text-emerald-400" />
+                                {user?.role === 'SALON_OWNER' && (
+                                    <div className="bg-emerald-900 p-8 rounded-xl shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden group flex flex-col justify-center">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-800/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-700/50"></div>
+                                        <div className="relative z-10">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
+                                                    <Zap size={20} className="text-emerald-400" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Rewards Wallet</p>
+                                                    <h3 className="text-3xl font-black tracking-tight">{user?.salonOwnerProfile?.rewardPoints?.available || 0}</h3>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Rewards Wallet</p>
-                                                <h3 className="text-3xl font-black tracking-tight">{user?.salonOwnerProfile?.rewardPoints?.available || 0}</h3>
+                                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-80">
+                                                <span>Locked: {user?.salonOwnerProfile?.rewardPoints?.locked || 0}</span>
+                                                <span>Expires soon</span>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-80">
-                                            <span>Locked: {user?.salonOwnerProfile?.rewardPoints?.locked || 0}</span>
-                                            <span>Expires soon</span>
                                         </div>
                                     </div>
-                                </div>
+                                )}
+
+                                {user?.role === 'AGENT' && (
+                                    <div className="bg-emerald-900 p-8 rounded-xl shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden group flex flex-col justify-center">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-800/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-700/50"></div>
+                                        <div className="relative z-10">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
+                                                    <Wallet size={20} className="text-emerald-400" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Commission Wallet</p>
+                                                    <h3 className="text-3xl font-black tracking-tight">₹{user?.agentProfile?.wallet?.available || 0}</h3>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-80">
+                                                <span>Total Auth Earned: ₹{user?.agentProfile?.totalEarnings || 0}</span>
+                                                <span>Rate: {(user?.agentProfile?.commissionRate || 0.1) * 100}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {user?.role === 'ADMIN' && (
+                                    <div className="bg-emerald-900 p-8 rounded-xl shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden group flex flex-col justify-center">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-800/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-700/50"></div>
+                                        <div className="relative z-10">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
+                                                    <Shield size={20} className="text-emerald-400" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">System Admin</p>
+                                                    <h3 className="text-3xl font-black tracking-tight">Full Access</h3>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-80">
+                                                <span>Manage global operations</span>
+                                                <span>Privileged</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="col-span-3 bg-white p-10 rounded-xl border border-neutral-100 shadow-sm space-y-4">

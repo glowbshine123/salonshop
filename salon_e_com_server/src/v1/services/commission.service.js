@@ -47,11 +47,23 @@ export const calculateCommission = async (order) => {
         status: 'PENDING'
     });
 
-    agent.agentProfile.totalEarnings += amountEarned;
-    agent.agentProfile.currentMonthEarnings += amountEarned;
-    agent.agentProfile.points = (agent.agentProfile.points || 0) + Math.round(amountEarned);
+    const AgentProfile = (await import('../models/AgentProfile.js')).default;
+    let agentProfile = await AgentProfile.findOne({ userId: agent._id });
 
-    await agent.save();
+    if (!agentProfile) {
+        agentProfile = new AgentProfile({
+            userId: agent._id,
+            totalEarnings: 0,
+            currentMonthEarnings: 0,
+            points: 0
+        });
+    }
+
+    agentProfile.totalEarnings += amountEarned;
+    agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) + amountEarned;
+    agentProfile.points = (agentProfile.points || 0) + Math.round(amountEarned);
+
+    await agentProfile.save();
 
     order.commissionCalculated = true;
     await order.save();
@@ -76,11 +88,14 @@ export const deductCommission = async (order) => {
 
     const deductionAmount = transaction.amount;
 
-    agent.agentProfile.totalEarnings -= deductionAmount;
-    agent.agentProfile.currentMonthEarnings -= deductionAmount;
-    // Ensure it doesn't go below 0 if that's a requirement, but usually it can be negative if refund happens.
+    const AgentProfile = (await import('../models/AgentProfile.js')).default;
+    const agentProfile = await AgentProfile.findOne({ userId: agent._id });
 
-    await agent.save();
+    if (agentProfile) {
+        agentProfile.totalEarnings -= deductionAmount;
+        agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) - deductionAmount;
+        await agentProfile.save();
+    }
 
     // Delete or mark transaction as cancelled? 
     // Requirements say "Update the transaction record accordingly"

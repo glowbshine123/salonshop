@@ -10,11 +10,11 @@ const commissionSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ['PENDING', 'APPROVED', 'PAID', 'CLAWBACK', 'SETTLED'],
+        enum: ['PENDING', 'PAID'],
         default: 'PENDING'
     },
     paidAt: { type: Date }
 
 }, { timestamps: true });
 
-export default mongoose.model('Commission', commissionSchema);
+export default mongoose.models.Commission || mongoose.model('Commission', commissionSchema);

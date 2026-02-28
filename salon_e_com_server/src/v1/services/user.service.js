@@ -4,10 +4,23 @@ import crypto from 'crypto';
 import * as notificationService from './notification.service.js';
 
 export const getUserProfile = async (userId) => {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).lean();
     if (!user) {
         throw new Error('User not found');
     }
+
+    // Fetch profiles separately
+    const AgentProfile = (await import('../models/AgentProfile.js')).default;
+    const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+
+    if (user.role === 'AGENT') {
+        user.agentProfile = await AgentProfile.findOne({ userId: user._id }).lean();
+    } else if (user.role === 'SALON_OWNER') {
+        user.salonOwnerProfile = await SalonOwnerProfile.findOne({ userId: user._id })
+            .populate('agentId', 'firstName lastName email role')
+            .lean();
+    } // ... admin profile can similarly be loaded
+
     return user;
 };
 
@@ -24,49 +37,52 @@ export const updateUserProfile = async (userId, updateData) => {
     if (updateData.phone) user.phone = updateData.phone;
     if (updateData.avatarUrl) user.avatarUrl = updateData.avatarUrl;
 
-    // Handle Address Updates based on Role
-    if (updateData.address) {
+    // Handle Profile updates based on Role
+    if (updateData.address || updateData.commissionRate || updateData.salonName) {
         if (user.role === 'ADMIN') {
-            user.adminProfile = {
-                ...(user.adminProfile || {}),
-                address: {
-                    ...(user.adminProfile?.address || {}),
-                    ...updateData.address
-                }
-            };
-        } else if (user.role === 'SALON_OWNER') {
-            if (!user.salonOwnerProfile) user.salonOwnerProfile = {};
-            if (!user.salonOwnerProfile.shippingAddresses) user.salonOwnerProfile.shippingAddresses = [];
+            const AdminProfile = (await import('../models/AdminProfile.js')).default;
+            let adminProfile = await AdminProfile.findOne({ userId: user._id });
+            if (!adminProfile) adminProfile = new AdminProfile({ userId: user._id });
 
-            const newAddress = {
-                street: updateData.address.street,
-                city: updateData.address.city,
-                state: updateData.address.state,
-                zip: updateData.address.zip,
-                phone: updateData.phone || user.phone, // Ensure phone is synced or pulled from update
-                isDefault: true
-            };
-
-            if (user.salonOwnerProfile.shippingAddresses.length > 0) {
-                // Update existing default/first address
-                Object.assign(user.salonOwnerProfile.shippingAddresses[0], newAddress);
-            } else {
-                // Add new address
-                user.salonOwnerProfile.shippingAddresses.push(newAddress);
+            if (updateData.address) {
+                adminProfile.address = { ...(adminProfile.address || {}), ...updateData.address };
             }
-        } else if (user.role === 'AGENT') {
-            user.agentProfile = {
-                ...(user.agentProfile || {}),
-                address: {
-                    ...(user.agentProfile?.address || {}),
-                    ...updateData.address
-                }
-            };
-        }
-    }
+            await adminProfile.save();
+        } else if (user.role === 'SALON_OWNER') {
+            const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+            let salonOwnerProfile = await SalonOwnerProfile.findOne({ userId: user._id });
+            if (!salonOwnerProfile) salonOwnerProfile = new SalonOwnerProfile({ userId: user._id });
 
-    if (updateData.adminProfile && user.role === 'ADMIN') {
-        // ... (keep existing adminProfile logic if any, but address is handled above)
+            if (updateData.address) {
+                const newAddress = {
+                    street: updateData.address.street,
+                    city: updateData.address.city,
+                    state: updateData.address.state,
+                    zip: updateData.address.zip,
+                    phone: updateData.phone || user.phone,
+                    isDefault: true
+                };
+
+                if (salonOwnerProfile.shippingAddresses && salonOwnerProfile.shippingAddresses.length > 0) {
+                    Object.assign(salonOwnerProfile.shippingAddresses[0], newAddress);
+                } else {
+                    salonOwnerProfile.shippingAddresses = [newAddress];
+                }
+            }
+            if (updateData.salonName) salonOwnerProfile.salonName = updateData.salonName;
+            await salonOwnerProfile.save();
+
+        } else if (user.role === 'AGENT') {
+            const AgentProfile = (await import('../models/AgentProfile.js')).default;
+            let agentProfile = await AgentProfile.findOne({ userId: user._id });
+            if (!agentProfile) agentProfile = new AgentProfile({ userId: user._id });
+
+            if (updateData.address) {
+                agentProfile.address = { ...(agentProfile.address || {}), ...updateData.address };
+            }
+            // Bank details / razor pay updates can be handled here if passed in updateData
+            await agentProfile.save();
+        }
     }
 
     await user.save();
@@ -115,19 +131,24 @@ export const createInternalUser = async (creatorRole, creatorId, userData) => {
         status: 'ACTIVE'
     };
 
+    const createdUser = await User.create(newUserObj);
+
     if (role === 'AGENT') {
-        newUserObj.agentProfile = {
+        const AgentProfile = (await import('../models/AgentProfile.js')).default;
+        await AgentProfile.create({
+            userId: createdUser._id,
             referralCode: crypto.randomBytes(4).toString('hex').toUpperCase(),
             commissionRate: userData.commissionRate || 0.10,
             wallet: { pending: 0, available: 0 },
             panCard: panCard || '',
             aadharCard: aadharCard || '',
             address: address || {}
-        };
+        });
     }
 
     if (role === 'SALON_OWNER') {
         const ownerProfile = {
+            userId: createdUser._id,
             agentId: creatorRole === 'AGENT' ? creatorId : (agentId || null),
             rewardPoints: { locked: 0, available: 0 },
             salonName: userData.salonName || '',
@@ -146,10 +167,9 @@ export const createInternalUser = async (creatorRole, creatorId, userData) => {
             }];
         }
 
-        newUserObj.salonOwnerProfile = ownerProfile;
+        const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+        await SalonOwnerProfile.create(ownerProfile);
     }
-
-    const createdUser = await User.create(newUserObj);
 
     // 1. User Welcome Notification
     await notificationService.createNotification({
@@ -201,7 +221,15 @@ export const assignAgent = async (salonId, agentId) => {
     const agent = await User.findById(agentId);
     if (!agent || agent.role !== 'AGENT') throw new Error('Agent not found');
 
-    salon.salonOwnerProfile.agentId = agentId;
-    await salon.save();
+    const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+    let salonOwnerProfile = await SalonOwnerProfile.findOne({ userId: salonId });
+
+    if (!salonOwnerProfile) {
+        salonOwnerProfile = new SalonOwnerProfile({ userId: salonId, agentId: agentId });
+    } else {
+        salonOwnerProfile.agentId = agentId;
+    }
+
+    await salonOwnerProfile.save();
     return salon;
 };

@@ -52,13 +52,15 @@ export const createOrder = async (userId, orderData) => {
     const shippingCost = subtotal > 50 ? 0 : 10;
     const total = subtotal + tax + shippingCost;
 
-    const salonOwner = await User.findById(userId);
+    const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+    const salonOwnerProfile = await SalonOwnerProfile.findOne({ userId });
+
     let agentId = null;
 
     if (orderData.agentId) {
         agentId = orderData.agentId;
-    } else if (salonOwner && salonOwner.salonOwnerProfile.agentId) {
-        agentId = salonOwner.salonOwnerProfile.agentId;
+    } else if (salonOwnerProfile && salonOwnerProfile.agentId) {
+        agentId = salonOwnerProfile.agentId;
     } else if (referralCode) {
         const agent = await User.findOne({ 'agentProfile.referralCode': referralCode, role: 'AGENT' });
         if (agent) agentId = agent._id;
@@ -124,6 +126,11 @@ export const createOrder = async (userId, orderData) => {
         },
         timeline: [{ status: 'PENDING', note: `Order created - ${pointsUsed > 0 ? `Redeemed ${pointsUsed} points. ` : ''}Payment Method: ${paymentMethod || 'ONLINE'}` }]
     });
+
+    if (salonRewardPointsAmount > 0) {
+        const rewardService = await import('./reward.service.js');
+        await rewardService.lockOrderRewards(order._id);
+    }
 
     // Execute Redemption (Deduct points)
     if (pointsUsed > 0) {
@@ -295,6 +302,11 @@ export const updateOrderStatus = async (orderId, status) => {
         if (order.pointsUsed > 0) {
             const rewardService = await import('./reward.service.js');
             await rewardService.reverseRedemption(order._id);
+        }
+
+        if (!order.salonRewardPoints?.isCredited && order.salonRewardPoints?.earned > 0) {
+            const rewardService = await import('./reward.service.js');
+            await rewardService.reverseLockedRewards(order._id);
         }
 
         // STOCK LOGIC: Restore stock on cancellation/refund

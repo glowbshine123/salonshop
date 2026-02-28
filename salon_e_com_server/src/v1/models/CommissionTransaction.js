@@ -12,4 +12,4 @@ const commissionTransactionSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-export default mongoose.model('CommissionTransaction', commissionTransactionSchema);
+export default mongoose.models.CommissionTransaction || mongoose.model('CommissionTransaction', commissionTransactionSchema);

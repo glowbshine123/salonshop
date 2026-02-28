@@ -7,4 +7,4 @@ const commissionSlabSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
-export default mongoose.model('CommissionSlab', commissionSlabSchema);
+export default mongoose.models.CommissionSlab || mongoose.model('CommissionSlab', commissionSlabSchema);

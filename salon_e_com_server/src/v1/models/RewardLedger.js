@@ -21,4 +21,4 @@ const rewardLedgerSchema = new mongoose.Schema({
 // Index for efficient expiry checking and user balance lookups
 rewardLedgerSchema.index({ userId: 1, status: 1, expiresAt: 1 });
 
-export default mongoose.model('RewardLedger', rewardLedgerSchema);
+export default mongoose.models.RewardLedger || mongoose.model('RewardLedger', rewardLedgerSchema);
