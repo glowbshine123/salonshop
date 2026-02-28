@@ -15,6 +15,7 @@ const agentProfileSchema = new mongoose.Schema({
         ifscCode: String,
         accountHolderName: String
     },
+    upiId: { type: String },
     address: {
         street: String,
         city: String,

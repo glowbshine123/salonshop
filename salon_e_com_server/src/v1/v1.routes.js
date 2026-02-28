@@ -47,6 +47,9 @@ router.use('/admin', adminRoutes);
 import systemRoutes from './routes/system.routes.js';
 router.use('/settings', systemRoutes);
 
+import payoutRoutes from './routes/payout.routes.js';
+router.use('/payout', payoutRoutes);
+
 import rewardRoutes from './routes/reward.routes.js';
 router.use('/rewards', rewardRoutes);
 

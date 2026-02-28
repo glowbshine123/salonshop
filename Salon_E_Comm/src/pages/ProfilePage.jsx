@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { userAPI, authAPI } from '../services/apiService';
+import { userAPI, authAPI, payoutAPI } from '../services/apiService';
 import { useLoading } from '../context/LoadingContext';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, MapPin, Camera, Shield, Bell, CreditCard, ChevronRight, Loader2, CheckCircle2, Zap, Upload, Wallet } from 'lucide-react';
@@ -23,6 +23,7 @@ export default function ProfilePage() {
     const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [paymentPref, setPaymentPref] = useState('BANK');
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -34,7 +35,14 @@ export default function ProfilePage() {
             state: '',
             zip: '',
             country: ''
-        }
+        },
+        bankDetails: {
+            bankName: '',
+            accountNumber: '',
+            ifscCode: '',
+            accountHolderName: ''
+        },
+        upiId: ''
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
@@ -92,8 +100,19 @@ export default function ProfilePage() {
                     lastName: freshUser.lastName || '',
                     phone: extractedPhone,
                     email: freshUser.email || '',
-                    address: addressData
+                    address: addressData,
+                    bankDetails: freshUser.agentProfile?.bankDetails || {
+                        bankName: '', accountNumber: '', ifscCode: '', accountHolderName: ''
+                    },
+                    upiId: freshUser.agentProfile?.upiId || ''
                 });
+                if (freshUser.role === 'AGENT') {
+                    if (freshUser.agentProfile?.upiId && !freshUser.agentProfile?.bankDetails?.accountNumber) {
+                        setPaymentPref('UPI');
+                    } else {
+                        setPaymentPref('BANK');
+                    }
+                }
                 setPreviewUrl(freshUser.avatarUrl || '');
 
             } catch (error) {
@@ -141,8 +160,19 @@ export default function ProfilePage() {
                         lastName: user.lastName || '',
                         phone: extractedPhone,
                         email: user.email || '',
-                        address: addressData
+                        address: addressData,
+                        bankDetails: user.agentProfile?.bankDetails || {
+                            bankName: '', accountNumber: '', ifscCode: '', accountHolderName: ''
+                        },
+                        upiId: user.agentProfile?.upiId || ''
                     });
+                    if (user.role === 'AGENT') {
+                        if (user.agentProfile?.upiId && !user.agentProfile?.bankDetails?.accountNumber) {
+                            setPaymentPref('UPI');
+                        } else {
+                            setPaymentPref('BANK');
+                        }
+                    }
                     setPreviewUrl(user.avatarUrl || '');
                 }
             } finally {
@@ -201,6 +231,38 @@ export default function ProfilePage() {
         }
     };
 
+    const handlePayoutUpdate = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setSuccess(false);
+        try {
+            const payload = {};
+            if (paymentPref === 'BANK') {
+                payload.bankDetails = formData.bankDetails;
+                payload.upiId = ''; // Clear UPI if bank preferred
+            } else if (paymentPref === 'UPI') {
+                payload.upiId = formData.upiId;
+                payload.bankDetails = { bankName: '', accountNumber: '', ifscCode: '', accountHolderName: '' }; // Clear Bank if UPI preferred
+            }
+
+            const res = await payoutAPI.updateSettings(payload);
+
+            // Optionally merge returned agent profile details back into the global user object if necessary, 
+            // but for safety, we simply refresh user state from backend entirely:
+            const freshMe = await authAPI.me();
+            if (setUser) setUser(freshMe.data);
+
+            setSuccess(true);
+            toast.success('Payout Settings saved successfully');
+            setTimeout(() => setSuccess(false), 3000);
+        } catch (err) {
+            console.error('Payout settings update failed:', err);
+            toast.error(err.response?.data?.message || err.message || 'Failed to update payout settings');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name.includes('.')) {
@@ -223,8 +285,10 @@ export default function ProfilePage() {
     const tabs = [
         { id: 'PROFILE', label: 'Profile', icon: User },
         { id: 'SECURITY', label: 'Security', icon: Shield },
-        // { id: 'NOTIFICATIONS', label: 'Notifications', icon: Bell },
     ];
+    if (user?.role === 'AGENT') {
+        tabs.push({ id: 'BANK_DETAILS', label: 'Bank Details', icon: CreditCard });
+    }
 
     return (
         <div className="bg-neutral-50/50 min-h-screen py-20 px-4">
@@ -486,6 +550,123 @@ export default function ProfilePage() {
                     {activeTab === 'SECURITY' && (
                         <div className="max-w-7xl px-8 bg-white p-10 rounded-xl border border-neutral-100 shadow-sm ">
                             <SecuritySettings />
+                        </div>
+                    )}
+
+                    {activeTab === 'BANK_DETAILS' && user?.role === 'AGENT' && (
+                        <div className="bg-white p-10 rounded-xl border border-neutral-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="flex items-center justify-between border-b border-neutral-100 pb-6">
+                                <div>
+                                    <h3 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Payout Settings</h3>
+                                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Configure where your agent commissions are deposited</p>
+                                </div>
+                                {success && (
+                                    <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
+                                        <CheckCircle2 size={16} />
+                                        Payouts Updated
+                                    </div>
+                                )}
+                            </div>
+
+                            <form onSubmit={handlePayoutUpdate} className="space-y-8 max-w-2xl">
+                                <div className="p-1 bg-neutral-100/80 rounded-xl flex">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentPref('BANK')}
+                                        className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${paymentPref === 'BANK' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                                    >
+                                        Bank Transfer (NEFT/RTGS)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentPref('UPI')}
+                                        className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${paymentPref === 'UPI' ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20' : 'text-neutral-400 hover:text-neutral-600'}`}
+                                    >
+                                        UPI Interface
+                                    </button>
+                                </div>
+
+                                {paymentPref === 'BANK' && (
+                                    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Account Holder Name</label>
+                                            <input
+                                                type="text"
+                                                name="bankDetails.accountHolderName"
+                                                value={formData.bankDetails.accountHolderName}
+                                                onChange={handleChange}
+                                                placeholder="As per bank records"
+                                                required
+                                                className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Bank Name</label>
+                                            <input
+                                                type="text"
+                                                name="bankDetails.bankName"
+                                                value={formData.bankDetails.bankName}
+                                                onChange={handleChange}
+                                                placeholder="e.g. HDFC Bank, State Bank of India"
+                                                required
+                                                className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Account Number</label>
+                                                <input
+                                                    type="password"
+                                                    name="bankDetails.accountNumber"
+                                                    value={formData.bankDetails.accountNumber}
+                                                    onChange={handleChange}
+                                                    required
+                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">IFSC Code</label>
+                                                <input
+                                                    type="text"
+                                                    name="bankDetails.ifscCode"
+                                                    value={formData.bankDetails.ifscCode}
+                                                    onChange={handleChange}
+                                                    required
+                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold uppercase focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {paymentPref === 'UPI' && (
+                                    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Verified UPI ID</label>
+                                            <input
+                                                type="text"
+                                                name="upiId"
+                                                value={formData.upiId}
+                                                onChange={handleChange}
+                                                placeholder="username@bank"
+                                                required
+                                                className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold lowercase focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                            />
+                                            <p className="text-[9px] font-black text-neutral-400 px-2">Ensure this UPI ID is active and linked directly to your authenticated name.</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="pt-6">
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full h-16 bg-neutral-900 text-white rounded-[24px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-neutral-900/20 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
+                                    >
+                                        {loading ? <Loader2 className="animate-spin" size={20} /> : 'Save Payment Tunnel Configuration'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     )}
                     {/* 

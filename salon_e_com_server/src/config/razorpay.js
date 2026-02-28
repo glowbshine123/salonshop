@@ -37,6 +37,34 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
         console.log('[razorpay] ✅ Mock order created:', mockOrder.id);
         return mockOrder;
       }
+    },
+    fundAccount: {
+      create: async (options) => {
+        console.log(`[razorpay] 🏦 Creating mock fund account type: ${options.account_type}`);
+        return {
+          id: `fa_${Date.now()}_mock`,
+          entity: 'fund_account',
+          contact_id: options.contact_id,
+          account_type: options.account_type,
+          active: true,
+          created_at: Math.floor(Date.now() / 1000)
+        };
+      }
+    },
+    api: {
+      post: async (req) => {
+        if (req.url === '/contacts') {
+          console.log(`[razorpay] 👤 Creating mock contact via API: ${req.data.name}`);
+          return {
+            id: `cont_${Date.now()}_mock`,
+            entity: 'contact',
+            name: req.data.name,
+            active: true,
+            created_at: Math.floor(Date.now() / 1000)
+          };
+        }
+        throw new Error(`Mock API not implemented for URL: ${req.url}`);
+      }
     }
   };
 }

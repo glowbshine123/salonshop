@@ -186,7 +186,7 @@ export const cartAPI = {
 
 
 export const payoutAPI = {
-
+    updateSettings: (data) => api.post('/payout/settings', data),
     getAll: (params) => api.get('/admin/payouts', { params }),
     updateStatus: (id, status) => api.patch(`/admin/payouts/${id}/status`, { status }),
 };

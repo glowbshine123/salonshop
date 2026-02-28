@@ -38,7 +38,7 @@ export const updateUserProfile = async (userId, updateData) => {
     if (updateData.avatarUrl) user.avatarUrl = updateData.avatarUrl;
 
     // Handle Profile updates based on Role
-    if (updateData.address || updateData.commissionRate || updateData.salonName) {
+    if (updateData.address || updateData.commissionRate || updateData.salonName || updateData.bankDetails || updateData.upiId !== undefined) {
         if (user.role === 'ADMIN') {
             const AdminProfile = (await import('../models/AdminProfile.js')).default;
             let adminProfile = await AdminProfile.findOne({ userId: user._id });
@@ -80,7 +80,7 @@ export const updateUserProfile = async (userId, updateData) => {
             if (updateData.address) {
                 agentProfile.address = { ...(agentProfile.address || {}), ...updateData.address };
             }
-            // Bank details / razor pay updates can be handled here if passed in updateData
+
             await agentProfile.save();
         }
     }
