@@ -13,10 +13,25 @@ razorpayInstance.isEnabled = !!(process.env.RAZORPAY_KEY_ID && process.env.RAZOR
 razorpayInstance.payouts = {
   create: async (options) => {
     try {
-      return await razorpayInstance.api.post({
-        url: 'payouts',
-        data: options
+      // Use the standard SDK's resource method if available, or fetch directly
+      const auth = Buffer.from(`${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`).toString('base64');
+
+      const response = await fetch('https://api.razorpay.com/v1/payouts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${auth}`
+        },
+        body: JSON.stringify(options)
       });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw { statusCode: response.status, error: responseData };
+      }
+
+      return responseData;
     } catch (error) {
       console.error('[razorpay] Payout API Error:', JSON.stringify(error, null, 2));
       throw error;

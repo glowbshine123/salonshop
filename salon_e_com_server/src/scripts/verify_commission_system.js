@@ -30,6 +30,9 @@ async function runVerification() {
             }
         });
 
+        const AgentProfile = (await import('../v1/models/AgentProfile.js')).default;
+        const agentProfile = await AgentProfile.findOne({ userId: agent._id });
+
         // 1.1 Find or create a Customer
         let customer = await User.findOne({ role: 'SALON_OWNER' });
         if (!customer) {
@@ -43,8 +46,8 @@ async function runVerification() {
             });
         }
 
-        const initialTotal = agent.agentProfile.totalEarnings;
-        const initialMonth = agent.agentProfile.currentMonthEarnings;
+        const initialTotal = agentProfile?.totalEarnings || 0;
+        const initialMonth = agentProfile?.currentMonthEarnings || 0;
         console.log(`Agent: ${agent.email}`);
         console.log(`Initial Total: ${initialTotal}, Initial Month: ${initialMonth}`);
 
@@ -68,11 +71,11 @@ async function runVerification() {
         await commissionService.calculateCommission(order);
 
         // 4. Verify earnings updated
-        const updatedAgent = await User.findById(agent._id);
-        console.log(`Updated Total: ${updatedAgent.agentProfile.totalEarnings}`);
-        console.log(`Updated Month: ${updatedAgent.agentProfile.currentMonthEarnings}`);
+        const updatedProfile = await AgentProfile.findOne({ userId: agent._id });
+        console.log(`Updated Total: ${updatedProfile.totalEarnings}`);
+        console.log(`Updated Month: ${updatedProfile.currentMonthEarnings}`);
 
-        if (updatedAgent.agentProfile.currentMonthEarnings === initialMonth + 100) {
+        if (updatedProfile.currentMonthEarnings === initialMonth + 100) {
             console.log('✅ Earnings updated correctly.');
         } else {
             console.error('❌ Earnings update failed.');
@@ -92,10 +95,10 @@ async function runVerification() {
         console.log(`Settlement Results: ${JSON.stringify(settlementResults)}`);
 
         // 7. Verify settlement
-        const finalizedAgent = await User.findById(agent._id);
+        const finalizedProfile = await AgentProfile.findOne({ userId: agent._id });
         const settlement = await Settlement.findOne({ agentId: agent._id }).sort({ createdAt: -1 });
 
-        if (finalizedAgent.agentProfile.currentMonthEarnings === 0 && settlement && settlement.setid) {
+        if (finalizedProfile.currentMonthEarnings === 0 && settlement && settlement.setid) {
             console.log(`✅ Settlement processed: currentMonthEarnings reset, Settlement created with setid: ${settlement.setid}`);
             console.log(`✅ Summary Counts: Orders: ${settlement.totalOrders}, Commissions: ${settlement.totalCommissions}`);
             if (settlement.totalOrders === 1 && settlement.totalCommissions === 1) {

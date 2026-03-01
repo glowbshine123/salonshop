@@ -217,7 +217,7 @@ export default function CartPage() {
                   REMOVE UNAVAILABLE ITEMS
                 </div>
               ) : (
-                <Link to="/checkout" className="flex items-center justify-center">
+                <Link to="/checkout" className="flex items-center justify-center rounded-lg !bg-emerald-600 ">
                   PROCEED TO SECURE CHECKOUT
                   <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>

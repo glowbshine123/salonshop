@@ -104,6 +104,20 @@ export const processMonthlySettlement = async (manualMonth = null) => {
                     settlement.status = 'PROCESSING';
                     await settlement.save();
 
+                    // 5. Post-Payout Internal Ledger Updates
+                    // Mark all pending transactions as SETTLED for this agent
+                    await CommissionTransaction.updateMany(
+                        { agentId: agent._id, status: 'PENDING' },
+                        { $set: { status: 'SETTLED' } }
+                    );
+
+                    // Reset Current Month Yield (as it has been settled/payout triggered)
+                    if (agentProfile) {
+                        agentProfile.currentMonthEarnings = 0;
+                        agentProfile.lastSettlementDate = new Date();
+                        await agentProfile.save();
+                    }
+
                     results.success++;
                     results.totalAmount += amount;
 

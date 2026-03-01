@@ -49,6 +49,14 @@ export const calculateCommission = async (order) => {
         });
     }
 
+    // Month Reset Logic: Check if we are in a new month compared to last settlement or system date
+    const lastUpdate = agentProfile.updatedAt || new Date();
+    const isNewMonth = lastUpdate.getMonth() !== now.getMonth() || lastUpdate.getFullYear() !== now.getFullYear();
+
+    if (isNewMonth) {
+        agentProfile.currentMonthEarnings = 0;
+    }
+
     agentProfile.totalEarnings += amountEarned;
     agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) + amountEarned;
     agentProfile.points = (agentProfile.points || 0) + Math.round(amountEarned);

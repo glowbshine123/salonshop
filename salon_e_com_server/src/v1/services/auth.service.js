@@ -119,6 +119,12 @@ export const registerUser = async (userData) => {
     const user = await baseCreateUser(userData);
 
     if (user) {
+        let profile = null;
+        if (user.role === 'SALON_OWNER') {
+            const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+            profile = await SalonOwnerProfile.findOne({ userId: user._id });
+        }
+
         return {
             _id: user.id,
             firstName: user.firstName,
@@ -126,6 +132,7 @@ export const registerUser = async (userData) => {
             email: user.email,
             role: user.role,
             status: user.status,
+            salonOwnerProfile: profile,
             token: generateToken(user.id, user.role),
         };
     } else {
@@ -149,9 +156,22 @@ export const loginUser = async (email, password) => {
         throw new Error('Your account is deactivated. Please contact support.');
     }
 
-    // Note: PENDING users can login to check status, but routes should handle access control
-
     if (await bcrypt.compare(password, user.passwordHash)) {
+        let agentProfile = null;
+        let salonOwnerProfile = null;
+        let adminProfile = null;
+
+        if (user.role === 'AGENT') {
+            const AgentProfile = (await import('../models/AgentProfile.js')).default;
+            agentProfile = await AgentProfile.findOne({ userId: user._id });
+        } else if (user.role === 'SALON_OWNER') {
+            const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+            salonOwnerProfile = await SalonOwnerProfile.findOne({ userId: user._id });
+        } else if (user.role === 'ADMIN') {
+            const AdminProfile = (await import('../models/AdminProfile.js')).default;
+            adminProfile = await AdminProfile.findOne({ userId: user._id });
+        }
+
         return {
             _id: user.id,
             firstName: user.firstName,
@@ -159,6 +179,9 @@ export const loginUser = async (email, password) => {
             email: user.email,
             role: user.role,
             status: user.status,
+            agentProfile,
+            salonOwnerProfile,
+            adminProfile,
             token: generateToken(user.id, user.role),
         };
     } else {

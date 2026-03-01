@@ -187,17 +187,18 @@ export default function AdminPayouts() {
                                     <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest">Settlement ID</th>
                                     <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest">Amount</th>
                                     <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest text-center">Month</th>
+                                    <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest text-center">Status</th>
                                     <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest text-right">Ops</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-50">
                                 {loading ? (
                                     Array.from({ length: 5 }).map((_, i) => (
-                                        <TableRowSkeleton key={i} cellCount={5} />
+                                        <TableRowSkeleton key={i} cellCount={6} />
                                     ))
                                 ) : settlements.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="px-10 py-32 text-center text-neutral-400 font-black uppercase tracking-widest italic leading-loose">
+                                        <td colSpan="6" className="px-10 py-32 text-center text-neutral-400 font-black uppercase tracking-widest italic leading-loose">
                                             <div className="w-16 h-16 bg-neutral-50 rounded-2xl flex items-center justify-center text-neutral-300 mx-auto mb-4">
                                                 <Package size={32} />
                                             </div>
@@ -234,6 +235,17 @@ export default function AdminPayouts() {
                                             <td className="px-8 py-6 text-center">
                                                 <span className="px-3 py-1.5 bg-neutral-50 border border-neutral-100 rounded-lg text-[10px] font-black text-neutral-500 uppercase tracking-widest">
                                                     {sett.month}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-6 text-center">
+                                                <span className={cn(
+                                                    "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border",
+                                                    sett.status === 'SUCCESS' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                                        sett.status === 'PROCESSING' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                                            sett.status === 'FAILED' ? "bg-red-50 text-red-600 border-red-100" :
+                                                                "bg-neutral-50 text-neutral-500 border-neutral-100"
+                                                )}>
+                                                    {sett.status}
                                                 </span>
                                             </td>
                                             <td className="px-8 py-6 text-right">
@@ -371,7 +383,23 @@ export default function AdminPayouts() {
                                             <span className="text-xs font-black text-neutral-600 uppercase tracking-tight">Timestamp</span>
                                         </div>
                                         <span className="text-xs font-black text-neutral-900 uppercase tracking-tight">
-                                            {new Date(selectedSettlement.settledAt).toLocaleString()}
+                                            {new Date(selectedSettlement.settledAt || selectedSettlement.createdAt).toLocaleString()}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-neutral-100">
+                                        <div className="flex items-center gap-3">
+                                            <Filter size={18} className="text-neutral-400" />
+                                            <span className="text-xs font-black text-neutral-600 uppercase tracking-tight">Status</span>
+                                        </div>
+                                        <span className={cn(
+                                            "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg",
+                                            selectedSettlement.status === 'SUCCESS' ? "bg-emerald-500 text-white" :
+                                                selectedSettlement.status === 'PROCESSING' ? "bg-blue-500 text-white" :
+                                                    selectedSettlement.status === 'FAILED' ? "bg-red-500 text-white" :
+                                                        "bg-neutral-400 text-white"
+                                        )}>
+                                            {selectedSettlement.status}
                                         </span>
                                     </div>
                                 </div>
