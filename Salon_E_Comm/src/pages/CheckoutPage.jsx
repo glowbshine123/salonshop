@@ -203,10 +203,11 @@ export default function CheckoutPage() {
         throw new Error('Failed to create order on server');
       }
 
-      if (paymentMethod === 'COD') {
+      // 0-Total or COD handling
+      if (total === 0 || paymentMethod === 'COD') {
         try { await clearCart(); } catch (clearErr) { }
 
-        toast.success('Order placed successfully!');
+        toast.success(total === 0 ? 'Order placed successfully using rewards!' : 'Order placed successfully!');
         navigate('/my-orders');
         return;
       }
@@ -538,7 +539,6 @@ export default function CheckoutPage() {
                           <div className="flex items-center gap-3 mb-3">
                             <input
                               type="checkbox"
-                              disabled={paymentMethod === 'COD'}
                               checked={redeemRewards}
                               onChange={(e) => {
                                 const checked = e.target.checked;
@@ -553,9 +553,8 @@ export default function CheckoutPage() {
                               }}
                               className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-gray-300 disabled:opacity-50"
                             />
-                            <label className={`text-xs font-black uppercase tracking-wide ${paymentMethod === 'COD' ? 'text-neutral-400' : 'text-neutral-900'}`}>
+                            <label className="text-xs font-black uppercase tracking-wide text-neutral-900">
                               Redeem Rewards
-                              {paymentMethod === 'COD' && <span className="ml-2 text-[8px] italic">(Prepaid Only)</span>}
                             </label>
                           </div>
 

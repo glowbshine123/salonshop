@@ -278,11 +278,11 @@ export const validateRedemption = async (userId, pointsRequested, orderTotal, pa
     const isUnlocked = await isRedemptionUnlocked(userId);
     if (!isUnlocked) return { pointsToRedeem: 0, error: "Reward redemption is locked until you complete 3 delivered orders." };
 
-    // 2. Check Order Type (Prepaid only)
-    const normalizedPaymentMethod = (paymentMethod || '').toUpperCase();
-    if (normalizedPaymentMethod !== 'ONLINE' && normalizedPaymentMethod !== 'UPI' && normalizedPaymentMethod !== 'CARD') {
-        return { pointsToRedeem: 0, error: "Rewards can only be redeemed on prepaid orders (UPI or Card)." };
-    }
+    // 2. Check Order Type (Removed restriction: Now allowed on COD)
+    // const normalizedPaymentMethod = (paymentMethod || '').toUpperCase();
+    // if (normalizedPaymentMethod !== 'ONLINE' && normalizedPaymentMethod !== 'UPI' && normalizedPaymentMethod !== 'CARD') {
+    //     return { pointsToRedeem: 0, error: "Rewards can only be redeemed on prepaid orders (UPI or Card)." };
+    // }
 
     // 3. Check Max Redemption (Percentage of Order)
     const config = await getRewardConfig();
