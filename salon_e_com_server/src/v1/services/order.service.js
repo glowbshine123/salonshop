@@ -112,8 +112,9 @@ export const createOrder = async (userId, orderData) => {
         total: finalTotalWithDiscount,
         pointsUsed,
         shippingAddress: shippingAddress || null,
-        paymentMethod: paymentMethod || 'ONLINE', // Default to ONLINE if not specified, or checks provided
-        paymentStatus: 'UNPAID',
+        paymentMethod: paymentMethod || 'COD', // Default to COD for zero-total or if not specified
+        paymentStatus: finalTotalWithDiscount === 0 ? 'PAID' : 'UNPAID',
+        status: finalTotalWithDiscount === 0 ? 'PAID' : 'PENDING',
         agentCommission: {
             rate: commissionRate,
             amount: agentCommissionAmount,

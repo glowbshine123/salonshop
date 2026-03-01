@@ -81,9 +81,23 @@ export const rewardAPI = {
 };
 
 // System Settings
-export const systemSettingsAPI = {
-    getSystemSettings: () => api.get('/settings'),
+export const settingsAPI = {
+    get: async () => {
+        const res = await api.get('/settings');
+        return res.data;
+    },
+    getSystemSettings: async () => {
+        const res = await api.get('/settings');
+        return res.data;
+    },
+    update: async (data) => {
+        const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+        const res = await api.put('/settings', data, { headers });
+        return res.data;
+    },
 };
+
+export const systemSettingsAPI = settingsAPI;
 
 
 export const productAPI = {

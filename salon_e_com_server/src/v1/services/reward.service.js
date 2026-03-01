@@ -4,6 +4,18 @@ import Order from '../models/Order.js';
 import RewardLedger from '../models/RewardLedger.js';
 import RewardTransaction from '../models/RewardTransaction.js';
 import * as notificationService from './notification.service.js';
+import SystemSettings from '../models/SystemSettings.js';
+
+const getRewardConfig = async () => {
+    let settings = await SystemSettings.findOne();
+    if (!settings || !settings.rewardConfig) {
+        return {
+            maxRedemptionPercentage: 50,
+            minOrderAmountForRewards: 1000
+        };
+    }
+    return settings.rewardConfig;
+};
 
 // --- 8. GET REWARD DATA (API Support) ---
 export const getRewardWallet = async (userId) => {
@@ -80,6 +92,7 @@ export const getEligibleOrderCount = async (userId) => {
 
     if (allValidOrders.length === 0) return 0;
 
+    const config = await getRewardConfig();
     let eligibleCount = 0;
 
     for (let i = 0; i < allValidOrders.length; i++) {
@@ -96,11 +109,11 @@ export const getEligibleOrderCount = async (userId) => {
             continue;
         }
 
-        // 2. Subsequent orders MUST be > 1000 AND Prepaid
+        // 2. Subsequent orders MUST be > minOrderAmountForRewards AND Prepaid
         const normalizedPaymentMethod = (order.paymentMethod || '').toUpperCase();
         const isPrepaid = normalizedPaymentMethod !== 'COD' && normalizedPaymentMethod !== 'POSTPAID' && normalizedPaymentMethod !== 'POST PAID';
 
-        if (order.total > 1000 && isPrepaid) {
+        if (order.total > config.minOrderAmountForRewards && isPrepaid) {
             eligibleCount++;
         }
     }
@@ -120,7 +133,9 @@ export const calculatePoints = async (userId, orderTotal, paymentMethod, pointsR
     const isCodOrPostPaid = normalizedPaymentMethod === 'COD' || normalizedPaymentMethod === 'POSTPAID' || normalizedPaymentMethod === 'POST PAID';
     const isPrepaid = !isCodOrPostPaid;
 
-    // First Order: Bypasses both conditions (Min 1000 and Prepaid)
+    const config = await getRewardConfig();
+
+    // First Order: Bypasses both conditions (Min Order Amount and Prepaid)
     if (isFirstOrder) {
         // Keep a reasonable minimum of 300 for the very first order to earn points
         if (orderTotal > 300) {
@@ -129,8 +144,8 @@ export const calculatePoints = async (userId, orderTotal, paymentMethod, pointsR
         return 0;
     }
 
-    // Subsequent Orders: Must be > 1000 AND Prepaid
-    if (orderTotal > 1000 && isPrepaid) {
+    // Subsequent Orders: Must be > minOrderAmountForRewards AND Prepaid
+    if (orderTotal > config.minOrderAmountForRewards && isPrepaid) {
         return Math.floor(orderTotal * 0.10);
     }
 
@@ -263,18 +278,19 @@ export const validateRedemption = async (userId, pointsRequested, orderTotal, pa
     const isUnlocked = await isRedemptionUnlocked(userId);
     if (!isUnlocked) return { pointsToRedeem: 0, error: "Reward redemption is locked until you complete 3 delivered orders." };
 
-    // 2. Check Order Type (Prepaid only)
-    const normalizedPaymentMethod = (paymentMethod || '').toUpperCase();
-    if (normalizedPaymentMethod !== 'ONLINE' && normalizedPaymentMethod !== 'UPI' && normalizedPaymentMethod !== 'CARD') {
-        return { pointsToRedeem: 0, error: "Rewards can only be redeemed on prepaid orders (UPI or Card)." };
-    }
+    // 2. Check Order Type (Removed restriction: Now allowed on COD)
+    // const normalizedPaymentMethod = (paymentMethod || '').toUpperCase();
+    // if (normalizedPaymentMethod !== 'ONLINE' && normalizedPaymentMethod !== 'UPI' && normalizedPaymentMethod !== 'CARD') {
+    //     return { pointsToRedeem: 0, error: "Rewards can only be redeemed on prepaid orders (UPI or Card)." };
+    // }
 
-    // 3. Check Max Redemption (50% of Order)
-    const maxRedeemable = Math.floor(orderTotal * 0.50);
+    // 3. Check Max Redemption (Percentage of Order)
+    const config = await getRewardConfig();
+    const maxRedeemable = Math.floor(orderTotal * (config.maxRedemptionPercentage / 100));
     if (pointsRequested > maxRedeemable) {
         return {
             pointsToRedeem: 0,
-            error: `You can only redeem up to ${maxRedeemable} points (50% of order value).`
+            error: `You can only redeem up to ${maxRedeemable} points (${config.maxRedemptionPercentage}% of order value).`
         };
     }
 
@@ -294,13 +310,19 @@ export const executeRedemption = async (userId, orderId, pointsUsed) => {
     // 1. Deduct from User Wallet & Update Last Redemption Order Count
     // To properly lock it for the NEXT 3 orders, we snap the 'last redemption count'
     // directly to whatever their current eligible count is.
-    // e.g., if they are at 5 orders and redeem, we set lastRedemption = 5.
-    // The unlock logic computes: Math.max(0, current_count - 5) >= 3.
-    // Thus it will stay locked until they hit 8 eligible orders.
+    const profile = await SalonOwnerProfile.findOne({ userId });
     const currentEligibleCount = await getEligibleOrderCount(userId);
+    const previousCount = profile?.rewardPoints?.ordersCountAtLastRedemption || 0;
+
     await SalonOwnerProfile.findOneAndUpdate({ userId }, {
         $inc: { 'rewardPoints.available': -pointsUsed },
         $set: { 'rewardPoints.ordersCountAtLastRedemption': currentEligibleCount }
+    });
+
+    // Store snapshots in Order for accurate reversal
+    await Order.findByIdAndUpdate(orderId, {
+        'salonRewardPoints.currentOrdersCountAtLastRedemption': currentEligibleCount,
+        'salonRewardPoints.previousOrdersCountAtLastRedemption': previousCount
     });
 
     // 2. Deduct from Ledgers (FIFO)
@@ -411,6 +433,16 @@ export const reverseRedemption = async (orderId) => {
             description: `Points reversed from cancelled order #${order.orderNumber}`,
             timeline: [{ status: 'COMPLETED', note: 'Refunded' }]
         });
+    }
+
+    // 4. Restore Reward Lock (Unlock if this order locked it)
+    if (order.salonRewardPoints?.previousOrdersCountAtLastRedemption !== undefined) {
+        const currentProfile = await SalonOwnerProfile.findOne({ userId: order.customerId });
+        if (currentProfile && currentProfile.rewardPoints?.ordersCountAtLastRedemption === order.salonRewardPoints.currentOrdersCountAtLastRedemption) {
+            await SalonOwnerProfile.findOneAndUpdate({ userId: order.customerId }, {
+                $set: { 'rewardPoints.ordersCountAtLastRedemption': order.salonRewardPoints.previousOrdersCountAtLastRedemption }
+            });
+        }
     }
 };
 

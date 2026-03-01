@@ -17,6 +17,10 @@ const systemSettingsSchema = new mongoose.Schema({
         instagram: { type: String },
         twitter: { type: String },
         linkedin: { type: String }
+    },
+    rewardConfig: {
+        maxRedemptionPercentage: { type: Number, default: 50 },
+        minOrderAmountForRewards: { type: Number, default: 1000 }
     }
 }, {
     timestamps: true

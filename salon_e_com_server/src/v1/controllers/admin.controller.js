@@ -6,6 +6,7 @@ import User from '../models/User.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Commission from '../models/Commission.js';
+import SystemSettings from '../models/SystemSettings.js';
 
 // REMOVED: getPayoutRequests (Legacy)
 // REMOVED: approvePayout (Legacy)
@@ -259,5 +260,32 @@ export const getDashboardStats = async (req, res) => {
     } catch (error) {
         console.error("Dashboard Stats Error:", error);
         res.status(500).json({ message: error.message });
+    }
+};
+
+export const getSystemSettings = async (req, res) => {
+    try {
+        let settings = await SystemSettings.findOne();
+        if (!settings) {
+            settings = await SystemSettings.create({});
+        }
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const updateSystemSettings = async (req, res) => {
+    try {
+        let settings = await SystemSettings.findOne();
+        if (!settings) {
+            settings = new SystemSettings(req.body);
+        } else {
+            Object.assign(settings, req.body);
+        }
+        await settings.save();
+        res.json(settings);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
 };

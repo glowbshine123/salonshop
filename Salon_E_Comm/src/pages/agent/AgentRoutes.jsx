@@ -6,7 +6,7 @@ import AgentCustomers from './AgentCustomers';
 import AgentPayouts from './AgentPayouts';
 import AgentOrders from './AgentOrders';
 import AgentRewards from './AgentRewards';
-import AgentProfile from './AgentProfile';
+import AgentSettings from './AgentSettings';
 import NotificationsPage from '../NotificationsPage';
 
 export default function AgentRoutes() {
@@ -18,7 +18,8 @@ export default function AgentRoutes() {
                 <Route path="payouts" element={<AgentPayouts />} />
                 <Route path="orders" element={<AgentOrders />} />
                 <Route path="rewards" element={<AgentRewards />} />
-                <Route path="profile" element={<AgentProfile />} />
+                <Route path="settings" element={<AgentSettings />} />
+                <Route path="profile" element={<AgentSettings />} /> {/* Redirect/Alias Profile to Settings */}
                 <Route path="notifications" element={<NotificationsPage />} />
             </Routes>
         </AgentLayout>

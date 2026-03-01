@@ -110,7 +110,7 @@ export default function AgentSidebar() {
                 </NavLink>
 
                 <NavLink
-                    to="/agent-dashboard/profile"
+                    to="/agent-dashboard/settings"
                     className={({ isActive }) => cn(
                         "flex items-center gap-3 px-4 py-2 rounded-md transition-all group",
                         isActive
@@ -118,8 +118,8 @@ export default function AgentSidebar() {
                             : "text-neutral-500 hover:bg-emerald-500/10 hover:text-neutral-900"
                     )}
                 >
-                    <User className="w-4 h-4 transition-transform group-hover:scale-110" />
-                    <span className="font-bold text-xs uppercase tracking-wider">Profile</span>
+                    <Settings className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    <span className="font-bold text-xs uppercase tracking-wider">Settings</span>
                 </NavLink>
 
                 {/* Profile Card */}

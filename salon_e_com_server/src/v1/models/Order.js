@@ -60,7 +60,9 @@ const orderSchema = new mongoose.Schema({
     salonRewardPoints: {
         earned: { type: Number, default: 0 },
         redeemed: { type: Number, default: 0 },
-        isCredited: { type: Boolean, default: false }
+        isCredited: { type: Boolean, default: false },
+        currentOrdersCountAtLastRedemption: { type: Number },
+        previousOrdersCountAtLastRedemption: { type: Number }
     },
 
     commissionCalculated: { type: Boolean, default: false },

@@ -18,4 +18,8 @@ router.post('/commission-slabs', adminController.createSlab);
 // Dashboard Stats
 router.get('/dashboard-stats', adminController.getDashboardStats);
 
+// System Settings
+router.get('/settings', adminController.getSystemSettings);
+router.put('/settings', adminController.updateSystemSettings);
+
 export default router;
