@@ -310,13 +310,19 @@ export const executeRedemption = async (userId, orderId, pointsUsed) => {
     // 1. Deduct from User Wallet & Update Last Redemption Order Count
     // To properly lock it for the NEXT 3 orders, we snap the 'last redemption count'
     // directly to whatever their current eligible count is.
-    // e.g., if they are at 5 orders and redeem, we set lastRedemption = 5.
-    // The unlock logic computes: Math.max(0, current_count - 5) >= 3.
-    // Thus it will stay locked until they hit 8 eligible orders.
+    const profile = await SalonOwnerProfile.findOne({ userId });
     const currentEligibleCount = await getEligibleOrderCount(userId);
+    const previousCount = profile?.rewardPoints?.ordersCountAtLastRedemption || 0;
+
     await SalonOwnerProfile.findOneAndUpdate({ userId }, {
         $inc: { 'rewardPoints.available': -pointsUsed },
         $set: { 'rewardPoints.ordersCountAtLastRedemption': currentEligibleCount }
+    });
+
+    // Store snapshots in Order for accurate reversal
+    await Order.findByIdAndUpdate(orderId, {
+        'salonRewardPoints.currentOrdersCountAtLastRedemption': currentEligibleCount,
+        'salonRewardPoints.previousOrdersCountAtLastRedemption': previousCount
     });
 
     // 2. Deduct from Ledgers (FIFO)
@@ -427,6 +433,16 @@ export const reverseRedemption = async (orderId) => {
             description: `Points reversed from cancelled order #${order.orderNumber}`,
             timeline: [{ status: 'COMPLETED', note: 'Refunded' }]
         });
+    }
+
+    // 4. Restore Reward Lock (Unlock if this order locked it)
+    if (order.salonRewardPoints?.previousOrdersCountAtLastRedemption !== undefined) {
+        const currentProfile = await SalonOwnerProfile.findOne({ userId: order.customerId });
+        if (currentProfile && currentProfile.rewardPoints?.ordersCountAtLastRedemption === order.salonRewardPoints.currentOrdersCountAtLastRedemption) {
+            await SalonOwnerProfile.findOneAndUpdate({ userId: order.customerId }, {
+                $set: { 'rewardPoints.ordersCountAtLastRedemption': order.salonRewardPoints.previousOrdersCountAtLastRedemption }
+            });
+        }
     }
 };
 

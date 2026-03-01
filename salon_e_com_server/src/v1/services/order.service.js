@@ -109,6 +109,8 @@ export const createOrder = async (userId, orderData) => {
         subtotal,
         tax,
         shippingCost,
+        total: finalTotalWithDiscount,
+        pointsUsed,
         shippingAddress: shippingAddress || null,
         paymentMethod: paymentMethod || 'COD', // Default to COD for zero-total or if not specified
         paymentStatus: finalTotalWithDiscount === 0 ? 'PAID' : 'UNPAID',
