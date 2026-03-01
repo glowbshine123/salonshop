@@ -10,16 +10,6 @@ export const calculateCommission = async (order) => {
     const deliveredCount = await rewardService.getDeliveredOrderCount(order.customerId, order._id);
     const isFirstOrder = deliveredCount === 0;
 
-    const normalizedPaymentMethod = (order.paymentMethod || '').toUpperCase();
-    const isCodOrPostPaid = normalizedPaymentMethod === 'COD' || normalizedPaymentMethod === 'POSTPAID' || normalizedPaymentMethod === 'POST PAID';
-    const isPrepaid = !isCodOrPostPaid;
-
-    // Condition: Must be > 1000 and Prepaid, unless it's the first order
-    if (!isFirstOrder && (order.total <= 1000 || !isPrepaid)) {
-        return null;
-    }
-
-    // Double check to prevent duplicates
     const existingTransaction = await CommissionTransaction.findOne({ orderId: order._id });
     if (existingTransaction) {
         order.commissionCalculated = true;
