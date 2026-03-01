@@ -12,14 +12,26 @@ import {
     navigationMenuTriggerStyle,
 } from '../components/ui/navigation-menu';
 
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import SecuritySettings from '../components/common/SecuritySettings';
 
 export default function ProfilePage() {
+    const navigate = useNavigate();
     const { user, setUser } = useAuth();
-    const [searchParams] = useSearchParams();
-    const initialTab = searchParams.get('tab')?.toUpperCase();
-    const [activeTab, setActiveTab] = useState(initialTab === 'SECURITY' ? 'SECURITY' : 'PROFILE');
+
+    useEffect(() => {
+        if (user && (user.role === 'ADMIN' || user.role === 'AGENT')) {
+            const path = user.role === 'ADMIN' ? '/admin/settings' : '/agent-dashboard/settings';
+            navigate(path, { replace: true });
+        }
+    }, [user, navigate]);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentTab = searchParams.get('tab')?.toUpperCase() || 'PROFILE';
+    const activeTab = ['PROFILE', 'SECURITY'].includes(currentTab) ? currentTab : 'PROFILE';
+
+    const setActiveTab = (tabId) => {
+        setSearchParams({ tab: tabId.toLowerCase() });
+    };
     const { startLoading, finishLoading } = useLoading();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -101,18 +113,11 @@ export default function ProfilePage() {
                     phone: extractedPhone,
                     email: freshUser.email || '',
                     address: addressData,
-                    bankDetails: freshUser.agentProfile?.bankDetails || {
+                    bankDetails: {
                         bankName: '', accountNumber: '', ifscCode: '', accountHolderName: ''
                     },
-                    upiId: freshUser.agentProfile?.upiId || ''
+                    upiId: ''
                 });
-                if (freshUser.role === 'AGENT') {
-                    if (freshUser.agentProfile?.upiId && !freshUser.agentProfile?.bankDetails?.accountNumber) {
-                        setPaymentPref('UPI');
-                    } else {
-                        setPaymentPref('BANK');
-                    }
-                }
                 setPreviewUrl(freshUser.avatarUrl || '');
 
             } catch (error) {
@@ -161,18 +166,11 @@ export default function ProfilePage() {
                         phone: extractedPhone,
                         email: user.email || '',
                         address: addressData,
-                        bankDetails: user.agentProfile?.bankDetails || {
+                        bankDetails: {
                             bankName: '', accountNumber: '', ifscCode: '', accountHolderName: ''
                         },
-                        upiId: user.agentProfile?.upiId || ''
+                        upiId: ''
                     });
-                    if (user.role === 'AGENT') {
-                        if (user.agentProfile?.upiId && !user.agentProfile?.bankDetails?.accountNumber) {
-                            setPaymentPref('UPI');
-                        } else {
-                            setPaymentPref('BANK');
-                        }
-                    }
                     setPreviewUrl(user.avatarUrl || '');
                 }
             } finally {
@@ -231,37 +229,7 @@ export default function ProfilePage() {
         }
     };
 
-    const handlePayoutUpdate = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setSuccess(false);
-        try {
-            const payload = {};
-            if (paymentPref === 'BANK') {
-                payload.bankDetails = formData.bankDetails;
-                payload.upiId = ''; // Clear UPI if bank preferred
-            } else if (paymentPref === 'UPI') {
-                payload.upiId = formData.upiId;
-                payload.bankDetails = { bankName: '', accountNumber: '', ifscCode: '', accountHolderName: '' }; // Clear Bank if UPI preferred
-            }
-
-            const res = await payoutAPI.updateSettings(payload);
-
-            // Optionally merge returned agent profile details back into the global user object if necessary, 
-            // but for safety, we simply refresh user state from backend entirely:
-            const freshMe = await authAPI.me();
-            if (setUser) setUser(freshMe.data);
-
-            setSuccess(true);
-            toast.success('Payout Settings saved successfully');
-            setTimeout(() => setSuccess(false), 3000);
-        } catch (err) {
-            console.error('Payout settings update failed:', err);
-            toast.error(err.response?.data?.message || err.message || 'Failed to update payout settings');
-        } finally {
-            setLoading(false);
-        }
-    };
+    // handlePayoutUpdate removed as agents have their own settings
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -286,9 +254,6 @@ export default function ProfilePage() {
         { id: 'PROFILE', label: 'Profile', icon: User },
         { id: 'SECURITY', label: 'Security', icon: Shield },
     ];
-    if (user?.role === 'AGENT') {
-        tabs.push({ id: 'BANK_DETAILS', label: 'Bank Details', icon: CreditCard });
-    }
 
     return (
         <div className="bg-neutral-50/50 min-h-screen py-20 px-4">
@@ -346,72 +311,10 @@ export default function ProfilePage() {
                                     </div>
                                     <div className="space-y-1">
                                         <h2 className="text-2xl font-black text-neutral-900">{user?.firstName} {user?.lastName}</h2>
-                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">{user?.role || 'authorized user'}</p>
+                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Authorized Member</p>
                                     </div>
                                 </div>
 
-                                {user?.role === 'SALON_OWNER' && (
-                                    <div className="bg-emerald-900 p-8 rounded-xl shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden group flex flex-col justify-center">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-800/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-700/50"></div>
-                                        <div className="relative z-10">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                                                    <Zap size={20} className="text-emerald-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Rewards Wallet</p>
-                                                    <h3 className="text-3xl font-black tracking-tight">{user?.salonOwnerProfile?.rewardPoints?.available || 0}</h3>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-80">
-                                                <span>Locked: {user?.salonOwnerProfile?.rewardPoints?.locked || 0}</span>
-                                                <span>Expires soon</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {user?.role === 'AGENT' && (
-                                    <div className="bg-emerald-900 p-8 rounded-xl shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden group flex flex-col justify-center">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-800/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-700/50"></div>
-                                        <div className="relative z-10">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                                                    <Wallet size={20} className="text-emerald-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Commission Wallet</p>
-                                                    <h3 className="text-3xl font-black tracking-tight">₹{user?.agentProfile?.wallet?.available || 0}</h3>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-80">
-                                                <span>Total Auth Earned: ₹{user?.agentProfile?.totalEarnings || 0}</span>
-                                                <span>Rate: {(user?.agentProfile?.commissionRate || 0.1) * 100}%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {user?.role === 'ADMIN' && (
-                                    <div className="bg-emerald-900 p-8 rounded-xl shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden group flex flex-col justify-center">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-800/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-700/50"></div>
-                                        <div className="relative z-10">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                                                    <Shield size={20} className="text-emerald-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">System Admin</p>
-                                                    <h3 className="text-3xl font-black tracking-tight">Full Access</h3>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-80">
-                                                <span>Manage global operations</span>
-                                                <span>Privileged</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
 
                             <div className="col-span-3 bg-white p-10 rounded-xl border border-neutral-100 shadow-sm space-y-4">
@@ -553,122 +456,6 @@ export default function ProfilePage() {
                         </div>
                     )}
 
-                    {activeTab === 'BANK_DETAILS' && user?.role === 'AGENT' && (
-                        <div className="bg-white p-10 rounded-xl border border-neutral-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="flex items-center justify-between border-b border-neutral-100 pb-6">
-                                <div>
-                                    <h3 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Payout Settings</h3>
-                                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Configure where your agent commissions are deposited</p>
-                                </div>
-                                {success && (
-                                    <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
-                                        <CheckCircle2 size={16} />
-                                        Payouts Updated
-                                    </div>
-                                )}
-                            </div>
-
-                            <form onSubmit={handlePayoutUpdate} className="space-y-8 max-w-2xl">
-                                <div className="p-1 bg-neutral-100/80 rounded-xl flex">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentPref('BANK')}
-                                        className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${paymentPref === 'BANK' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                                    >
-                                        Bank Transfer (NEFT/RTGS)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentPref('UPI')}
-                                        className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${paymentPref === 'UPI' ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20' : 'text-neutral-400 hover:text-neutral-600'}`}
-                                    >
-                                        UPI Interface
-                                    </button>
-                                </div>
-
-                                {paymentPref === 'BANK' && (
-                                    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Account Holder Name</label>
-                                            <input
-                                                type="text"
-                                                name="bankDetails.accountHolderName"
-                                                value={formData.bankDetails.accountHolderName}
-                                                onChange={handleChange}
-                                                placeholder="As per bank records"
-                                                required
-                                                className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Bank Name</label>
-                                            <input
-                                                type="text"
-                                                name="bankDetails.bankName"
-                                                value={formData.bankDetails.bankName}
-                                                onChange={handleChange}
-                                                placeholder="e.g. HDFC Bank, State Bank of India"
-                                                required
-                                                className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Account Number</label>
-                                                <input
-                                                    type="password"
-                                                    name="bankDetails.accountNumber"
-                                                    value={formData.bankDetails.accountNumber}
-                                                    onChange={handleChange}
-                                                    required
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">IFSC Code</label>
-                                                <input
-                                                    type="text"
-                                                    name="bankDetails.ifscCode"
-                                                    value={formData.bankDetails.ifscCode}
-                                                    onChange={handleChange}
-                                                    required
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold uppercase focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {paymentPref === 'UPI' && (
-                                    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Verified UPI ID</label>
-                                            <input
-                                                type="text"
-                                                name="upiId"
-                                                value={formData.upiId}
-                                                onChange={handleChange}
-                                                placeholder="username@bank"
-                                                required
-                                                className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold lowercase focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                                            />
-                                            <p className="text-[9px] font-black text-neutral-400 px-2">Ensure this UPI ID is active and linked directly to your authenticated name.</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="pt-6">
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full h-16 bg-neutral-900 text-white rounded-[24px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-neutral-900/20 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
-                                    >
-                                        {loading ? <Loader2 className="animate-spin" size={20} /> : 'Save Payment Tunnel Configuration'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
                     {/* 
                     {activeTab === 'NOTIFICATIONS' && (
                         <div className="bg-white p-10 rounded-xl border border-neutral-100 shadow-sm flex flex-col items-center justify-center min-h-[400px] text-center space-y-4 animate-in fade-in zoom-in-95 duration-500">

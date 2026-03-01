@@ -13,13 +13,19 @@ import {
     NavigationMenuLink,
     navigationMenuTriggerStyle,
 } from '../../components/ui/navigation-menu';
-
+import { useSearchParams } from 'react-router-dom';
 import AgentProfileSettings from './settings/AgentProfileSettings';
 import AgentPayoutSettings from './settings/AgentPayoutSettings';
 import SecuritySettings from '../../components/common/SecuritySettings';
 
 export default function AgentSettings() {
-    const [activeTab, setActiveTab] = useState('PROFILE');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentTab = searchParams.get('tab')?.toUpperCase() || 'PROFILE';
+    const activeTab = ['PROFILE', 'PAYOUT', 'SECURITY'].includes(currentTab) ? currentTab : 'PROFILE';
+
+    const setActiveTab = (tabId) => {
+        setSearchParams({ tab: tabId.toLowerCase() });
+    };
 
     const tabs = [
         { id: 'PROFILE', label: 'Profile', icon: User },

@@ -17,6 +17,7 @@ import {
     NavigationMenuLink,
     navigationMenuTriggerStyle,
 } from '../../components/ui/navigation-menu';
+import { useSearchParams } from 'react-router-dom';
 import ProfileSettings from './settings/ProfileSettings';
 import RewardSettings from './settings/RewardSettings';
 import GatewaySettings from './settings/GatewaySettings';
@@ -24,7 +25,13 @@ import PaymentSettings from './settings/PaymentSettings';
 import SecuritySettings from '../../components/common/SecuritySettings';
 
 export default function AdminSettings() {
-    const [activeTab, setActiveTab] = useState('PROFILE');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentTab = searchParams.get('tab')?.toUpperCase() || 'PROFILE';
+    const activeTab = ['PROFILE', 'REWARDS', 'SECURITY'].includes(currentTab) ? currentTab : 'PROFILE';
+
+    const setActiveTab = (tabId) => {
+        setSearchParams({ tab: tabId.toLowerCase() });
+    };
 
     const tabs = [
         { id: 'PROFILE', label: 'Profile', icon: User },

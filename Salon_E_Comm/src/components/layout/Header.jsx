@@ -129,10 +129,18 @@ export default function Header() {
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="focus:outline-none">
-                    <div className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-neutral-50 border border-transparent hover:border-neutral-100 transition-all cursor-pointer">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center font-bold text-sm">
-                        <User size={20} />
-                      </div>
+                    <div className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-neutral-50 border border-neutral-100 transition-all cursor-pointer">
+                      {user.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt={`${user.firstName}'s avatar`}
+                          className="w-8 h-8 rounded-full object-cover border border-neutral-200 shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+                          <User size={20} />
+                        </div>
+                      )}
                       <ChevronDown size={14} className="text-neutral-400 mr-1" />
                     </div>
                   </DropdownMenuTrigger>
@@ -145,11 +153,13 @@ export default function Header() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="my-1" />
-                    <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
-                      <Link to="/profile" className="flex items-center gap-2.5 p-2.5 text-neutral-600 font-medium hover:text-neutral-900 hover:bg-neutral-50">
-                        <User size={16} /> My Profile
-                      </Link>
-                    </DropdownMenuItem>
+                    {user.role === 'SALON_OWNER' && (
+                      <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                        <Link to="/profile" className="flex items-center gap-2.5 p-2.5 text-neutral-600 font-medium hover:text-neutral-900 hover:bg-neutral-50">
+                          <User size={16} /> My Profile
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
                       <Link to="/my-orders" className="flex items-center gap-2.5 p-2.5 text-neutral-600 font-medium hover:text-neutral-900 hover:bg-neutral-50">
                         <Package size={16} /> My Orders
