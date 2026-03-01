@@ -20,18 +20,20 @@ export default function AuthHeader({ title, subtitle }) {
     }, []);
 
     return (
-        <div className='space-y-1'>
+        <div className='space-y-4'>
             {logoUrl ? (
-                <div className="w-16 h-16 mb-2">
-                    <img src={logoUrl} alt="Salon Logo" className="w-full h-full object-contain rounded-md" />
+                <div className="w-16 h-16 mb-4">
+                    <img src={logoUrl} alt="Salon Logo" className="w-full h-full object-contain rounded-2xl" />
                 </div>
             ) : (
-                <div className="w-12 h-12 bg-neutral-900 rounded-md flex items-center justify-center text-white mb-2">
-                    <Sparkles size={24} />
+                <div className="w-16 h-16 bg-bg-secondary rounded-[24px] flex items-center justify-center border border-primary/5 shadow-inner mb-4">
+                    <Sparkles size={28} className="text-primary animate-pulse" />
                 </div>
             )}
-            <h1 className="text-3xl text-neutral-900 tracking-tighter">{title}</h1>
-            <p className="text-neutral-500 font-medium">{subtitle}</p>
+            <div className="space-y-1">
+                <h1 className="text-4xl md:text-5xl font-display font-black text-neutral-900 leading-[0.9] tracking-tighter">{title}</h1>
+                <p className="text-neutral-400 text-xs font-bold uppercase tracking-[0.2em]">{subtitle}</p>
+            </div>
         </div>
     );
 }

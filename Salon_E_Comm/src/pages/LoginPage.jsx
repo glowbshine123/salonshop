@@ -58,84 +58,99 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white font-body selection:bg-primary/10">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 p-2 flex flex-col relative ">
-        <div className="flex-1  bg-neutral-50/50 p-8 md:p-12 flex flex-col justify-center relative overflow-hidden">
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 md:p-12 lg:p-20 relative bg-white">
 
-          {/* Back Button */}
-          <Link to="/" className="absolute top-4 left-4">
-            <Button variant="outline" className="border-neutral-800 border rounded-sm hover:bg-transparent gap-1">
-              <ChevronLeft size={20} />
-              Home
-            </Button>
-          </Link>
+        {/* Decorative background element */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent-color to-primary-light" />
 
-          <div className="max-w-sm w-full mx-auto relative z-10 space-y-4">
-            {/* Branding */}
-            <AuthHeader title="Welcome Back." subtitle="Login to your Account." />
+        {/* Back Button - Premium */}
+        <Link
+          to="/"
+          className="absolute top-8 left-8 group"
+        >
+          <div className="flex items-center gap-2 px-4 py-2 bg-bg-secondary rounded-full text-[10px] font-bold uppercase tracking-widest text-neutral-400 group-hover:text-primary transition-all group-hover:shadow-lg group-hover:shadow-primary/5">
+            <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+            House
+          </div>
+        </Link>
 
-            {/* Form */}
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="email">Email Address</Label>
+        <div className="max-w-sm w-full space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+
+          {/* Header */}
+          <AuthHeader title="WELCOME BACK." subtitle="Enter your ritual space." />
+
+          {/* Form Section */}
+          <form onSubmit={handleLogin} className="space-y-8">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 ml-1">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="luxury@salon.com"
+                className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between ml-1">
+                <Label htmlFor="password" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Access Pin</Label>
+                <button type="button" className="text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary-dark transition-colors">
+                  Forgotten?
+                </button>
+              </div>
+              <div className="relative">
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  className="h-12 bg-white border-neutral-200 rounded-sm"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-primary transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
+            </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <button type="button" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-neutral-900 transition-colors">
-                    Forgot?
-                  </button>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="h-12 bg-white border-neutral-200 pr-10 rounded-sm"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
+            {error && (
+              <div className="p-4 bg-rose-50 text-rose-500 text-[10px] font-black uppercase tracking-widest rounded-2xl text-center border border-rose-100 flex items-center justify-center gap-2">
+                <div className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
+                {error}
               </div>
+            )}
 
-              {error && (
-                <div className="p-3 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wide rounded-sm text-center">
-                  {error}
-                </div>
+            <Button
+              type="submit"
+              className="w-full h-16 bg-primary hover:bg-primary-dark text-white font-black rounded-full tracking-[0.2em] uppercase transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                "Enter Session"
               )}
+            </Button>
+          </form>
 
-              <Button type="submit" className="w-full h-12 bg-neutral-900 hover:bg-neutral-800 text-white font-bold rounded-sm tracking-wide" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
-                SIGN IN
-              </Button>
-            </form>
-
-            <p className="text-center text-sm font-medium text-neutral-500">
-              Don't have an account?{' '}
-              <Link to="/auth/signup" className="text-neutral-900 font-bold hover:underline">
-                Create Account
+          {/* Footer Navigation */}
+          <div className="space-y-8 pt-8 border-t border-primary/5">
+            <p className="text-center text-xs font-bold text-neutral-400 uppercase tracking-widest">
+              New to our house?{' '}
+              <Link to="/auth/signup" className="text-primary font-black hover:underline ml-1">
+                Create Membership
               </Link>
             </p>
-
             <AuthFooter />
           </div>
         </div>

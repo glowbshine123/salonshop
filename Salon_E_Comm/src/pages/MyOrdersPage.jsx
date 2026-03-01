@@ -114,7 +114,7 @@ export default function MyOrdersPage() {
   }
 
   return (
-    <div className="bg-neutral-50/50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-bg-secondary/30 min-h-screen py-16 px-4 sm:px-6 lg:px-8 font-body selection:bg-primary/10">
       <ReviewModal
         isOpen={isReviewFormOpen}
         onClose={() => setIsReviewFormOpen(false)}
@@ -123,48 +123,49 @@ export default function MyOrdersPage() {
         loading={submittingReview}
       />
 
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-12">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-black text-neutral-900 tracking-tighter">
-              Order <span className="text-emerald-600">History</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-primary/5 pb-12">
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-6xl font-display font-black text-neutral-900 tracking-tighter leading-[0.8]">
+              YOUR <br />
+              <span className="text-primary italic">RITUALS</span>.
             </h1>
-            <p className="flex items-center gap-2 mt-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
-              <ShoppingBag size={14} className="text-emerald-600" />
-              {orders.length} Past Order{orders.length !== 1 ? 's' : ''}
+            <p className="flex items-center gap-2 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em]">
+              <ShoppingBag size={14} className="text-primary" />
+              {orders.length} Past Acquisition{orders.length !== 1 ? 's' : ''}
             </p>
           </div>
           <button
-            onClick={() => navigate('/')}
-            className="group flex items-center gap-2 px-6 py-3 bg-white border border-neutral-200 rounded-xl text-xs font-black uppercase tracking-widest text-neutral-900 hover:border-neutral-300 hover:shadow-md transition-all"
+            onClick={() => navigate('/products')}
+            className="group flex items-center gap-3 px-8 py-4 bg-white border border-neutral-100 rounded-full text-[10px] font-black uppercase tracking-widest text-neutral-900 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all"
           >
             Sourcing Collection
-            <ExternalLink size={14} className="text-neutral-400 group-hover:text-emerald-600 transition-colors" />
+            <ExternalLink size={14} className="text-neutral-400 group-hover:text-primary transition-colors" />
           </button>
         </div>
 
         {orders.length === 0 ? (
-          <div className="bg-white rounded-[32px] p-16 md:p-24 border border-neutral-100 shadow-xl shadow-neutral-100/50 text-center space-y-6">
-            <div className="w-24 h-24 bg-neutral-50 rounded-3xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
-              <Package size={40} className="text-neutral-300" />
+          <div className="bg-white rounded-[48px] p-20 md:p-32 border border-primary/5 shadow-2xl shadow-primary/5 text-center space-y-8 animate-in fade-in zoom-in-95 duration-700">
+            <div className="w-24 h-24 bg-bg-secondary rounded-[32px] flex items-center justify-center mx-auto mb-8 transform -rotate-6 border border-primary/5">
+              <Package size={40} className="text-primary/20" />
             </div>
-            <div className="max-w-md mx-auto space-y-3">
-              <h2 className="text-2xl font-black text-neutral-900 tracking-tight">No Orders Yet</h2>
-              <p className="text-neutral-500 font-medium leading-relaxed">
-                Your order history is empty. Start building your salon inventory with our premium professional collection.
+            <div className="max-w-md mx-auto space-y-4">
+              <h2 className="text-3xl font-display font-black text-neutral-900 tracking-tight leading-none">NO RITUALS YET</h2>
+              <p className="text-neutral-400 text-xs font-bold uppercase tracking-widest leading-relaxed">
+                Your history is a blank canvas. Start curating your professional collection today.
               </p>
             </div>
             <button
-              onClick={() => navigate('/')}
-              className="inline-flex items-center gap-2 h-14 px-8 bg-neutral-900 text-white rounded-2xl font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-neutral-900/20 active:scale-95 mt-4"
+              onClick={() => navigate('/products')}
+              className="inline-flex items-center gap-3 h-16 px-10 bg-primary text-white rounded-full font-black uppercase tracking-widest text-[10px] hover:bg-primary-dark transition-all shadow-xl shadow-primary/20 hover:scale-[1.05] active:scale-95 mt-6"
             >
-              Start Shopping
+              Start Curation
               <ChevronRight size={18} />
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {orders.map((order) => {
               const statusCfg = getStatusConfig(order.status);
               const StatusIcon = statusCfg.icon;
@@ -173,126 +174,126 @@ export default function MyOrdersPage() {
               return (
                 <div
                   key={order._id}
-                  className={`bg-white rounded-[24px] border transition-all duration-300 overflow-hidden group ${isExpanded
-                    ? 'border-emerald-500/20 ring-4 ring-emerald-500/5 shadow-xl'
-                    : 'border-neutral-100 shadow-sm hover:shadow-md hover:border-neutral-200'
+                  className={`bg-white rounded-[32px] border transition-all duration-500 overflow-hidden group ${isExpanded
+                    ? 'border-primary/20 ring-8 ring-primary/5 shadow-2xl shadow-primary/10 bg-white'
+                    : 'border-neutral-100 shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/10'
                     }`}
                 >
                   <div
-                    className="p-6 md:p-8 cursor-pointer select-none"
+                    className="p-8 md:p-10 cursor-pointer select-none"
                     onClick={() => setExpandedOrder(isExpanded ? null : order._id)}
                   >
-                    <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between">
+                    <div className="flex flex-col lg:flex-row gap-8 lg:items-center justify-between">
                       {/* Left: ID & Status */}
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${statusCfg.bg} ${statusCfg.color.replace('text-', 'bg-').replace('600', '100')}`}>
-                          <StatusIcon size={20} className={statusCfg.color} />
+                      <div className="flex items-start gap-6">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner border border-primary/5 ${isExpanded ? 'bg-primary text-white' : 'bg-bg-secondary text-primary'}`}>
+                          <StatusIcon size={24} className={isExpanded ? 'text-white' : 'text-primary'} />
                         </div>
                         <div>
-                          <div className="flex items-center gap-3 mb-1">
-                            <h3 className="text-lg font-black text-neutral-900 tracking-tight">
+                          <div className="flex items-center gap-4 mb-2">
+                            <h3 className="text-xl font-display font-black text-neutral-900 tracking-tighter">
                               #{order.orderNumber || order._id.slice(-8).toUpperCase()}
                             </h3>
-                            <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${statusCfg.color} bg-white`}>
+                            <span className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border transition-colors", statusCfg.color, "bg-white")}>
                               {order.status}
                             </span>
                           </div>
-                          <p className="text-xs font-medium text-neutral-400 flex items-center gap-2">
-                            <Calendar size={12} />
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-3">
+                            <Calendar size={12} className="text-primary" />
                             {new Date(order.createdAt).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}
-                            <span className="w-1 h-1 rounded-full bg-neutral-300" />
-                            {order.items.length} Items
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+                            {order.items.length} Product{order.items.length !== 1 ? 's' : ''}
                           </p>
                         </div>
                       </div>
 
                       {/* Right: Price & Toggle */}
-                      <div className="flex items-center justify-between lg:justify-end gap-8 w-full lg:w-auto pl-16 lg:pl-0">
+                      <div className="flex items-center justify-between lg:justify-end gap-10 w-full lg:w-auto pl-20 lg:pl-0">
                         <div className="text-right">
-                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Total</p>
-                          <p className="text-2xl font-black text-neutral-900 tracking-tight">₹{order.total.toLocaleString()}</p>
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-1">Acquisition Value</p>
+                          <p className="text-3xl font-display font-black text-neutral-900 tracking-tighter italic">₹{order.total.toLocaleString()}</p>
                         </div>
 
-                        {/* Invoice Button */}
-                        {(order.status === 'DELIVERED' || order.status === 'COMPLETED') && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedInvoiceOrder(order);
-                              setIsInvoiceOpen(true);
-                            }}
-                            className="w-10 h-10 rounded-full border border-neutral-100 flex items-center justify-center bg-white text-neutral-400 hover:text-emerald-600 hover:border-emerald-200 transition-all hover:scale-105 active:scale-95 shadow-sm"
-                            title="Download Invoice"
-                          >
-                            <ExternalLink size={18} />
-                          </button>
-                        )}
+                        <div className="flex items-center gap-4">
+                          {/* Invoice Button */}
+                          {(order.status === 'DELIVERED' || order.status === 'COMPLETED') && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedInvoiceOrder(order);
+                                setIsInvoiceOpen(true);
+                              }}
+                              className="w-12 h-12 rounded-full border border-neutral-100 flex items-center justify-center bg-white text-neutral-400 hover:text-primary hover:border-primary/20 transition-all hover:scale-110 shadow-sm"
+                              title="Download Invoice"
+                            >
+                              <ExternalLink size={20} />
+                            </button>
+                          )}
 
-                        <div className={`w-10 h-10 rounded-full border border-neutral-100 flex items-center justify-center transition-all duration-300 ${isExpanded ? 'bg-neutral-900 text-white rotate-180' : 'bg-white text-neutral-400 group-hover:border-neutral-300'}`}>
-                          <ChevronDown size={20} />
+                          <div className={`w-12 h-12 rounded-full border border-neutral-100 flex items-center justify-center transition-all duration-500 ${isExpanded ? 'bg-neutral-900 text-white rotate-180 border-neutral-900' : 'bg-white text-neutral-400 group-hover:border-primary/20'}`}>
+                            <ChevronDown size={22} />
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Expanded Content */}
-                  <div className={`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                  <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                     <div className="overflow-hidden">
-                      <div className="border-t border-dashed border-neutral-100 bg-neutral-50/30 p-6 md:p-8">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+                      <div className="border-t border-primary/5 bg-bg-secondary/20 p-8 md:p-12">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-20">
 
                           {/* Col 1: Order Items (Span 2) */}
-                          <div className="lg:col-span-2 space-y-6">
-                            <h4 className="flex items-center gap-2 text-xs font-black text-neutral-900 uppercase tracking-widest">
-                              <Package size={14} className="text-emerald-600" />
-                              Items Purchased
+                          <div className="lg:col-span-2 space-y-10">
+                            <h4 className="flex items-center gap-3 text-[10px] font-black text-neutral-900 uppercase tracking-[0.3em]">
+                              <Package size={16} className="text-primary" />
+                              MANIFEST
                             </h4>
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                               {order.items.map((item, idx) => {
-                                // Check if reviewable
                                 const productId = item.productId._id || item.productId;
                                 const isDelivered = order.status === 'DELIVERED' || order.status === 'COMPLETED';
                                 const hasReviewed = reviewedProductIds.has(productId);
                                 const showReviewBtn = isDelivered && !hasReviewed;
 
                                 return (
-                                  <div key={idx} className="bg-white p-4 rounded-xl border border-neutral-100 flex gap-4 items-center">
-                                    <div className="w-16 h-16 bg-neutral-50 rounded-lg shrink-0 overflow-hidden border border-neutral-100">
+                                  <div key={idx} className="bg-white p-6 rounded-3xl border border-primary/5 shadow-sm flex gap-6 items-center group/item hover:border-primary/20 transition-all">
+                                    <div className="w-20 h-20 bg-bg-secondary rounded-[20px] shrink-0 overflow-hidden border border-primary/5 shadow-inner">
                                       {(item.image || item.productImage) ? (
-                                        <img src={item.image || item.productImage} alt={item.name} className="w-full h-full object-cover" />
+                                        <img src={item.image || item.productImage} alt={item.name} className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-700" />
                                       ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-neutral-300">
-                                          <Package size={24} />
+                                        <div className="w-full h-full flex items-center justify-center text-primary/10">
+                                          <Package size={28} />
                                         </div>
                                       )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-bold text-neutral-900 line-clamp-1">{item.name}</p>
-                                      <p className="text-xs text-neutral-500 mt-1">Qty: {item.quantity}</p>
+                                      <p className="text-lg font-display font-black text-neutral-900 line-clamp-1 italic">{item.name}</p>
+                                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Quantity <span className="text-primary">{item.quantity}</span></p>
                                     </div>
 
-                                    <div className="text-right">
-                                      <p className="text-sm font-black text-neutral-900 mb-2">₹{(item.priceAtPurchase * item.quantity).toLocaleString()}</p>
+                                    <div className="text-right space-y-3">
+                                      <p className="text-xl font-display font-black text-neutral-900 tracking-tighter italic">₹{(item.priceAtPurchase * item.quantity).toLocaleString()}</p>
 
                                       {showReviewBtn && (
                                         <Button
                                           size="sm"
-                                          variant="outline"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             handleOpenReview(item);
                                           }}
-                                          className="h-8 text-xs rounded-lg border-neutral-200 hover:bg-neutral-50 hover:text-emerald-600"
+                                          className="h-10 px-6 text-[9px] font-black rounded-full bg-primary hover:bg-primary-dark text-white uppercase tracking-widest shadow-lg shadow-primary/20"
                                         >
-                                          <Star size={12} className="mr-1.5" />
-                                          Rate Product
+                                          <Star size={12} className="mr-2" />
+                                          Rate
                                         </Button>
                                       )}
 
                                       {hasReviewed && (
-                                        <span className="inline-flex items-center text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-md">
-                                          <Star size={10} className="mr-1 fill-current" />
-                                          Reviewed
+                                        <span className="inline-flex items-center text-[9px] font-black text-accent-color bg-accent-color/5 px-3 py-1.5 rounded-full border border-accent-color/10 uppercase tracking-widest">
+                                          <Star size={10} className="mr-1.5 fill-current" />
+                                          Vetted
                                         </span>
                                       )}
                                     </div>
@@ -303,50 +304,48 @@ export default function MyOrdersPage() {
                           </div>
 
                           {/* Col 2: Details & Timeline */}
-                          <div className="space-y-8">
+                          <div className="space-y-12">
 
                             {/* Shipping Address */}
-                            <div className="space-y-4">
-                              <h4 className="flex items-center gap-2 text-xs font-black text-neutral-900 uppercase tracking-widest">
-                                <ExternalLink size={14} className="text-emerald-600" />
-                                Shipping Details
+                            <div className="space-y-6">
+                              <h4 className="flex items-center gap-3 text-[10px] font-black text-neutral-900 uppercase tracking-[0.3em]">
+                                <MapPin size={16} className="text-primary" />
+                                DESTINATION
                               </h4>
-                              <div className="bg-white p-5 rounded-2xl border border-neutral-100 shadow-sm space-y-3">
-                                <p className="text-sm font-bold text-neutral-900">{order.shippingAddress?.name || 'Customer'}</p>
-                                <p className="text-xs text-neutral-500 leading-relaxed">
+                              <div className="bg-white p-8 rounded-[32px] border border-primary/5 shadow-xl shadow-primary/5 space-y-4">
+                                <p className="text-base font-display font-black text-neutral-900 tracking-tight italic">{order.shippingAddress?.name || 'Authorized Member'}</p>
+                                <p className="text-[11px] text-neutral-500 font-bold uppercase tracking-widest leading-relaxed">
                                   {order.shippingAddress?.street}<br />
                                   {order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.zip}
                                 </p>
-                                <div className="pt-2 border-t border-neutral-50">
-                                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
-                                    Phone: {order.shippingAddress?.phone}
+                                <div className="pt-4 border-t border-primary/5">
+                                  <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] italic">
+                                    Contact: {order.shippingAddress?.phone}
                                   </p>
                                 </div>
                               </div>
                             </div>
 
                             {/* Timeline/Status */}
-                            <div className="space-y-4">
-                              <h4 className="flex items-center gap-2 text-xs font-black text-neutral-900 uppercase tracking-widest">
-                                <Clock size={14} className="text-emerald-600" />
-                                Order Timeline
+                            <div className="space-y-6">
+                              <h4 className="flex items-center gap-3 text-[10px] font-black text-neutral-900 uppercase tracking-[0.3em]">
+                                <Clock size={16} className="text-primary" />
+                                PROGRESS
                               </h4>
-                              <div className="bg-white p-5 rounded-2xl border border-neutral-100 shadow-sm">
-                                <div className="space-y-6 relative pl-2">
+                              <div className="bg-white p-8 rounded-[32px] border border-primary/5 shadow-xl shadow-primary/5">
+                                <div className="space-y-8 relative pl-4">
                                   {/* Line */}
-                                  <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-neutral-100" />
+                                  <div className="absolute left-[19px] top-4 bottom-4 w-[2px] bg-bg-secondary" />
 
                                   {(order.timeline || [
                                     { status: 'PENDING', timestamp: order.createdAt, note: 'Order placed' },
                                     { status: order.status, timestamp: new Date(), note: 'Current Status' }
                                   ]).map((evt, idx) => (
-                                    <div key={idx} className="relative flex gap-4">
-                                      <div className={`w-5 h-5 rounded-full border-2 border-white shadow-sm shrink-0 z-10 flex items-center justify-center ${idx === 0 ? 'bg-emerald-500' : 'bg-neutral-200'}`}>
-                                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                                      </div>
-                                      <div>
-                                        <p className="text-[10px] font-black text-neutral-900 uppercase tracking-wider">{evt.status}</p>
-                                        <p className="text-[10px] text-neutral-400 font-medium">{new Date(evt.timestamp).toLocaleDateString()}</p>
+                                    <div key={idx} className="relative flex gap-6">
+                                      <div className={`w-3 h-3 rounded-full border-4 border-white shadow-xl shrink-0 z-10 mt-1.5 ring-4 ring-bg-secondary ${idx === 0 ? 'bg-primary' : 'bg-neutral-200'}`} />
+                                      <div className="space-y-1">
+                                        <p className="text-[10px] font-black text-neutral-900 uppercase tracking-widest">{evt.status}</p>
+                                        <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest opacity-60">{new Date(evt.timestamp).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</p>
                                       </div>
                                     </div>
                                   ))}

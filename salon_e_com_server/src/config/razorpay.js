@@ -1,6 +1,11 @@
 import Razorpay from 'razorpay';
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+
+console.log('[razorpay-config] process.cwd():', process.cwd());
+const result = dotenv.config();
+console.log('[razorpay-config] dotenv result:', result);
+console.log('[razorpay-config] RAZORPAY_KEY_ID from env:', process.env.RAZORPAY_KEY_ID ? 'found' : 'missing');
 
 const razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,

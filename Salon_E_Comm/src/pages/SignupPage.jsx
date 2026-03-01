@@ -100,59 +100,118 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white font-body selection:bg-primary/10">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 p-2 h-screen sticky top-0">
-        <div className="h-full bg-neutral-50/50 p-4 md:p-12 flex flex-col justify-center relative overflow-y-auto scrollbar-hide">
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 md:p-12 lg:p-20 relative bg-white">
 
-          {/* Back Button */}
-          <Link to="/" className="absolute top-4 left-4">
-            <Button variant="outline" className="border-neutral-800 border rounded-sm hover:bg-transparent gap-1">
-              <ChevronLeft size={20} />
-              Home
-            </Button>
-          </Link>
+        {/* Decorative background element for luxury feel */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent-color to-primary-light" />
 
-          <div className="max-w-xs w-full mx-auto relative z-10 space-y-4 pt-128">
-            {/* Branding */}
-            <AuthHeader title="Get Started." subtitle="Create your account to get started." />
+        {/* Back Button - Premium */}
+        <Link
+          to="/"
+          className="absolute top-8 left-8 group"
+        >
+          <div className="flex items-center gap-2 px-4 py-2 bg-bg-secondary rounded-full text-[10px] font-bold uppercase tracking-widest text-neutral-400 group-hover:text-primary transition-all group-hover:shadow-lg group-hover:shadow-primary/5">
+            <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+            House
+          </div>
+        </Link>
 
-            {/* Form */}
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" placeholder="John" className="h-12 bg-white border-neutral-200 rounded-sm" value={firstName} onChange={e => setFirstName(e.target.value)} required />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" placeholder="Doe" className="h-12 bg-white border-neutral-200 rounded-sm" value={lastName} onChange={e => setLastName(e.target.value)} required />
-                </div>
+        <div className="max-w-md w-full space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+
+          {/* Header */}
+          <div className="space-y-4">
+            <div className="w-16 h-16 bg-bg-secondary rounded-[24px] flex items-center justify-center border border-primary/5 shadow-inner">
+              <Sparkles className="text-primary animate-pulse" size={28} />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-4xl md:text-5xl font-display font-black text-neutral-900 leading-[0.9] tracking-tighter">
+                BECOME A <br />
+                <span className="text-primary italic">PARTNER</span>.
+              </h1>
+              <p className="text-neutral-400 text-xs font-bold uppercase tracking-[0.2em]">
+                Join our premium salon network today.
+              </p>
+            </div>
+          </div>
+
+          {/* Form Section */}
+          <form onSubmit={handleSignup} className="space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 ml-1">First Name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="e.g. Alexis"
+                  className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  required
+                />
               </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" placeholder="name@example.com" className="h-12 bg-white border-neutral-200 rounded-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 ml-1">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="e.g. Bloom"
+                  className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  required
+                />
               </div>
+            </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="+91 00000 00000" className="h-12 bg-white border-neutral-200 rounded-sm" value={phone} onChange={e => setPhone(e.target.value)} required />
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 ml-1">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="luxury@salon.com"
+                className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 ml-1">Contact Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+91 00000 00000"
+                className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between ml-1">
+                <Label htmlFor="categories" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Trading Categories</Label>
+                <span className="text-[8px] font-bold text-primary-light uppercase tracking-tighter bg-primary/5 px-2 py-0.5 rounded-full">Pro Tip: Use Commas</span>
               </div>
+              <Input
+                id="categories"
+                placeholder="Escentials, Skincare, Haircare..."
+                className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
+                value={categories}
+                onChange={e => setCategories(e.target.value)}
+              />
+            </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="categories">Categories (What you are selling, comma separated)</Label>
-                <Input id="categories" placeholder="Chair, hair brush, etc." className="h-12 bg-white border-neutral-200 rounded-sm" value={categories} onChange={e => setCategories(e.target.value)} />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="password">Password</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 ml-1">Access Pin</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="h-12 bg-white border-neutral-200 pr-10 rounded-sm"
+                    className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -160,21 +219,21 @@ export default function SignupPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-primary transition-colors"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 ml-1">Verify Pin</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="h-12 bg-white border-neutral-200 pr-10 rounded-sm"
+                    className="h-14 bg-bg-secondary border-0 rounded-2xl focus:ring-primary/20 transition-all font-medium placeholder:text-neutral-200"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -182,37 +241,48 @@ export default function SignupPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-primary transition-colors"
                   >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
+            </div>
 
-              {error && (
-                <div className="p-3 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wide rounded-sm text-center">
-                  {error}
-                </div>
+            {error && (
+              <div className="p-4 bg-rose-50 text-rose-500 text-[10px] font-black uppercase tracking-widest rounded-2xl text-center border border-rose-100 flex items-center justify-center gap-2">
+                <div className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full h-16 bg-primary hover:bg-primary-dark text-white font-black rounded-full tracking-[0.2em] uppercase transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                "Establish Membership"
               )}
+            </Button>
+          </form>
 
-              <Button type="submit" className="w-full h-12 bg-neutral-900 hover:bg-neutral-800 text-white font-bold rounded-sm tracking-wide" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
-                CREATE ACCOUNT
-              </Button>
-            </form>
-
-            <p className="text-center text-sm font-medium text-neutral-500">
-              Already have an account?{' '}
-              <Link to="/auth/signin" className="text-neutral-900 font-bold hover:underline">
-                Sign In
+          {/* Footer Navigation */}
+          <div className="space-y-8 pt-8 border-t border-primary/5">
+            <p className="text-center text-xs font-bold text-neutral-400 uppercase tracking-widest">
+              Part of our network?{' '}
+              <Link to="/auth/signin" className="text-primary font-black hover:underline ml-1">
+                Enter Ritual
               </Link>
             </p>
-
             <AuthFooter />
           </div>
         </div>
       </div>
 
+      {/* Right Side - Visual Panel */}
       <AuthSidePanel />
     </div>
   );

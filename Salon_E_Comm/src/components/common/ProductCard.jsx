@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { ShoppingCart, Eye, Heart, Star } from 'lucide-react';
+import { Button } from '../ui/button';
 import toast from 'react-hot-toast';
 
 export default function ProductCard({ product }) {
@@ -40,87 +41,88 @@ export default function ProductCard({ product }) {
   const imgPlaceholder = "https://placehold.co/600x400/f3f4f6/999999?text=Image+Unavailable";
 
   return (
-    <div className="group bg-white rounded-xl border border-neutral-100 p-1 md:p-2 hover:shadow-2xl hover:shadow-neutral-200/50 transition-all duration-500 overflow-hidden relative">
+    <div className="group bg-white rounded-3xl border border-neutral-100 p-3 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-700 overflow-hidden relative flex flex-col h-full">
       {/* Image Wrapper */}
       <div
-        className="relative aspect-square rounded-lg overflow-hidden bg-neutral-50 cursor-pointer"
+        className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-bg-secondary cursor-pointer"
         onClick={() => navigate(`/products/${product._id || product.id}`)}
       >
         <img
           src={product.images?.[0] || product.image || imgPlaceholder}
           alt={product.name}
-          className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 ease-out ${(product.inventoryCount <= 0 || product.status === 'EXPIRED') ? 'grayscale opacity-60' : ''}`}
+          className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-1000 ease-out ${(product.inventoryCount <= 0 || product.status === 'EXPIRED') ? 'grayscale opacity-60' : ''}`}
         />
 
-        <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-          {product.status === 'NEW' && (
-            <span className="bg-neutral-900 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-lg">
-              NEW
+        {/* Badges */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+          {(product.status === 'NEW' || product.isFeatured) && (
+            <span className="bg-primary text-white text-[9px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
+              {product.status === 'NEW' ? 'New Ritual' : 'Editor\'s Choice'}
             </span>
           )}
           {product.status === 'EXPIRED' ? (
-            <span className="bg-rose-600 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-lg">
-              EXPIRED
+            <span className="bg-neutral-900 text-white text-[9px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
+              Sold Out
             </span>
           ) : product.inventoryCount <= 0 && (
-            <span className="bg-rose-500 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-lg">
-              OUT OF STOCK
+            <span className="bg-neutral-400 text-white text-[9px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
+              Refilling
             </span>
           )}
         </div>
 
         <button
-          className="hidden group-hover:block absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-md rounded-full text-neutral-400 hover:text-red-500 transition-colors shadow-sm"
-          onClick={(e) => e.stopPropagation()}
+          className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-md rounded-full text-neutral-300 hover:text-primary transition-all shadow-sm opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           <Heart size={18} />
         </button>
       </div>
 
       {/* Info */}
-      <div className="mt-3 md:mt-4 px-1 pb-2">
-
-
-        <div className='flex items-center justify-between'>
-          <div className="flex items-center justify-between text-xs font-semibold text-neutral-400 tracking-wide">
-            {product.brand}
-          </div>
-          <div className="flex items-center gap-1 text-amber-500">
-            <Star size={10} fill="currentColor" />
-            <span className="text-neutral-900 font-semibold">4.8</span>
+      <div className="mt-5 px-1 pb-2 flex-grow flex flex-col">
+        <div className='flex items-center justify-between mb-2'>
+          <span className="text-[10px] font-bold text-accent-color uppercase tracking-[0.2em] font-body">
+            {product.brand || 'Premium Quality'}
+          </span>
+          <div className="flex items-center gap-1">
+            <Star size={10} className="fill-accent-color text-accent-color" />
+            <span className="text-[10px] text-neutral-900 font-black">4.9</span>
           </div>
         </div>
 
         <h3
-          className="text-sm md:text-base font-bold text-neutral-900 line-clamp-1 cursor-pointer hover:text-emerald-600 transition-colors tracking-wide"
+          className="text-base font-display font-black text-neutral-900 line-clamp-2 cursor-pointer hover:text-primary transition-colors tracking-tight leading-tight mb-2"
           onClick={() => navigate(`/products/${product._id || product.id}`)}
         >
           {product.name}
         </h3>
 
-        <div className="flex items-center justify-between text-xs font-semibold text-neutral-400 tracking-wide">
-          <span>{product.subcategory}</span>
-          {product.weight && (
-            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-wider">
-              {product.weight}
-            </span>
+        <p className="text-xs text-neutral-400 font-medium line-clamp-1 mb-4">
+          {product.subcategory || 'Beauty Ritual'}
+        </p>
+
+        <div className="flex items-center gap-2 mb-5">
+          <span className="text-xl font-black text-neutral-900 tracking-tighter">₹{product.price.toLocaleString()}</span>
+          {product.originalPrice && (
+            <span className="text-xs text-neutral-300 line-through font-medium">₹{product.originalPrice.toLocaleString()}</span>
           )}
         </div>
 
-        <div className="flex items-end justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-base md:text-xl font-bold text-neutral-900 tracking-tight">₹ {product.price.toLocaleString()}</span>
-            {product.originalPrice && (
-              <span className="text-[10px] md:text-xs text-neutral-400 line-through">₹{product.originalPrice.toLocaleString()}</span>
-            )}
-            {discount > 0 && (
-              <span className="text-neutral-900 text-xs font-bold">
-                {discount}% Off
-              </span>
-            )}
-          </div>
-
-        </div>
+        {/* Add to Cart Button - Matches Reference */}
+        <Button
+          onClick={handleAddCart}
+          disabled={isAdding || product.inventoryCount <= 0}
+          className={`w-full h-11 rounded-full font-bold text-[11px] uppercase tracking-widest transition-all ${product.inventoryCount <= 0
+            ? 'bg-neutral-100 text-neutral-400'
+            : 'bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/20 active:scale-95'
+            }`}
+        >
+          {isAdding ? 'Preparing...' : product.inventoryCount <= 0 ? 'Out of Ritual' : 'Add to Bag'}
+        </Button>
       </div>
     </div>
   );

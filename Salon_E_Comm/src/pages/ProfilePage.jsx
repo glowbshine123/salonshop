@@ -256,27 +256,36 @@ export default function ProfilePage() {
     ];
 
     return (
-        <div className="bg-neutral-50/50 min-h-screen py-20 px-4">
-            <div className="px-8 max-w-7xl mx-auto">
-                <div className="mb-2 text-center lg:text-left">
-                    <h1 className="text-4xl font-black text-neutral-900 tracking-tight">My <span className="text-emerald-600">Profile</span></h1>
-                    <p className="text-neutral-400 font-bold uppercase tracking-widest text-[10px] mt-2">Manage your account information and preferences</p>
+        <div className="bg-bg-secondary/30 min-h-screen py-16 px-4 sm:px-6 lg:px-8 font-body selection:bg-primary/10">
+            <div className="max-w-5xl mx-auto space-y-12">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-primary/5 pb-10">
+                    <div className="space-y-4">
+                        <h1 className="text-5xl md:text-6xl font-display font-black text-neutral-900 tracking-tighter leading-[0.8]">
+                            YOUR <br />
+                            <span className="text-primary italic">IDENTITY</span>.
+                        </h1>
+                        <p className="text-neutral-400 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Personal configuration & Security settings</p>
+                    </div>
                 </div>
 
-                <div className="w-fit pb-8">
+                <div className="w-fit">
                     <NavigationMenu>
-                        <NavigationMenuList>
+                        <NavigationMenuList className="gap-2">
                             {tabs.map((tab) => (
                                 <NavigationMenuItem key={tab.id}>
                                     <NavigationMenuLink
-                                        className={`${navigationMenuTriggerStyle()} ${activeTab === tab.id && 'bg-emerald-500/5'} cursor-pointer`}
+                                        className={cn(
+                                            "px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-2",
+                                            activeTab === tab.id
+                                                ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                                : "bg-white text-neutral-400 border border-neutral-100 hover:border-primary/20 hover:text-primary"
+                                        )}
                                         active={activeTab === tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <tab.icon size={14} />
-                                            <span className="font-bold text-xs uppercase tracking-wider">{tab.label}</span>
-                                        </div>
+                                        <tab.icon size={14} />
+                                        {tab.label}
                                     </NavigationMenuLink>
                                 </NavigationMenuItem>
                             ))}
@@ -284,152 +293,164 @@ export default function ProfilePage() {
                     </NavigationMenu>
                 </div>
 
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
                     {activeTab === 'PROFILE' && (
-                        <div className="space-y-8 grid grid-cols-1 lg:grid-cols-4 gap-4">
-                            {/* Profile Header Cards */}
-                            <div className="flex flex-col gap-4">
-                                <div className="bg-white p-8 rounded-xl border border-neutral-100 shadow-sm flex items-center gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+                            {/* Profile Card Side */}
+                            <div className="lg:col-span-4 space-y-6">
+                                <div className="bg-white p-10 rounded-[40px] border border-primary/5 shadow-2xl shadow-primary/5 flex flex-col items-center text-center space-y-6 sticky top-24">
                                     <div className="relative group cursor-pointer">
-                                        <div className="w-20 h-20 bg-emerald-50 rounded-[24px] flex items-center justify-center text-emerald-600 font-black text-2xl border border-emerald-100 shadow-inner group-hover:scale-105 transition-transform duration-500 overflow-hidden">
+                                        <div className="w-32 h-32 bg-bg-secondary rounded-[40px] flex items-center justify-center text-primary font-display font-black text-4xl border border-primary/10 shadow-inner group-hover:scale-105 transition-all duration-700 overflow-hidden">
                                             {previewUrl ? (
                                                 <img src={previewUrl} alt="Profile" className="w-full h-full object-cover" />
                                             ) : (
                                                 user?.firstName?.[0] || 'U'
                                             )}
                                         </div>
-                                        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-neutral-900 text-white rounded-xl flex items-center justify-center border-4 border-white shadow-lg group-hover:bg-emerald-600 transition-colors">
-                                            <Camera size={14} />
+                                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-neutral-900 text-white rounded-2xl flex items-center justify-center border-4 border-white shadow-xl group-hover:bg-primary transition-colors">
+                                            <Camera size={18} />
                                         </div>
                                         <input
                                             type="file"
                                             accept="image/*"
                                             onChange={handleImageChange}
                                             className="absolute inset-0 opacity-0 cursor-pointer"
-                                            title="Change Profile Picture"
+                                            title="Update Avatar"
                                         />
                                     </div>
-                                    <div className="space-y-1">
-                                        <h2 className="text-2xl font-black text-neutral-900">{user?.firstName} {user?.lastName}</h2>
-                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Authorized Member</p>
+                                    <div className="space-y-2">
+                                        <h2 className="text-3xl font-display font-black text-neutral-900 tracking-tighter leading-none italic">{user?.firstName} {user?.lastName}</h2>
+                                        <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Authorized Member</p>
+                                    </div>
+
+                                    <div className="w-full pt-6 border-t border-primary/5 grid grid-cols-1 gap-3">
+                                        <div className="bg-bg-secondary/50 p-4 rounded-2xl flex items-center gap-4 border border-primary/5">
+                                            <Mail size={16} className="text-primary" />
+                                            <span className="text-[11px] font-bold text-neutral-500 truncate">{user?.email}</span>
+                                        </div>
+                                        <div className="bg-bg-secondary/50 p-4 rounded-2xl flex items-center gap-4 border border-primary/5">
+                                            <Phone size={16} className="text-primary" />
+                                            <span className="text-[11px] font-bold text-neutral-500">{user?.phone || 'Not Provided'}</span>
+                                        </div>
                                     </div>
                                 </div>
-
                             </div>
 
-                            <div className="col-span-3 bg-white p-10 rounded-xl border border-neutral-100 shadow-sm space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Profile Configuration</h3>
+                            {/* Form Content Side */}
+                            <div className="lg:col-span-8 bg-white p-10 md:p-12 rounded-[40px] border border-primary/5 shadow-2xl shadow-primary/5 space-y-12">
+                                <div className="flex items-center justify-between border-b border-primary/5 pb-8">
+                                    <h3 className="text-lg font-display font-black text-neutral-900 uppercase tracking-[0.2em] italic">Profile Configuration</h3>
                                     {success && (
-                                        <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
+                                        <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-right-4">
                                             <CheckCircle2 size={16} />
-                                            Profile Updated
+                                            Updates Synced
                                         </div>
                                     )}
                                 </div>
 
-                                <form onSubmit={handleUpdate} className="space-y-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">First Name</label>
-                                            <div className="relative">
-                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                <form onSubmit={handleUpdate} className="space-y-12">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">Sovereign First Name</label>
+                                            <div className="relative group">
+                                                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-primary transition-colors" size={18} />
                                                 <input
                                                     type="text"
                                                     name="firstName"
                                                     value={formData.firstName}
                                                     onChange={handleChange}
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                    className="w-full bg-bg-secondary/50 border border-primary/5 rounded-[24px] p-5 pl-14 text-sm font-bold text-neutral-900 focus:ring-8 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all"
                                                 />
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Last Name</label>
-                                            <div className="relative">
-                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">Family Last Name</label>
+                                            <div className="relative group">
+                                                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-primary transition-colors" size={18} />
                                                 <input
                                                     type="text"
                                                     name="lastName"
                                                     value={formData.lastName}
                                                     onChange={handleChange}
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                    className="w-full bg-bg-secondary/50 border border-primary/5 rounded-[24px] p-5 pl-14 text-sm font-bold text-neutral-900 focus:ring-8 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all"
                                                 />
                                             </div>
                                         </div>
-                                        <div className="md:col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Email Address</label>
+                                        <div className="md:col-span-2 space-y-3">
+                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">Communication Channel (Read-Only)</label>
                                             <div className="relative">
-                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
                                                 <input
                                                     type="email"
                                                     disabled
                                                     name="email"
                                                     value={formData.email}
-                                                    className="w-full bg-neutral-100 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold text-neutral-400 cursor-not-allowed"
+                                                    className="w-full bg-bg-secondary/30 border border-primary/5 rounded-[24px] p-5 pl-14 text-sm font-bold text-neutral-400 cursor-not-allowed opacity-60"
                                                 />
                                             </div>
                                         </div>
-                                        <div className="md:col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Phone Number</label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                        <div className="md:col-span-2 space-y-3">
+                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">Voice Frequency (Phone)</label>
+                                            <div className="relative group">
+                                                <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-primary transition-colors" size={18} />
                                                 <input
                                                     type="tel"
                                                     name="phone"
                                                     value={formData.phone}
                                                     onChange={handleChange}
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                    className="w-full bg-bg-secondary/50 border border-primary/5 rounded-[24px] p-5 pl-14 text-sm font-bold text-neutral-900 focus:ring-8 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="border-t border-neutral-100 pt-6">
-                                        <h4 className="text-sm font-black text-neutral-900 uppercase tracking-wide mb-6">Address Information</h4>
-                                        <div className="space-y-6">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Street Address</label>
-                                                <div className="relative">
-                                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                    <div className="pt-8 border-t border-primary/5">
+                                        <h4 className="text-sm font-display font-black text-neutral-900 uppercase tracking-[0.2em] mb-8 italic">Geospatial Distribution</h4>
+                                        <div className="space-y-8">
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">Street Address</label>
+                                                <div className="relative group">
+                                                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-primary transition-colors" size={18} />
                                                     <input
                                                         type="text"
                                                         name="address.street"
                                                         value={formData.address.street}
                                                         onChange={handleChange}
-                                                        placeholder="123 Main St"
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        placeholder="Primary Dispatch Location"
+                                                        className="w-full bg-bg-secondary/50 border border-primary/5 rounded-[24px] p-5 pl-14 text-sm font-bold text-neutral-900 focus:ring-8 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all"
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">City</label>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                <div className="space-y-3">
+                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">City</label>
                                                     <input
                                                         type="text"
                                                         name="address.city"
                                                         value={formData.address.city}
                                                         onChange={handleChange}
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        className="w-full bg-bg-secondary/50 border border-primary/5 rounded-[24px] p-5 px-8 text-sm font-bold text-neutral-900 focus:ring-8 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all"
                                                     />
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">State</label>
+                                                <div className="space-y-3">
+                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">State</label>
                                                     <input
                                                         type="text"
                                                         name="address.state"
                                                         value={formData.address.state}
                                                         onChange={handleChange}
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        className="w-full bg-bg-secondary/50 border border-primary/5 rounded-[24px] p-5 px-8 text-sm font-bold text-neutral-900 focus:ring-8 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all"
                                                     />
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Zip Code</label>
+                                                <div className="space-y-3">
+                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] ml-2">Postal Code</label>
                                                     <input
                                                         type="text"
                                                         name="address.zip"
                                                         value={formData.address.zip}
                                                         onChange={handleChange}
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        className="w-full bg-bg-secondary/50 border border-primary/5 rounded-[24px] p-5 px-8 text-sm font-bold text-neutral-900 focus:ring-8 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -440,9 +461,14 @@ export default function ProfilePage() {
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="w-full h-16 bg-neutral-900 text-white rounded-[24px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-neutral-900/20 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
+                                            className="w-full h-20 bg-neutral-900 text-white rounded-[32px] font-display font-black hover:bg-primary transition-all shadow-2xl shadow-neutral-900/20 active:scale-[0.98] flex items-center justify-center gap-4 uppercase tracking-[0.3em] text-xs"
                                         >
-                                            {loading ? <Loader2 className="animate-spin" size={20} /> : 'UPDATE CONFIGURATION'}
+                                            {loading ? <Loader2 className="animate-spin" size={20} /> : (
+                                                <>
+                                                    <Zap size={18} className="text-primary group-hover:text-white" />
+                                                    Apply New Configurations
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 </form>
@@ -451,26 +477,10 @@ export default function ProfilePage() {
                     )}
 
                     {activeTab === 'SECURITY' && (
-                        <div className="max-w-7xl px-8 bg-white p-10 rounded-xl border border-neutral-100 shadow-sm ">
+                        <div className="bg-white p-12 md:p-16 rounded-[48px] border border-primary/5 shadow-2xl shadow-primary/5 animate-in fade-in zoom-in-95 duration-700">
                             <SecuritySettings />
                         </div>
                     )}
-
-                    {/* 
-                    {activeTab === 'NOTIFICATIONS' && (
-                        <div className="bg-white p-10 rounded-xl border border-neutral-100 shadow-sm flex flex-col items-center justify-center min-h-[400px] text-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
-                            <div className="w-16 h-16 bg-neutral-50 rounded-2xl flex items-center justify-center text-neutral-300">
-                                <Bell size={32} />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight">Notification Center</h3>
-                                <p className="text-neutral-500 text-xs font-bold uppercase tracking-widest mt-1">Configure your alert preferences</p>
-                            </div>
-                            <div className="px-4 py-1.5 bg-neutral-100 text-neutral-500 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                                Coming Soon
-                            </div>
-                        </div>
-                    )} */}
                 </div>
             </div>
         </div>

@@ -8,18 +8,26 @@ import { ArrowRight, Sparkles, ShieldCheck, Zap, Heart, TrendingUp, Star, Search
 import ProductCardSkeleton from '../components/common/ProductCardSkeleton';
 import DotGrid from '../components/ui/dot-grid';
 
-const SectionHeader = ({ icon: Icon, iconColor, label, title, actionText, onAction, actionIconColor = "text-emerald-600" }) => (
-  <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 md:gap-6 mb-2 md:mb-8">
-    <div className="space-y-1 max-w-2xl">
+const SectionHeader = ({ icon: Icon, iconColor, label, title, actionText, onAction, actionIconColor = "text-primary" }) => (
+  <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-8 mb-8 md:mb-12">
+    <div className="space-y-2">
       <div className={`flex items-center gap-2 ${iconColor} mb-2`}>
-        <Icon size={18} fill="currentColor" />
-        <span className="text-[10px] font-black uppercase tracking-[0.3em]">{label}</span>
+        <div className="p-2 bg-primary-light rounded-lg">
+          <Icon size={16} className="fill-primary" />
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] font-body text-neutral-400">{label}</span>
       </div>
-      <h2 className="text-4xl md:text-5xl font-black text-neutral-900 leading-[0.9] tracking-tighter">{title}</h2>
+      <h2 className="text-4xl md:text-5xl font-display font-black text-neutral-900 tracking-tighter">{title}</h2>
     </div>
-    <Button onClick={onAction} variant="ghost" className="group flex items-center gap-1 text-sm font-bold text-neutral-500 hover:text-neutral-900 duration-100 transition-colors self-end">
+    <Button
+      onClick={onAction}
+      variant="ghost"
+      className="group flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-primary transition-all self-start md:self-end uppercase tracking-widest px-0 hover:bg-transparent"
+    >
       {actionText}
-      <ArrowRight size={16} className={`group-hover:translate-x-1 transition-transform ${actionIconColor}`} />
+      <div className="w-8 h-8 rounded-full border border-neutral-100 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all">
+        <ArrowRight size={14} className={`group-hover:translate-x-0.5 transition-transform ${actionIconColor} group-hover:text-white`} />
+      </div>
     </Button>
   </div>
 );
@@ -64,74 +72,113 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-neutral-50/50">
 
-      <section className="relative w-full h-[350px] bg-green-950 border-b border-neutral-800 overflow-hidden">
-        {/* Mobile Dark Overlay - Full cover with opacity for readability */}
-        <div className="absolute inset-0 bg-neutral-900/70 z-10 md:hidden" />
+      {/* Hero Section - Glow B Shine Premium */}
+      <section className="relative w-full h-[500px] md:h-[600px] bg-bg-secondary border-b border-primary/5 overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute top-20 right-[10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-10 left-[5%] w-48 h-48 bg-accent-color/5 rounded-full blur-3xl" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center relative z-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-8 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-12 items-center">
 
-            <div className="space-y-6 animate-in fade-in slide-in-from-left duration-700 relative z-20 text-center md:text-left flex flex-col items-center md:items-start">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-900/30 text-emerald-400 rounded-full text-[10px] font-bold tracking-widest uppercase mb-3 border border-emerald-900/50 backdrop-blur-sm">
-                  <Sparkles size={12} />
-                  Professional Grade
+            <div className="space-y-8 animate-in fade-in slide-in-from-left duration-1000">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-primary rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-sm border border-primary/5">
+                  <Sparkles size={14} className="animate-pulse" />
+                  Natural & Salon Quality
                 </div>
-                <h1 className="text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-md">
-                  Purest Quality. <br />
-                  <span className="text-emerald-400">Direct Prices.</span>
+                <h1 className="text-6xl lg:text-8xl font-display font-black text-neutral-900 leading-[0.9] tracking-tighter">
+                  PREMIUM <br />
+                  <span className="text-primary italic">BEAUTY</span> <br />
+                  PRODUCTS
                 </h1>
-                <p className="text-neutral-200 md:text-neutral-400 text-sm md:text-base font-medium max-w-md mt-2 drop-shadow-sm mx-auto md:mx-0">
-                  Verified chemicals and equipment for salon professionals.
+                <p className="text-neutral-500 text-sm md:text-lg font-medium max-w-sm leading-relaxed">
+                  Discover our curated collection of professional rituals for your daily glow.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 max-w-md w-full">
-                <div className="relative flex-1 group">
-                  <input
-                    type="text"
-                    placeholder="Search inventory..."
-                    className="w-full h-10 rounded-xl pl-4 pr-12 bg-white/10 border border-white/10 text-white placeholder:text-neutral-300 focus:outline-none focus:bg-white/20 focus:border-emerald-500/50 transition-all font-medium backdrop-blur-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        navigate(`/products?search=${e.target.value}`);
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const input = document.querySelector('input[placeholder="Search inventory..."]');
-                      if (input) navigate(`/products?search=${input.value}`);
-                    }}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 bg-neutral-800/80 rounded-lg text-emerald-400 hover:text-white transition-colors"
-                  >
-                    <Search size={18} />
-                  </button>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  onClick={() => navigate('/products')}
+                  className="h-14 px-10 rounded-full bg-primary hover:bg-primary-dark text-white font-bold text-sm uppercase tracking-widest shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                >
+                  Shop Now
+                </Button>
+                <div className="flex -space-x-3 items-center">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-neutral-100 overflow-hidden">
+                      <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" />
+                    </div>
+                  ))}
+                  <div className="pl-6">
+                    <p className="text-[11px] font-bold text-neutral-900 uppercase tracking-tighter">12K+ Happy Souls</p>
+                    <div className="flex gap-0.5 mt-0.5">
+                      {[1, 2, 3, 4, 5].map(i => <Star key={i} size={10} className="fill-accent-color text-accent-color" />)}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="absolute inset-0 md:left-auto md:right-8 md:w-1/2 overflow-hidden z-0">
-              <div className="hidden md:block absolute inset-0 bg-linear-to-r from-green-950 via-green-950/20 to-transparent z-10" />
-              <img
-                src="https://orchidlifesciences.com/wp-content/uploads/2024/06/01-14-01-1024x704.jpg"
-                alt="Professional Salon Supplies"
-                className="w-full h-full object-cover object-center opacity-60 md:opacity-100"
-              />
+            <div className="relative hidden md:flex justify-center items-center">
+              <div className="relative z-10 w-full max-w-md animate-in fade-in zoom-in duration-1000 delay-300">
+                <img
+                  src="https://orchidlifesciences.com/wp-content/uploads/2024/06/01-14-01-1024x704.jpg"
+                  alt="Premium Products"
+                  className="w-full h-auto rounded-[40px] shadow-2xl border-4 border-white rotate-2 hover:rotate-0 transition-transform duration-700"
+                />
+                <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-[24px] shadow-2xl border border-neutral-100 animate-bounce duration-[3000ms]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center">
+                      <Heart size={20} className="text-primary fill-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-neutral-900 uppercase tracking-tighter">Purest Quality</p>
+                      <p className="text-[10px] text-neutral-400 font-bold">Verified Professional</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
 
+      {/* Categories - Glow B Shine Style */}
+      <section className="py-12 md:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex overflow-x-auto scrollbar-hide gap-8 md:gap-16 pb-4 justify-between">
+            {[
+              { name: 'Scrubs', icon: 'https://img.icons8.com/ios/100/FF1B6B/cosmetic-brush.png' },
+              { name: 'Face Creams', icon: 'https://img.icons8.com/ios/100/FF1B6B/cream-tube.png' },
+              { name: 'Cleansers', icon: 'https://img.icons8.com/ios/100/FF1B6B/soap.png' },
+              { name: 'Hair Care', icon: 'https://img.icons8.com/ios/100/FF1B6B/shampoo.png' },
+              { name: 'Facial Kits', icon: 'https://img.icons8.com/ios/100/FF1B6B/cosmetic-face-mask.png' },
+              { name: 'Body Lotions', icon: 'https://img.icons8.com/ios/100/FF1B6B/bottle-of-liquid-soap.png' }
+            ].map((cat, i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center gap-4 cursor-pointer group flex-shrink-0"
+                onClick={() => navigate(`/products?category=${cat.name}`)}
+              >
+                <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-bg-secondary border border-primary/5 flex items-center justify-center transition-all duration-500 group-hover:shadow-xl group-hover:shadow-primary/10 group-hover:-translate-y-2 group-hover:bg-primary-light">
+                  <img src={cat.icon} alt={cat.name} className="w-10 h-10 md:w-14 md:h-14 opacity-70 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <span className="text-[11px] md:text-xs font-bold text-neutral-500 group-hover:text-primary transition-colors uppercase tracking-widest">{cat.name}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Featured Section - Pure White Cards on Neutral-50 */}
-      <section className="py-8 relative">
+      <section className="py-8 md:py-16 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             icon={TrendingUp}
-            iconColor="text-blue-600"
+            iconColor="text-primary"
             label="Trending Now"
-            title="Our Collection."
+            title="Bestselling Products."
             actionText="View All Products"
             onAction={() => navigate('/products')}
           />
@@ -166,19 +213,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-8 relative bg-neutral-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Editor's Choice Section */}
+      <section className="py-12 md:py-24 relative bg-bg-secondary overflow-hidden">
+        <div className="absolute top-0 right-0 p-20 opacity-5">
+          <Sparkles size={300} className="text-primary" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionHeader
             icon={Star}
-            iconColor="text-amber-500"
+            iconColor="text-primary"
             label="Editor's Choice"
-            title="Featured Collection."
+            title="House Pick Collection."
             actionText="View All Featured"
             onAction={() => navigate('/products?featured=true')}
           />
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-x-8 sm:gap-y-16">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-8">
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => <ProductCardSkeleton key={i} />)
             ) : (
@@ -191,18 +241,18 @@ export default function HomePage() {
       </section>
 
       {/* Latest Arrivals Section */}
-      <section className="py-8 relative">
+      <section className="py-12 md:py-24 relative bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             icon={Zap}
-            iconColor="text-blue-600"
+            iconColor="text-primary"
             label="New Drops"
-            title="Latest Arrivals."
+            title="The Latest Rituals."
             actionText="View All New"
             onAction={() => navigate('/products?sort=newest')}
           />
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-x-8 sm:gap-y-16">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-8">
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => <ProductCardSkeleton key={i} />)
             ) : (
