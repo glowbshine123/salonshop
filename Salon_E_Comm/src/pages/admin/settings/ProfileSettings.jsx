@@ -7,7 +7,7 @@ import { userAPI, settingsAPI } from '../../../utils/apiClient';
 import toast from 'react-hot-toast';
 
 export default function ProfileSettings() {
-    const { user, updateUser } = useAuth();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
 

@@ -60,22 +60,6 @@ export const addToCart = async (userId, productId, quantity = 1) => {
             throw new Error(`Only ${product.inventoryCount} items available in stock`);
         }
 
-        // Reserve stock immediately
-        product.inventoryCount -= quantity;
-        await product.save();
-
-        // Low Stock Alert for Admins
-        if (product.inventoryCount < 10) {
-            const notificationService = await import('./notification.service.js');
-            await notificationService.notifyAdmins({
-                title: 'Low Stock Alert',
-                description: `Product "${product.name}" is low on stock (${product.inventoryCount} remaining after cart reservation).`,
-                type: 'SYSTEM',
-                priority: 'HIGH',
-                metadata: { productId: product._id }
-            });
-        }
-
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
@@ -109,13 +93,6 @@ export const removeFromCart = async (userId, productId) => {
     );
 
     if (itemToRemove) {
-        // Restore stock
-        const product = await Product.findById(productId) || await Product.findOne({ slug: productId });
-        if (product) {
-            product.inventoryCount += itemToRemove.quantity;
-            await product.save();
-        }
-
         cart.items = cart.items.filter(
             item => item.productId.toString() !== productId.toString()
         );
@@ -149,22 +126,6 @@ export const updateCartItem = async (userId, productId, quantity) => {
                 throw new Error(`Only ${product.inventoryCount} more items available in stock`);
             }
 
-            // Adjust stock
-            product.inventoryCount -= diff;
-            await product.save();
-
-            // Low Stock Alert for Admins (only if decrementing)
-            if (diff > 0 && product.inventoryCount < 10) {
-                const notificationService = await import('./notification.service.js');
-                await notificationService.notifyAdmins({
-                    title: 'Low Stock Alert',
-                    description: `Product "${product.name}" is low on stock (${product.inventoryCount} remaining after cart update).`,
-                    type: 'SYSTEM',
-                    priority: 'HIGH',
-                    metadata: { productId: product._id }
-                });
-            }
-
             item.quantity = quantity;
         } else {
             throw new Error('Product not found in cart');
@@ -180,17 +141,6 @@ export const clearCart = async (userId, isPurchase = false) => {
 
     if (!cart) {
         throw new Error('Cart not found');
-    }
-
-    // Restore stock for all items ONLY if it's NOT a purchase
-    if (!isPurchase) {
-        for (const item of cart.items) {
-            const product = await Product.findById(item.productId) || await Product.findOne({ slug: item.productId });
-            if (product) {
-                product.inventoryCount += item.quantity;
-                await product.save();
-            }
-        }
     }
 
     cart.items = [];

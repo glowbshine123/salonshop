@@ -43,7 +43,8 @@ export default function AddProductPage() {
         hsnCode: '',
         expiryDate: '',
         weight: '',
-        contentSections: []
+        contentSections: [],
+        rewardPercentage: ''
     });
     const [categories, setCategories] = useState([]);
     const [imageFiles, setImageFiles] = useState([]);
@@ -82,7 +83,8 @@ export default function AddProductPage() {
                             hsnCode: product.hsnCode || '',
                             expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : '',
                             weight: product.weight || '',
-                            contentSections: product.contentSections || []
+                            contentSections: product.contentSections || [],
+                            rewardPercentage: product.rewardPercentage || ''
                         });
 
                         // Handle existing images
@@ -501,7 +503,7 @@ export default function AddProductPage() {
                                 <h2 className="text-xl font-black tracking-tighter uppercase text-emerald-900">Fiscal Valuation</h2>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-emerald-800/60 ml-1">Original Valuation (MRP)</label>
                                     <div className="relative">
@@ -528,6 +530,20 @@ export default function AddProductPage() {
                                             placeholder="00.00"
                                             className="w-full pl-10 pr-6 py-4 bg-white border border-emerald-200 rounded-2xl focus:border-emerald-500 outline-none transition-all font-black text-lg tracking-tight shadow-lg shadow-emerald-500/5"
                                             required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-orange-600 ml-1">Reward %</label>
+                                    <div className="relative">
+                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-orange-600 text-sm font-bold">%</div>
+                                        <input
+                                            type="number"
+                                            name="rewardPercentage"
+                                            value={formData.rewardPercentage}
+                                            onChange={handleChange}
+                                            placeholder="Default (10%)"
+                                            className="w-full px-6 py-4 bg-white border border-orange-100 rounded-2xl focus:border-orange-500 outline-none transition-all font-black text-lg tracking-tight shadow-sm"
                                         />
                                     </div>
                                 </div>

@@ -66,7 +66,7 @@ export default function ProfilePage() {
                 // including address and new avatar if changed elsewhere
                 const res = await authAPI.me();
                 const freshUser = res.data;
-                console.log("fresh user ===>>>", freshUser)
+
 
                 // Update context if it differs (optional, but good for consistency)
                 if (setUser) setUser(freshUser);

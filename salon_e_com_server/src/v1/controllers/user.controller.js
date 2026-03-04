@@ -72,11 +72,62 @@ export const updateProfile = async (req, res) => {
 
 export const getUsers = async (req, res) => {
     try {
-        const { role, isActive, status } = req.query;
+        const { role, isActive, status, search } = req.query;
         let query = {};
         if (role) query.role = role.toUpperCase();
         if (typeof isActive !== 'undefined') query.isActive = (isActive === 'true' || isActive === true);
         if (status) query.status = status.toUpperCase();
+
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            query.$or = [
+                { firstName: searchRegex },
+                { lastName: searchRegex },
+                { email: searchRegex },
+                { phone: searchRegex }
+            ];
+
+            // If searching for agents, also search in their profile address
+            if (role === 'AGENT' || !role) {
+                const AgentProfile = (await import('../models/AgentProfile.js')).default;
+                const matchingProfiles = await AgentProfile.find({
+                    $or: [
+                        { 'address.street': searchRegex },
+                        { 'address.city': searchRegex },
+                        { 'address.state': searchRegex },
+                        { 'address.zip': searchRegex }
+                    ]
+                }).select('userId').lean();
+
+                if (matchingProfiles.length > 0) {
+                    const userIdsFromProfiles = matchingProfiles.map(p => p.userId);
+                    query.$or.push({ _id: { $in: userIdsFromProfiles } });
+                }
+            }
+
+            // If searching for salons, also search in their shipping addresses
+            if (role === 'SALON_OWNER' || !role) {
+                const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+                const matchingSalonProfiles = await SalonOwnerProfile.find({
+                    shippingAddresses: {
+                        $elemMatch: {
+                            $or: [
+                                { street: searchRegex },
+                                { city: searchRegex },
+                                { state: searchRegex },
+                                { zip: searchRegex },
+                                { phone: searchRegex }
+                            ]
+                        }
+                    }
+                }).select('userId').lean();
+
+                if (matchingSalonProfiles.length > 0) {
+                    const userIdsFromSalonProfiles = matchingSalonProfiles.map(p => p.userId);
+                    query.$or.push({ _id: { $in: userIdsFromSalonProfiles } });
+                }
+            }
+        }
 
         if (req.user.role === 'AGENT') {
             const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
@@ -87,11 +138,11 @@ export const getUsers = async (req, res) => {
         }
 
         const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 20;
+        const limit = parseInt(req.query.limit, 10) || 100; // Increased limit for admin view or handle pagination
 
         const total = await User.countDocuments(query);
         const users = await User.find(query)
-            .select('firstName lastName email role isActive status createdAt avatarUrl')
+            .select('firstName lastName email role isActive status createdAt avatarUrl phone')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
@@ -109,12 +160,40 @@ export const getUsers = async (req, res) => {
             .populate('agentId', 'firstName lastName email role avatarUrl')
             .lean();
 
+        // Fetch monthly rewards for salons
+        const RewardTransaction = (await import('../models/RewardTransaction.js')).default;
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const monthlyRewards = await RewardTransaction.aggregate([
+            {
+                $match: {
+                    userId: { $in: salonOwnerIds },
+                    type: 'REWARD_EARNED',
+                    status: 'COMPLETED',
+                    createdAt: { $gte: startOfMonth }
+                }
+            },
+            {
+                $group: {
+                    _id: '$userId',
+                    total: { $sum: '$amount' }
+                }
+            }
+        ]);
+
         const usersWithProfiles = users.map(user => {
             const userObj = { ...user };
             if (user.role === 'AGENT') {
                 userObj.agentProfile = agentProfiles.find(p => p.userId.toString() === user._id.toString());
             } else if (user.role === 'SALON_OWNER') {
-                userObj.salonOwnerProfile = salonOwnerProfiles.find(p => p.userId.toString() === user._id.toString());
+                const profile = salonOwnerProfiles.find(p => p.userId.toString() === user._id.toString());
+                if (profile) {
+                    const rewards = monthlyRewards.find(r => r._id.toString() === user._id.toString());
+                    profile.currentMonthRewards = rewards ? rewards.total : 0;
+                    userObj.salonOwnerProfile = profile;
+                }
             }
             return userObj;
         });
@@ -138,8 +217,22 @@ export const updateSalonStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
-        const salon = await userService.updateSalonStatus(id, status);
-        res.json(salon);
+
+        // Security check for AGENT role
+        if (req.user.role === 'AGENT') {
+            const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
+            const assignedSalon = await SalonOwnerProfile.findOne({
+                userId: id,
+                agentId: req.user._id
+            });
+
+            if (!assignedSalon) {
+                return res.status(403).json({ message: 'Unauthorized to update status for this salon partner' });
+            }
+        }
+
+        const user = await userService.updateSalonStatus(id, status);
+        res.json(user);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

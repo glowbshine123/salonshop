@@ -26,6 +26,10 @@ export const getAssignedSalons = async (req, res) => {
 
 export const getCommissionTransactions = async (req, res) => {
     try {
+        // Sync stats to ensure accuracy when viewing ledger
+        const { syncAgentStats } = await import('../services/commission.service.js');
+        await syncAgentStats(req.user._id);
+
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const month = req.query.month;

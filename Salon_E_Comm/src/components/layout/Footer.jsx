@@ -19,7 +19,6 @@ export default function Footer() {
       links: [
         { label: 'Contact Us', path: '/contact' },
         { label: 'About Us', path: '/about' },
-        { label: 'Help Center', path: '/help' },
       ],
     },
     {

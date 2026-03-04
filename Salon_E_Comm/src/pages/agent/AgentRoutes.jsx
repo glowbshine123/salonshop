@@ -19,7 +19,6 @@ export default function AgentRoutes() {
                 <Route path="orders" element={<AgentOrders />} />
                 <Route path="rewards" element={<AgentRewards />} />
                 <Route path="settings" element={<AgentSettings />} />
-                <Route path="profile" element={<AgentSettings />} /> {/* Redirect/Alias Profile to Settings */}
                 <Route path="notifications" element={<NotificationsPage />} />
             </Routes>
         </AgentLayout>

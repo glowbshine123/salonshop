@@ -6,7 +6,7 @@ const useTheme = () => {
 
     useEffect(() => {
         // Logic to check system preference or local storage could go here
-        console.log('useTheme hook initialized');
+
     }, []);
 
     return { isDark, setIsDark };

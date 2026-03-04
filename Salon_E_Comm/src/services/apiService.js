@@ -15,7 +15,7 @@ const getBaseURL = () => {
 };
 
 const API_BASE_URL = getBaseURL();
-console.log(`[API Service] Initialized with baseURL: ${API_BASE_URL}`);
+
 
 const api = axios.create({
     baseURL: API_BASE_URL,

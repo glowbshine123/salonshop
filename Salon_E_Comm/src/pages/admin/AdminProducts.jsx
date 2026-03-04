@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Plus,
     Search,
@@ -52,13 +52,13 @@ export default function AdminProducts() {
     const [loading, setLoading] = useState(true);
     const [totalPages, setTotalPages] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
-    const { startLoading, finishLoading } = useLoading();
+    const { finishLoading } = useLoading();
 
     const [updatingStatusId, setUpdatingStatusId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [currentProduct, setCurrentProduct] = useState(null);
+    const [currentProduct] = useState(null);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             const params = {
@@ -93,11 +93,11 @@ export default function AdminProducts() {
             setLoading(false);
             finishLoading();
         }
-    };
+    }, [currentPage, searchTerm, selectedCategory, statusFilter, stockFilter, sortOrder, finishLoading]);
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, searchTerm, selectedCategory, statusFilter, stockFilter, sortOrder]);
+    }, [currentPage, searchTerm, selectedCategory, statusFilter, stockFilter, sortOrder, fetchData]);
 
     // Sync state with URL search parameters
     useEffect(() => {
@@ -110,7 +110,7 @@ export default function AdminProducts() {
         if (currentPage > 1) params.page = currentPage;
 
         setSearchParams(params, { replace: true });
-    }, [searchTerm, selectedCategory, statusFilter, stockFilter, sortOrder, currentPage]);
+    }, [searchTerm, selectedCategory, statusFilter, stockFilter, sortOrder, currentPage, setSearchParams]);
 
     // Reset to page 1 when search/filter changes (except for initial mount/param load)
     const isFirstRun = React.useRef(true);
@@ -153,7 +153,6 @@ export default function AdminProducts() {
                 toast.success('Product deleted successfully');
                 fetchData();
             } catch (err) {
-                toast.error('Failed to delete asset');
             }
         }
     };

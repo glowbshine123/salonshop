@@ -1,7 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import AdminHome from './AdminHome';
 import AdminProducts from './AdminProducts';
 import AdminCategories from './AdminCategories';
 import AdminOrders from './AdminOrders';

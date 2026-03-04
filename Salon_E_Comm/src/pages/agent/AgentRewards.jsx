@@ -15,7 +15,6 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 
 export default function AgentRewards() {
-    const { user } = useAuth();
 
     const achievements = [
         { id: 1, title: 'Network Pioneer', desc: 'Onboarded 5 salons in first month', icon: Star, color: 'blue' },

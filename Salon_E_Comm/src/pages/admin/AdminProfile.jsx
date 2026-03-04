@@ -18,7 +18,6 @@ import { Button } from '../../components/ui/button';
 
 export default function AdminProfile() {
     const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
 
     return (
         <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in duration-700 pb-20">

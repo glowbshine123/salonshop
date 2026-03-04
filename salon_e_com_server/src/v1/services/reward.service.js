@@ -18,7 +18,76 @@ const getRewardConfig = async () => {
 };
 
 // --- 8. GET REWARD DATA (API Support) ---
+export const syncRewardStats = async (userId) => {
+    const profile = await SalonOwnerProfile.findOne({ userId });
+    if (!profile) return null;
+
+    // 1. Find the most recent successful redemption transaction
+    const lastRedemption = await RewardTransaction.findOne({
+        userId,
+        type: 'REWARD_REDEEMED',
+        status: 'COMPLETED'
+    }).sort({ createdAt: -1 });
+
+    let lastRedemptionEligibleCount = 0;
+
+    // 2. Fetch all valid orders chronologically
+    const allValidOrders = await Order.find({
+        customerId: userId,
+        status: { $in: [/delivered/i, /completed/i] }
+    }).sort({ createdAt: 1 });
+
+    const config = await getRewardConfig();
+    let currentEligibleCount = 0;
+
+    for (let i = 0; i < allValidOrders.length; i++) {
+        const order = allValidOrders[i];
+
+        // Match getEligibleOrderCount logic exactly
+        let isEligible = false;
+        if (i === 0) {
+            isEligible = true;
+        } else {
+            const normalizedPaymentMethod = (order.paymentMethod || '').toUpperCase();
+            const isPrepaid = normalizedPaymentMethod !== 'COD' && normalizedPaymentMethod !== 'POSTPAID' && normalizedPaymentMethod !== 'POST PAID';
+            // First order is always eligible, subsequent must be > min amount AND prepaid AND NOT have points redeemed
+            if (order.total > config.minOrderAmountForRewards && isPrepaid && !(order.pointsUsed > 0)) {
+                isEligible = true;
+            }
+        }
+
+        if (isEligible) {
+            currentEligibleCount++;
+        }
+
+        // 3. Anchoring Logic
+        if (lastRedemption) {
+            if (lastRedemption.orderId) {
+                // If linked to an order, anchor there
+                if (order._id.toString() === lastRedemption.orderId.toString()) {
+                    lastRedemptionEligibleCount = currentEligibleCount;
+                }
+            } else {
+                // If NOT linked, anchor to all eligible orders created AT OR BEFORE the redemption timestamp
+                // This handles manual redemptions or unlinked records.
+                if (order.createdAt <= lastRedemption.createdAt) {
+                    lastRedemptionEligibleCount = currentEligibleCount;
+                }
+            }
+        }
+    }
+
+    // 4. Update the profile with the ledger-anchored count
+    profile.rewardPoints.ordersCountAtLastRedemption = lastRedemptionEligibleCount;
+    await profile.save();
+
+    return { lastRedemptionEligibleCount, totalEligible: currentEligibleCount };
+};
+
 export const getRewardWallet = async (userId) => {
+    // Always sync first to ensure accuracy
+    await syncRewardStats(userId);
+
     const profile = await SalonOwnerProfile.findOne({ userId }).select('rewardPoints');
     if (!profile) return null;
 
@@ -122,7 +191,7 @@ export const getEligibleOrderCount = async (userId) => {
 };
 
 // --- 1. CALCULATE POINTS (Preview) ---
-export const calculatePoints = async (userId, orderTotal, paymentMethod, pointsRedeemed = 0, currentOrderId = null) => {
+export const calculatePoints = async (userId, orderTotal, paymentMethod, pointsRedeemed = 0, currentOrderId = null, items = []) => {
     // Global Rule: No Rewards if Points were Redeemed
     if (pointsRedeemed > 0) return 0;
 
@@ -134,19 +203,52 @@ export const calculatePoints = async (userId, orderTotal, paymentMethod, pointsR
     const isPrepaid = !isCodOrPostPaid;
 
     const config = await getRewardConfig();
+    const defaultRewardPercentage = config.defaultRewardPercentage || 10;
 
-    // First Order: Bypasses both conditions (Min Order Amount and Prepaid)
+    // Fetch items from order if not provided but orderId exists
+    let calculationItems = items || [];
+    if (calculationItems.length === 0 && currentOrderId) {
+        const order = await Order.findById(currentOrderId).populate('items.productId');
+        if (order) {
+            calculationItems = order.items;
+        }
+    }
+
+    if (calculationItems && calculationItems.length > 0) {
+        let totalPoints = 0;
+
+        for (const item of calculationItems) {
+            const product = item.productId && item.productId.name ? item.productId : await import('../models/Product.js').then(m => m.default.findById(item.productId));
+
+            const itemRewardPercentage = (product && product.rewardPercentage !== undefined)
+                ? product.rewardPercentage
+                : defaultRewardPercentage;
+
+            const itemTotal = (item.priceAtPurchase || item.price || 0) * (item.quantity || 1);
+
+            let pointsForItem = 0;
+            if (isFirstOrder) {
+                if (orderTotal > 300) { // Keep the order-level guard
+                    pointsForItem = Math.floor(itemTotal * (itemRewardPercentage / 100));
+                }
+            } else if (orderTotal > config.minOrderAmountForRewards && isPrepaid) {
+                pointsForItem = Math.floor(itemTotal * (itemRewardPercentage / 100));
+            }
+
+            totalPoints += pointsForItem;
+        }
+        return totalPoints;
+    }
+
     if (isFirstOrder) {
-        // Keep a reasonable minimum of 300 for the very first order to earn points
         if (orderTotal > 300) {
-            return Math.floor(orderTotal * 0.10);
+            return Math.floor(orderTotal * (defaultRewardPercentage / 100));
         }
         return 0;
     }
 
-    // Subsequent Orders: Must be > minOrderAmountForRewards AND Prepaid
     if (orderTotal > config.minOrderAmountForRewards && isPrepaid) {
-        return Math.floor(orderTotal * 0.10);
+        return Math.floor(orderTotal * (defaultRewardPercentage / 100));
     }
 
     return 0;
@@ -187,7 +289,7 @@ export const processOrderDeliveryRewards = async (orderId) => {
     if (existingLedger) return;
 
     // Calculate points based on the rules
-    const pointsToEarn = await calculatePoints(order.customerId, order.total, order.paymentMethod, order.pointsUsed, order._id);
+    const pointsToEarn = await calculatePoints(order.customerId, order.total, order.paymentMethod, order.pointsUsed, order._id, order.items);
 
     if (pointsToEarn > 0) {
         // Expiry: 4 months from NOW (Delivery time)
@@ -241,7 +343,6 @@ export const processOrderDeliveryRewards = async (orderId) => {
         order.salonRewardPoints = {
             earned: pointsToEarn,
             isCredited: true,
-            // We can also store expiry here if needed for easy reference
         };
         await order.save();
 
@@ -270,21 +371,12 @@ export const isRedemptionUnlocked = async (userId) => {
 };
 
 // --- 4. REDEEM POINTS (Validation & Calculation) ---
-// Returns: { pointsToRedeem: Number, error: String | null }
 export const validateRedemption = async (userId, pointsRequested, orderTotal, paymentMethod) => {
     if (!pointsRequested || pointsRequested <= 0) return { pointsToRedeem: 0, error: null };
 
-    // 1. Check Unlock
     const isUnlocked = await isRedemptionUnlocked(userId);
     if (!isUnlocked) return { pointsToRedeem: 0, error: "Reward redemption is locked until you complete 3 delivered orders." };
 
-    // 2. Check Order Type (Removed restriction: Now allowed on COD)
-    // const normalizedPaymentMethod = (paymentMethod || '').toUpperCase();
-    // if (normalizedPaymentMethod !== 'ONLINE' && normalizedPaymentMethod !== 'UPI' && normalizedPaymentMethod !== 'CARD') {
-    //     return { pointsToRedeem: 0, error: "Rewards can only be redeemed on prepaid orders (UPI or Card)." };
-    // }
-
-    // 3. Check Max Redemption (Percentage of Order)
     const config = await getRewardConfig();
     const maxRedeemable = Math.floor(orderTotal * (config.maxRedemptionPercentage / 100));
     if (pointsRequested > maxRedeemable) {
@@ -294,7 +386,6 @@ export const validateRedemption = async (userId, pointsRequested, orderTotal, pa
         };
     }
 
-    // 4. Check Balance
     const profile = await SalonOwnerProfile.findOne({ userId });
     if (!profile || (profile.rewardPoints?.available || 0) < pointsRequested) {
         return { pointsToRedeem: 0, error: "Insufficient reward balance." };
@@ -307,9 +398,6 @@ export const validateRedemption = async (userId, pointsRequested, orderTotal, pa
 export const executeRedemption = async (userId, orderId, pointsUsed) => {
     if (pointsUsed <= 0) return;
 
-    // 1. Deduct from User Wallet & Update Last Redemption Order Count
-    // To properly lock it for the NEXT 3 orders, we snap the 'last redemption count'
-    // directly to whatever their current eligible count is.
     const profile = await SalonOwnerProfile.findOne({ userId });
     const currentEligibleCount = await getEligibleOrderCount(userId);
     const previousCount = profile?.rewardPoints?.ordersCountAtLastRedemption || 0;
@@ -319,16 +407,12 @@ export const executeRedemption = async (userId, orderId, pointsUsed) => {
         $set: { 'rewardPoints.ordersCountAtLastRedemption': currentEligibleCount }
     });
 
-    // Store snapshots in Order for accurate reversal
     await Order.findByIdAndUpdate(orderId, {
         'salonRewardPoints.currentOrdersCountAtLastRedemption': currentEligibleCount,
         'salonRewardPoints.previousOrdersCountAtLastRedemption': previousCount
     });
 
-    // 2. Deduct from Ledgers (FIFO)
     let remainingToDeduct = pointsUsed;
-
-    // Fetch active ledgers, oldest expiry first
     const activeLedgers = await RewardLedger.find({
         userId,
         status: 'ACTIVE',
@@ -337,19 +421,13 @@ export const executeRedemption = async (userId, orderId, pointsUsed) => {
 
     for (const ledger of activeLedgers) {
         if (remainingToDeduct <= 0) break;
-
         const deduction = Math.min(ledger.pointsRemaining, remainingToDeduct);
-
         ledger.pointsRemaining -= deduction;
-        if (ledger.pointsRemaining === 0) {
-            ledger.status = 'FULLY_REDEEMED';
-        }
+        if (ledger.pointsRemaining === 0) ledger.status = 'FULLY_REDEEMED';
         await ledger.save();
-
         remainingToDeduct -= deduction;
     }
 
-    // 3. Log Transaction
     let transaction = await RewardTransaction.findOne({ orderId, type: 'REWARD_REDEEMED' });
     if (!transaction) {
         await RewardTransaction.create({
@@ -369,7 +447,6 @@ export const reverseLockedRewards = async (orderId) => {
     if (!order || !order.customerId || !order.salonRewardPoints || order.salonRewardPoints.earned <= 0) return;
 
     const pointsToReverse = order.salonRewardPoints.earned;
-
     await SalonOwnerProfile.findOneAndUpdate({ userId: order.customerId }, {
         $inc: { 'rewardPoints.locked': -pointsToReverse }
     });
@@ -388,28 +465,16 @@ export const reverseRedemption = async (orderId) => {
     if (!order || !order.pointsUsed || order.pointsUsed <= 0) return;
 
     const pointsToRefund = order.pointsUsed;
-
-    // 1. Refund to User Wallet
     await SalonOwnerProfile.findOneAndUpdate({ userId: order.customerId }, {
         $inc: { 'rewardPoints.available': pointsToRefund }
     });
-
-    // 2. We need to "Put back" the points into Ledgers?
-    // That's complex because we consumed FIFO.
-    // Easier strategy: Create a NEW "Refunded" Ledger entry with short expiry?
-    // OR just add to the most recent Active ledger?
-    // OR create a special "REFUND_CREDIT" ledger.
-    // Let's create a new Ledger entry for simplicity and distinct tracking.
-    // Expiry? Let's give it the original 4 months from NOW (fresh start) or try to restore original expiry.
-    // Given complexity, let's give it a standard 4 month expiry or reasonable time.
-    // Let's stick to: Create a new ACTIVE ledger.
 
     const expiryDate = new Date();
     expiryDate.setMonth(expiryDate.getMonth() + 4);
 
     await RewardLedger.create({
         userId: order.customerId,
-        orderId: order._id, // References the cancelled order (source of refund)
+        orderId: order._id,
         pointsEarned: pointsToRefund,
         pointsRemaining: pointsToRefund,
         status: 'ACTIVE',
@@ -417,7 +482,6 @@ export const reverseRedemption = async (orderId) => {
         activatedAt: new Date()
     });
 
-    // 3. Log Transaction - Update existing redeemption transaction if applicable, else create
     let transaction = await RewardTransaction.findOne({ orderId: order._id, type: 'REWARD_REDEEMED' });
     if (transaction) {
         transaction.status = 'CANCELLED';
@@ -427,7 +491,7 @@ export const reverseRedemption = async (orderId) => {
         await RewardTransaction.create({
             userId: order.customerId,
             orderId: order._id,
-            type: 'REWARD_EARNED', // Technically earned back
+            type: 'REWARD_EARNED',
             amount: pointsToRefund,
             status: 'COMPLETED',
             description: `Points reversed from cancelled order #${order.orderNumber}`,
@@ -435,7 +499,6 @@ export const reverseRedemption = async (orderId) => {
         });
     }
 
-    // 4. Restore Reward Lock (Unlock if this order locked it)
     if (order.salonRewardPoints?.previousOrdersCountAtLastRedemption !== undefined) {
         const currentProfile = await SalonOwnerProfile.findOne({ userId: order.customerId });
         if (currentProfile && currentProfile.rewardPoints?.ordersCountAtLastRedemption === order.salonRewardPoints.currentOrdersCountAtLastRedemption) {
@@ -449,7 +512,6 @@ export const reverseRedemption = async (orderId) => {
 // --- 7. EXPIRY CRON LOGIC ---
 export const processExpiredRewards = async () => {
     const now = new Date();
-
     const expiredLedgers = await RewardLedger.find({
         status: 'ACTIVE',
         expiresAt: { $lt: now }
@@ -458,19 +520,13 @@ export const processExpiredRewards = async () => {
     let count = 0;
     for (const ledger of expiredLedgers) {
         const amountToExpire = ledger.pointsRemaining;
-
         if (amountToExpire > 0) {
-            // 1. Deduct from User
             await SalonOwnerProfile.findOneAndUpdate({ userId: ledger.userId }, {
                 $inc: { 'rewardPoints.available': -amountToExpire }
             });
-
-            // 2. Update Ledger
             ledger.status = 'EXPIRED';
             ledger.pointsRemaining = 0;
             await ledger.save();
-
-            // 3. Log Transaction
             await RewardTransaction.create({
                 userId: ledger.userId,
                 orderId: ledger.orderId,
@@ -480,8 +536,6 @@ export const processExpiredRewards = async () => {
                 description: `Points expired from order #${ledger.orderId}`,
                 timeline: [{ status: 'COMPLETED', note: 'Points Expired' }]
             });
-
-            // 4. Notify
             await notificationService.createNotification({
                 userId: ledger.userId,
                 title: 'Points Expired',
@@ -489,10 +543,8 @@ export const processExpiredRewards = async () => {
                 type: 'REWARD',
                 priority: 'HIGH'
             });
-
             count++;
         }
     }
-
     return count;
 };

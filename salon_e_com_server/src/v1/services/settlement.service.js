@@ -13,7 +13,7 @@ import * as notificationService from './notification.service.js';
  * @param {string} [manualMonth] - Optional month in YYYY-MM format.
  */
 export const processMonthlySettlement = async (manualMonth = null) => {
-    console.log('Starting monthly auto-settlement process...');
+
 
     // Determine target month (YYYY-MM)
     let targetMonth = manualMonth;
@@ -43,7 +43,7 @@ export const processMonthlySettlement = async (manualMonth = null) => {
             });
 
             if (existingSettlement && existingSettlement.status !== 'FAILED') {
-                console.log(`Settlement already exists for agent ${agent._id} for month ${targetMonth}. Skipping.`);
+
                 results.skipped++;
                 continue;
             }
@@ -57,7 +57,7 @@ export const processMonthlySettlement = async (manualMonth = null) => {
             });
 
             if (pendingTransactions.length === 0) {
-                console.log(`No pending transactions for agent ${agent._id}, skipping.`);
+
                 results.skipped++;
                 continue;
             }
@@ -104,6 +104,20 @@ export const processMonthlySettlement = async (manualMonth = null) => {
                     settlement.status = 'PROCESSING';
                     await settlement.save();
 
+                    // 5. Post-Payout Internal Ledger Updates
+                    // Mark all pending transactions as SETTLED for this agent
+                    await CommissionTransaction.updateMany(
+                        { agentId: agent._id, status: 'PENDING' },
+                        { $set: { status: 'SETTLED' } }
+                    );
+
+                    // Reset Current Month Yield (as it has been settled/payout triggered)
+                    if (agentProfile) {
+                        agentProfile.currentMonthEarnings = 0;
+                        agentProfile.lastSettlementDate = new Date();
+                        await agentProfile.save();
+                    }
+
                     results.success++;
                     results.totalAmount += amount;
 
@@ -125,7 +139,7 @@ export const processMonthlySettlement = async (manualMonth = null) => {
         }
     }
 
-    console.log('Monthly settlement process completed:', results);
+
 
     // Notify Admin
     await notificationService.notifyAdmins({

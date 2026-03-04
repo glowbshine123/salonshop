@@ -1,8 +1,0 @@
-/* 
-  Most styles have been migrated to Tailwind CSS in Header.jsx.
-  Keeping this file for any specific complex animations or overrides if needed in future.
-*/
-
-.header-mega-menu {
-  /* Reserved for complex mega-menu transitions if tailwind is insufficient */
-}

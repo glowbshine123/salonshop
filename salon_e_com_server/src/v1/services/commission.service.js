@@ -49,6 +49,12 @@ export const calculateCommission = async (order) => {
         });
     }
 
+    // Month Reset Logic using explicit tracking field
+    if (agentProfile.lastCommissionMonth !== month) {
+        agentProfile.currentMonthEarnings = 0;
+        agentProfile.lastCommissionMonth = month;
+    }
+
     agentProfile.totalEarnings += amountEarned;
     agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) + amountEarned;
     agentProfile.points = (agentProfile.points || 0) + Math.round(amountEarned);
@@ -59,6 +65,30 @@ export const calculateCommission = async (order) => {
     await order.save();
 
     return transaction;
+};
+
+export const syncAgentStats = async (agentId) => {
+    const AgentProfile = (await import('../models/AgentProfile.js')).default;
+    const agentProfile = await AgentProfile.findOne({ userId: agentId });
+    if (!agentProfile) return null;
+
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // Calculate total from ALL transactions
+    const allTransactions = await CommissionTransaction.find({ agentId });
+
+    const totalEarnings = allTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const monthEarnings = allTransactions
+        .filter(t => t.month === currentMonth)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    agentProfile.totalEarnings = totalEarnings;
+    agentProfile.currentMonthEarnings = monthEarnings;
+    agentProfile.lastCommissionMonth = currentMonth;
+
+    await agentProfile.save();
+    return agentProfile;
 };
 
 export const deductCommission = async (order) => {
@@ -101,6 +131,9 @@ export const listCommissions = async (userId, role, filters = {}) => {
     const query = {};
     if (role === 'AGENT') {
         query.agentId = userId;
+    }
+    if (filters.month) {
+        query.month = filters.month;
     }
 
     const page = parseInt(filters.page, 10) || 1;

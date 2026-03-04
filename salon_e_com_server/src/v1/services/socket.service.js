@@ -12,17 +12,17 @@ class SocketService {
         });
 
         this.io.on('connection', (socket) => {
-            console.log('New client connected:', socket.id);
+
 
             socket.on('join', (userId) => {
                 if (userId) {
                     socket.join(userId.toString());
-                    console.log(`User joined room: ${userId}`);
+
                 }
             });
 
             socket.on('disconnect', () => {
-                console.log('Client disconnected:', socket.id);
+
             });
         });
 

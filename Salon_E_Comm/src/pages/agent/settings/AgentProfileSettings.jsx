@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, MapPin, Save, Loader2, ShieldCheck } from 'lucide-react';
+import { User, Save, Loader2, Camera } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { useAuth } from '../../../context/AuthContext';
 import { userAPI } from '../../../services/apiService';
@@ -8,6 +8,9 @@ import toast from 'react-hot-toast';
 export default function AgentProfileSettings() {
     const { user, setUser } = useAuth();
     const [loading, setLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const fileInputRef = React.useRef(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -35,8 +38,17 @@ export default function AgentProfileSettings() {
                     country: user.agentProfile?.address?.country || 'India'
                 }
             });
+            if (user.avatarUrl) setPreviewUrl(user.avatarUrl);
         }
     }, [user]);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -55,9 +67,19 @@ export default function AgentProfileSettings() {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await userAPI.updateProfile(formData);
+            let dataToType;
+            if (selectedFile) {
+                dataToType = new FormData();
+                dataToType.append('image', selectedFile);
+                dataToType.append('data', JSON.stringify(formData));
+            } else {
+                dataToType = formData;
+            }
+
+            const res = await userAPI.updateProfile(dataToType);
             if (setUser) setUser(res.data);
             toast.success('Profile Synced Successfully');
+            setSelectedFile(null);
         } catch (error) {
             console.error("Profile Update Error:", error);
             toast.error(error.response?.data?.message || 'Failed to update profile');
@@ -67,18 +89,36 @@ export default function AgentProfileSettings() {
     };
 
     return (
-        <div className="animate-in slide-in-from-bottom-2 duration-500 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column: Profile Avatar Placeholder */}
+        <form onSubmit={handleSave} className="animate-in slide-in-from-bottom-2 duration-500 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column: Profile Avatar */}
             <div className="space-y-6 flex flex-col items-center lg:items-start">
                 <div className="relative group">
-                    <div className="w-48 h-48 bg-neutral-50 rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center overflow-hidden">
-                        <div className="text-center p-4">
-                            <User className="w-12 h-12 text-neutral-300 mx-auto mb-2" />
-                            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide">Identity Node</p>
-                        </div>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                    />
+                    <div
+                        onClick={() => !loading && fileInputRef.current?.click()}
+                        className={`w-48 h-48 bg-neutral-50 rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center overflow-hidden transition-colors ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer group-hover:border-emerald-500'}`}
+                    >
+                        {previewUrl ? (
+                            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="text-center p-4">
+                                <User className="w-12 h-12 text-neutral-300 mx-auto mb-2" />
+                                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide">Identity Node</p>
+                            </div>
+                        )}
                     </div>
-                    <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-not-allowed">
-                        <p className="text-white text-xs font-bold uppercase tracking-wide">Verified Partner</p>
+                    <div
+                        onClick={() => !loading && fileInputRef.current?.click()}
+                        className={`absolute inset-0 bg-black/50 rounded-lg opacity-0 transition-opacity flex flex-col items-center justify-center ${loading ? 'cursor-not-allowed' : 'group-hover:opacity-100 cursor-pointer'}`}
+                    >
+                        <Camera className="text-white w-8 h-8 mb-2" />
+                        <p className="text-white text-[10px] font-bold uppercase tracking-wide">Upload Photo</p>
                     </div>
                 </div>
                 <div className="space-y-2 text-center lg:text-left">
@@ -97,7 +137,8 @@ export default function AgentProfileSettings() {
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleChange}
-                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                            disabled={loading}
+                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
                     <div className="space-y-3">
@@ -107,7 +148,8 @@ export default function AgentProfileSettings() {
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleChange}
-                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                            disabled={loading}
+                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
                     <div className="space-y-3">
@@ -126,7 +168,8 @@ export default function AgentProfileSettings() {
                             name="phone"
                             value={formData.phone}
                             onChange={handleChange}
-                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                            disabled={loading}
+                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
 
@@ -151,8 +194,9 @@ export default function AgentProfileSettings() {
                             name="address.street"
                             value={formData.address.street}
                             onChange={handleChange}
+                            disabled={loading}
                             placeholder="123 Main St"
-                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
 
@@ -164,8 +208,9 @@ export default function AgentProfileSettings() {
                                 name="address.city"
                                 value={formData.address.city}
                                 onChange={handleChange}
+                                disabled={loading}
                                 placeholder="New York"
-                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                         </div>
                         <div className="space-y-3">
@@ -175,8 +220,9 @@ export default function AgentProfileSettings() {
                                 name="address.state"
                                 value={formData.address.state}
                                 onChange={handleChange}
+                                disabled={loading}
                                 placeholder="NY"
-                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                         </div>
                         <div className="space-y-3">
@@ -186,8 +232,9 @@ export default function AgentProfileSettings() {
                                 name="address.zip"
                                 value={formData.address.zip}
                                 onChange={handleChange}
+                                disabled={loading}
                                 placeholder="10001"
-                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                         </div>
                         <div className="space-y-3">
@@ -197,8 +244,9 @@ export default function AgentProfileSettings() {
                                 name="address.country"
                                 value={formData.address.country}
                                 onChange={handleChange}
+                                disabled={loading}
                                 placeholder="India"
-                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                         </div>
                     </div>
@@ -207,14 +255,14 @@ export default function AgentProfileSettings() {
                 <div className="pt-8 border-t border-neutral-50 flex items-center justify-end">
                     <Button
                         type="submit"
-                        className="h-14 px-10 bg-neutral-900 hover:bg-emerald-600 text-white rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-3 shadow-xl shadow-neutral-900/10"
+                        className="px-12 py-6 bg-neutral-900 hover:bg-emerald-600 text-white rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-3 shadow-xl shadow-neutral-900/10"
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={16} />}
-                        Save Nomenclature
+                        Save Profile Data
                     </Button>
                 </div>
             </div>
-        </div>
+        </form>
     );
 }

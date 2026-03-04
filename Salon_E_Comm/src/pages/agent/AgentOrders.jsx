@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     ShoppingBag,
     Search,
@@ -33,9 +33,8 @@ const TableRowSkeleton = ({ columns }) => (
 );
 
 export default function AgentOrders() {
-    const { user } = useAuth();
     const [orders, setOrders] = useState([]);
-    const { startLoading, finishLoading } = useLoading();
+    const { finishLoading } = useLoading();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('ALL');
@@ -44,21 +43,22 @@ export default function AgentOrders() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    const fetchOrders = useCallback(async () => {
+        try {
+            setLoading(true);
+            const res = await orderAPI.getAssigned();
+            setOrders(res.data.assignedOrders || res.data || []);
+        } catch (err) {
+            console.error('Failed to fetch orders:', err);
+        } finally {
+            setLoading(false);
+            finishLoading();
+        }
+    }, [finishLoading]);
+
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                setLoading(true);
-                const res = await orderAPI.getAssigned();
-                setOrders(res.data.assignedOrders || res.data || []);
-            } catch (err) {
-                console.error('Failed to fetch orders:', err);
-            } finally {
-                setLoading(false);
-                finishLoading();
-            }
-        };
         fetchOrders();
-    }, []);
+    }, [fetchOrders]);
 
     // Filter Logic
     const filteredOrders = orders.filter(order => {

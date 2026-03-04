@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     DollarSign,
     Users,
@@ -69,37 +69,37 @@ export default function AgentHome() {
         { name: 'Sun', orders: 38 },
     ];
 
+    const fetchDashboardData = useCallback(async () => {
+        try {
+            startLoading();
+            const [statsRes, ordersRes] = await Promise.all([
+                agentAPI.getDashboard(),
+                orderAPI.getAssigned({ limit: 5 })
+            ]);
+
+            // Map backend stats to frontend structure
+            const backendStats = statsRes.data.stats || {};
+            setStats({
+                totalEarnings: backendStats.earnedCommission || 0,
+                activeOrders: backendStats.totalOrders || 0,
+                totalSalons: backendStats.totalSalons || 0,
+                pendingWithdrawals: backendStats.pendingCommission || 0
+            });
+
+            setRecentOrders(ordersRes.data.assignedOrders || []);
+        } catch (error) {
+            console.error('Failed to load dashboard data:', error);
+        } finally {
+            setLoading(false);
+            finishLoading();
+        }
+    }, [startLoading, finishLoading]);
+
     useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                startLoading();
-                const [statsRes, ordersRes] = await Promise.all([
-                    agentAPI.getDashboard(),
-                    orderAPI.getAssigned({ limit: 5 })
-                ]);
-
-                // Map backend stats to frontend structure
-                const backendStats = statsRes.data.stats || {};
-                setStats({
-                    totalEarnings: backendStats.earnedCommission || 0,
-                    activeOrders: backendStats.totalOrders || 0,
-                    totalSalons: backendStats.totalSalons || 0,
-                    pendingWithdrawals: backendStats.pendingCommission || 0
-                });
-
-                setRecentOrders(ordersRes.data.assignedOrders || []);
-            } catch (error) {
-                console.error('Failed to load dashboard data:', error);
-            } finally {
-                setLoading(false);
-                finishLoading();
-            }
-        };
-
         if (user) {
             fetchDashboardData();
         }
-    }, [user]);
+    }, [user, fetchDashboardData]);
 
     const copyReferralCode = () => {
         if (user?.agentProfile?.referralCode) {

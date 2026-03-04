@@ -19,7 +19,7 @@ router.get('/', protect, authorize('ADMIN', 'AGENT'), userController.getUsers);
 router.post('/', protect, authorize('ADMIN', 'AGENT'), userController.createInternal);
 
 // Management endpoints
-router.post('/:id/status', protect, authorize('ADMIN'), userController.updateSalonStatus);
+router.post('/:id/status', protect, authorize('ADMIN', 'AGENT'), userController.updateSalonStatus);
 router.post('/:id/assign-agent', protect, authorize('ADMIN'), userController.assignAgent);
 
 router.get('/:id', protect, authorize('ADMIN', 'AGENT'), userController.getUserById);

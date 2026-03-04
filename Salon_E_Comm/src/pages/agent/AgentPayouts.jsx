@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { agentAPI } from '../../services/apiService';
+import { agentAPI, authAPI } from '../../services/apiService';
 import { useLoading } from '../../context/LoadingContext';
 import {
     Wallet,
@@ -39,7 +39,7 @@ export default function AgentPayouts() {
     const [transactions, setTransactions] = useState([]);
     const [settlements, setSettlements] = useState([]);
     const [loadingTrans, setLoadingTrans] = useState(true);
-    const { startLoading, finishLoading } = useLoading();
+    const { finishLoading } = useLoading();
     const [loadingSetts, setLoadingSetts] = useState(true);
 
     // Pagination & Filtering
@@ -51,6 +51,23 @@ export default function AgentPayouts() {
     const [activeTab, setActiveTab] = useState('ledger');
 
     const { user } = useAuth();
+    const [agentStats, setAgentStats] = useState(user?.agentProfile || {});
+
+    // Refresh agent profile on mount to ensure stats/earnings are not zero or stale
+    useEffect(() => {
+        const refreshStats = async () => {
+            try {
+                const res = await authAPI.me();
+                if (res.data?.agentProfile) {
+                    setAgentStats(res.data.agentProfile);
+                }
+            } catch (err) {
+                console.error('Failed to refresh agent stats', err);
+            }
+        };
+        refreshStats();
+    }, []);
+
 
     const fetchTransactions = useCallback(async () => {
         setLoadingTrans(true);
@@ -76,7 +93,7 @@ export default function AgentPayouts() {
             setLoadingTrans(false);
             finishLoading();
         }
-    }, [transPage, monthFilter]);
+    }, [transPage, monthFilter, finishLoading]);
 
     const fetchSettlements = useCallback(async () => {
         setLoadingSetts(true);
@@ -101,7 +118,7 @@ export default function AgentPayouts() {
             setLoadingSetts(false);
             finishLoading();
         }
-    }, [settPage]);
+    }, [settPage, finishLoading]);
 
     useEffect(() => {
         fetchTransactions();
@@ -125,7 +142,8 @@ export default function AgentPayouts() {
         );
     }
 
-    const agentProfile = user?.agentProfile || {};
+    // Use agentStats (refreshed state) instead of static user.agentProfile
+    const profile = agentStats || {};
 
     return (
         <div className="space-y-10 animate-in fade-in duration-700 pb-20">
@@ -141,20 +159,20 @@ export default function AgentPayouts() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatCard
                     title="Current Month Yield"
-                    value={`₹${(agentProfile?.currentMonthEarnings || 0).toLocaleString()}`}
+                    value={`₹${(profile?.currentMonthEarnings || 0).toLocaleString()}`}
                     icon={TrendingUp}
                     color="emerald"
                 />
                 <StatCard
                     title="Lifetime Revenue"
-                    value={`₹${(agentProfile?.totalEarnings || 0).toLocaleString()}`}
+                    value={`₹${(profile?.totalEarnings || 0).toLocaleString()}`}
                     icon={DollarSign}
                     color="blue"
                 />
                 <StatCard
                     title="Last Payout"
-                    value={agentProfile?.lastSettlementDate
-                        ? new Date(agentProfile.lastSettlementDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                    value={profile?.lastSettlementDate
+                        ? new Date(profile.lastSettlementDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
                         : 'PENDING'}
                     icon={Calendar}
                     color="neutral"

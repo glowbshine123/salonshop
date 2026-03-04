@@ -33,7 +33,8 @@ const productSchema = new mongoose.Schema({
         type: String,
         enum: ['ACTIVE', 'DRAFT', 'ARCHIVED', 'EXPIRED'],
         default: 'DRAFT'
-    }
+    },
+    rewardPercentage: { type: Number }
 }, {
     timestamps: true,
     toJSON: {

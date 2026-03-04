@@ -132,6 +132,33 @@ export default function RewardSettings() {
                     </p>
                 </div>
 
+                {/* Default Reward Percentage */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                            <Percent size={12} />
+                            Default Reward %
+                        </label>
+                        <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                            {settings.rewardConfig.defaultRewardPercentage}%
+                        </span>
+                    </div>
+                    <div className="relative">
+                        <input
+                            type="number"
+                            name="defaultRewardPercentage"
+                            value={settings.rewardConfig.defaultRewardPercentage}
+                            onChange={handleChange}
+                            placeholder="10"
+                            className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-xl text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                        />
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-300 font-black">%</div>
+                    </div>
+                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-tight ml-1">
+                        Default percentage of order price rewarded as points if not set per-product.
+                    </p>
+                </div>
+
                 <div className="pt-8 border-t border-neutral-50 flex items-center justify-end">
                     <Button
                         onClick={handleSave}

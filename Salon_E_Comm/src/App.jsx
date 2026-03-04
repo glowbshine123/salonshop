@@ -5,10 +5,6 @@ import SignupPage from './pages/SignupPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ProductsPage from './pages/ProductsPage';
 import CheckoutPage from './pages/CheckoutPage';
-import CategoryPage from './pages/CategoryPage';
-import BecomeSeller from './pages/BecomeSeller';
-import AgentRewards from './pages/AgentRewards';
-import HelpCenter from './pages/HelpCenter';
 import CartPage from './pages/CartPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import RewardPage from './pages/RewardPage';
@@ -39,7 +35,6 @@ const App = () => {
                 <Route element={<MainLayout />}>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/products/:id" element={<ProductDetailPage />} />
-                  <Route path="/category/:category" element={<CategoryPage />} />
                   <Route path="/products" element={<ProductsPage />} />
                   <Route path="/cart" element={<CartPage />} />
 
@@ -83,10 +78,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
-                  <Route path="/become-seller" element={<BecomeSeller />} />
-                  <Route path="/agent-rewards" element={<AgentRewards />} />
-                  <Route path="/help" element={<HelpCenter />} />
                 </Route>
 
                 <Route

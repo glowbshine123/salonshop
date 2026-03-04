@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import {
     Search,
@@ -39,7 +39,7 @@ export default function AdminOrders() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
-    const { startLoading, finishLoading } = useLoading();
+    const { finishLoading } = useLoading();
     const limit = 10;
 
 
@@ -53,7 +53,7 @@ export default function AdminOrders() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [activeActionId]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             const params = {
@@ -66,8 +66,6 @@ export default function AdminOrders() {
                 orderAPI.getAll(params),
                 userAPI.getAgents()
             ]);
-
-            console.log('[AdminOrders] Fetch success:', orderRes.data);
 
             const orders = orderRes.data?.allOrders || orderRes.data?.orders || orderRes.data?.items || [];
             const totalCount = orderRes.data?.count || orderRes.data?.pagination?.total || orders.length;
@@ -83,11 +81,11 @@ export default function AdminOrders() {
             setLoading(false);
             finishLoading();
         }
-    };
+    }, [currentPage, limit, searchTerm, statusFilter, finishLoading]);
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, searchTerm, statusFilter]);
+    }, [currentPage, searchTerm, statusFilter, fetchData]);
 
     const handleAssignAgent = async (orderId, agentId) => {
         if (!agentId) return;
@@ -97,7 +95,6 @@ export default function AdminOrders() {
             toast.success('Agent executive assigned to shipment');
             fetchData();
         } catch (err) {
-            toast.error('Failed to assign agent');
         }
     };
 
@@ -108,7 +105,6 @@ export default function AdminOrders() {
             setActiveActionId(null); // Close dropdown
             fetchData();
         } catch (err) {
-            toast.error('Failed to update shipment status');
         }
     };
 

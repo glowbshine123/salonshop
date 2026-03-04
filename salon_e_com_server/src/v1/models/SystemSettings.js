@@ -20,7 +20,8 @@ const systemSettingsSchema = new mongoose.Schema({
     },
     rewardConfig: {
         maxRedemptionPercentage: { type: Number, default: 50 },
-        minOrderAmountForRewards: { type: Number, default: 1000 }
+        minOrderAmountForRewards: { type: Number, default: 1000 },
+        defaultRewardPercentage: { type: Number, default: 10 }
     }
 }, {
     timestamps: true

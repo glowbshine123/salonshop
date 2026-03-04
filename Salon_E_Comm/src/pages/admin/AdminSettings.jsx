@@ -1,12 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-    Settings,
     Shield,
-    CreditCard,
-    Bell,
-    Database,
-    Globe,
-    Zap,
     User,
     Gift
 } from 'lucide-react';

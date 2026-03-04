@@ -22,7 +22,7 @@ export const handleRazorpayWebhook = async (req, res) => {
         }
 
         const { event, payload } = req.body;
-        console.log(`[webhook] Received event: ${event}`);
+
 
         if (event.startsWith('payout.')) {
             const payout = payload.payout.entity;

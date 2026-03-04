@@ -28,7 +28,7 @@ const uploadDir = path.join(__dirname, "../public/uploads");
 try {
    if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
-      console.log(`Created uploads directory at: ${uploadDir}`);
+
    }
 } catch (error) {
    console.warn(`⚠️ Could not create uploads directory (likely read-only filesystem): ${error.message}`);
@@ -82,14 +82,14 @@ cron.schedule("0 2 1 * *", () => {
 cron.schedule("0 0 * * *", async () => {
    const { processExpiredRewards } = await import("./v1/services/reward.service.js"); // Dynamic import to avoid circular dep issues if any
    const count = await processExpiredRewards();
-   console.log(`[CRON] Processed reward expiry for ${count} ledgers.`);
+
 });
 
 // Run at 12:05 AM every day
 cron.schedule("5 0 * * *", async () => {
    const { checkAndNotifyExpiredProducts } = await import("./v1/services/product.service.js");
    const count = await checkAndNotifyExpiredProducts();
-   console.log(`[CRON] Notified admin about ${count} expired products.`);
+
 });
 
 /* =======================

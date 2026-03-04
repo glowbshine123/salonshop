@@ -13,7 +13,7 @@ const getSocketURL = () => {
 };
 
 const SOCKET_URL = getSocketURL();
-console.log(`[Socket Service] Initialized with URL: ${SOCKET_URL}`);
+
 
 const socket = io(SOCKET_URL, {
     autoConnect: false,

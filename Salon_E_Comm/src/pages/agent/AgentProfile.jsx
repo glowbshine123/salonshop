@@ -25,6 +25,7 @@ export default function AgentProfile() {
     const [activeTab, setActiveTab] = useState('PROFILE');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const fileInputRef = React.useRef(null);
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -40,6 +41,26 @@ export default function AgentProfile() {
         }
     });
 
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLoading(true);
+            try {
+                const formDataWithFile = new FormData();
+                formDataWithFile.append('image', file);
+
+                const res = await userAPI.updateProfile(formDataWithFile);
+                if (setUser) setUser(res.data);
+                toast.success('Profile Image Updated');
+            } catch (err) {
+                console.error('Image upload failed:', err);
+                toast.error('Failed to upload image');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     const handleUpdate = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -48,7 +69,6 @@ export default function AgentProfile() {
             const res = await userAPI.updateProfile(formData);
             if (setUser) setUser(res.data);
             setSuccess(true);
-            setTimeout(() => setSuccess(false), 3000);
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             console.error('Update failed:', err);
@@ -71,11 +91,29 @@ export default function AgentProfile() {
                 <div className="px-12 -mt-24 flex flex-col md:flex-row items-end justify-between gap-10 relative z-10">
                     <div className="flex items-end gap-10">
                         <div className="relative group">
-                            <div className="w-44 h-44 bg-white rounded-[48px] p-2 shadow-2xl shadow-neutral-900/10 ring-8 ring-neutral-50/50 group-hover:ring-emerald-500/10 transition-all duration-700">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                            <div
+                                onClick={() => !loading && fileInputRef.current?.click()}
+                                className={`w-44 h-44 bg-white rounded-[48px] p-2 shadow-2xl shadow-neutral-900/10 ring-8 ring-neutral-50/50 transition-all duration-700 ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer group-hover:ring-emerald-500/10'}`}
+                            >
                                 <div className="w-full h-full bg-neutral-100 rounded-[40px] flex items-center justify-center text-neutral-300 relative overflow-hidden group/avatar">
-                                    <User size={72} className="group-hover/avatar:scale-110 transition-transform duration-500" />
-                                    <button className="absolute inset-0 bg-neutral-900/60 opacity-0 group-hover/avatar:opacity-100 transition-all flex items-center justify-center text-white backdrop-blur-sm">
-                                        <Camera size={28} />
+                                    {user?.avatarUrl ? (
+                                        <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-500" />
+                                    ) : (
+                                        <User size={72} className="group-hover/avatar:scale-110 transition-transform duration-500" />
+                                    )}
+                                    <button
+                                        type="button"
+                                        disabled={loading}
+                                        className={`absolute inset-0 bg-neutral-900/60 transition-all flex items-center justify-center text-white backdrop-blur-sm ${loading ? 'opacity-100' : 'opacity-0 group-hover/avatar:opacity-100'}`}
+                                    >
+                                        {loading ? <Loader2 className="animate-spin" size={28} /> : <Camera size={28} />}
                                     </button>
                                 </div>
                             </div>
@@ -157,7 +195,8 @@ export default function AgentProfile() {
                                             type="text"
                                             value={formData.firstName}
                                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                            className="w-full pl-14 pr-6 h-16 bg-neutral-50/50 border-2 border-transparent rounded-[24px] text-sm font-black outline-none focus:border-emerald-500/20 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 placeholder:text-neutral-300"
+                                            disabled={loading}
+                                            className="w-full pl-14 pr-6 h-16 bg-neutral-50/50 border-2 border-transparent rounded-[24px] text-sm font-black outline-none focus:border-emerald-500/20 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 placeholder:text-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
                                 </div>
@@ -170,7 +209,8 @@ export default function AgentProfile() {
                                             type="text"
                                             value={formData.lastName}
                                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                            className="w-full pl-14 pr-6 h-16 bg-neutral-50/50 border-2 border-transparent rounded-[24px] text-sm font-black outline-none focus:border-emerald-500/20 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 placeholder:text-neutral-300"
+                                            disabled={loading}
+                                            className="w-full pl-14 pr-6 h-16 bg-neutral-50/50 border-2 border-transparent rounded-[24px] text-sm font-black outline-none focus:border-emerald-500/20 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 placeholder:text-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
                                 </div>
@@ -196,7 +236,8 @@ export default function AgentProfile() {
                                             type="tel"
                                             value={formData.phoneNumber}
                                             onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                            className="w-full pl-14 pr-6 h-16 bg-neutral-50/50 border-2 border-transparent rounded-[24px] text-sm font-black outline-none focus:border-emerald-500/20 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900"
+                                            disabled={loading}
+                                            className="w-full pl-14 pr-6 h-16 bg-neutral-50/50 border-2 border-transparent rounded-[24px] text-sm font-black outline-none focus:border-emerald-500/20 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
                                 </div>
@@ -252,7 +293,8 @@ export default function AgentProfile() {
                                     <input
                                         type="text"
                                         placeholder="LEGAL HOLDER NAME"
-                                        className="w-full px-5 h-14 bg-neutral-50 border border-neutral-100 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-500/20 transition-all"
+                                        disabled={loading}
+                                        className="w-full px-5 h-14 bg-neutral-50 border border-neutral-100 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         value={formData.agentProfile.bankDetails.accountHolderName}
                                         onChange={(e) => setFormData({
                                             ...formData,
@@ -269,7 +311,8 @@ export default function AgentProfile() {
                                     <input
                                         type="text"
                                         placeholder="ACCOUNT NUMBER"
-                                        className="w-full px-5 h-14 bg-neutral-50 border border-neutral-100 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-500/20 transition-all tabular-nums"
+                                        disabled={loading}
+                                        className="w-full px-5 h-14 bg-neutral-50 border border-neutral-100 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-500/20 transition-all tabular-nums disabled:opacity-50 disabled:cursor-not-allowed"
                                         value={formData.agentProfile.bankDetails.accountNumber}
                                         onChange={(e) => setFormData({
                                             ...formData,
@@ -286,7 +329,8 @@ export default function AgentProfile() {
                                     <input
                                         type="text"
                                         placeholder="IFSC IDENTIFIER"
-                                        className="w-full px-5 h-14 bg-neutral-50 border border-neutral-100 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-500/20 transition-all"
+                                        disabled={loading}
+                                        className="w-full px-5 h-14 bg-neutral-50 border border-neutral-100 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         value={formData.agentProfile.bankDetails.ifscCode}
                                         onChange={(e) => setFormData({
                                             ...formData,

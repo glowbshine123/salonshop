@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Banknote, Landmark, QrCode, Save, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { CreditCard, Save, Loader2 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { useAuth } from '../../../context/AuthContext';
 import { payoutAPI } from '../../../services/apiService';

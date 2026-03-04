@@ -251,7 +251,7 @@ export default function Header() {
                           <h3 className="text-lg font-bold text-neutral-900 mb-2">New Arrivals</h3>
                           <p className="text-sm text-neutral-500 mb-4">Check out the latest professional gear.</p>
                           <NavigationMenuLink asChild>
-                            <Link to="/new-arrivals">
+                            <Link to="/products">
                               <Button>Shop New</Button>
                             </Link>
                           </NavigationMenuLink>

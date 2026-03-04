@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const LoadingContext = createContext();
 
@@ -8,20 +8,20 @@ export const LoadingProvider = ({ children }) => {
     const [isFinished, setIsFinished] = useState(false);
 
     // Start loading process
-    const startLoading = () => {
+    const startLoading = useCallback(() => {
         setIsLoading(true);
         setProgress(0);
         setIsFinished(false);
-    };
+    }, []);
 
     // Finish loading process
-    const finishLoading = () => {
+    const finishLoading = useCallback(() => {
         setIsFinished(true);
         setProgress(100);
         setTimeout(() => {
             setIsLoading(false);
         }, 800); // Wait for fade out animation
-    };
+    }, []);
 
     // Handle initial/automatic progress (fake feel)
     useEffect(() => {

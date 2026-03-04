@@ -32,11 +32,30 @@ export const createOrder = async (userId, orderData) => {
         const price = product.price;
         subtotal += price * item.quantity;
 
-        // Stock is already reserved by cart.service.js
-        // We just verify it here.
-        if (typeof product.inventoryCount === 'number' && product.inventoryCount < 0) {
-            // This shouldn't happen if reservation worked, but good for safety
+        // --- ATOMIC STOCK DEDUCTION ---
+        const updatedProduct = await Product.findOneAndUpdate(
+            { _id: product._id, inventoryCount: { $gte: item.quantity } },
+            { $inc: { inventoryCount: -item.quantity } },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            // Rollback previously deducted items in this loop
+            for (const rollbackItem of orderItems) {
+                await Product.findByIdAndUpdate(rollbackItem.productId, { $inc: { inventoryCount: rollbackItem.quantity } });
+            }
             throw new Error(`Insufficient stock for product ${product.name}`);
+        }
+
+        // Low Stock Alert for Admins
+        if (updatedProduct.inventoryCount < 10) {
+            await notificationService.notifyAdmins({
+                title: 'Low Stock Alert',
+                description: `Product "${updatedProduct.name}" is low on stock (${updatedProduct.inventoryCount} remaining).`,
+                type: 'SYSTEM',
+                priority: 'HIGH',
+                metadata: { productId: updatedProduct._id }
+            });
         }
 
         orderItems.push({
@@ -96,7 +115,7 @@ export const createOrder = async (userId, orderData) => {
         const rewardService = await import('./reward.service.js');
         // Preview points (optional, but good to store expected points). 
         // We calculate this for storage in 'earned' but actual crediting happens on delivery.
-        return await rewardService.calculatePoints(userId, finalTotalWithDiscount, paymentMethod || 'ONLINE', pointsUsed);
+        return await rewardService.calculatePoints(userId, finalTotalWithDiscount, paymentMethod || 'ONLINE', pointsUsed, null, orderItems);
     })();
 
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;

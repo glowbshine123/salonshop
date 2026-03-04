@@ -8,6 +8,7 @@ const agentProfileSchema = new mongoose.Schema({
     },
     totalEarnings: { type: Number, default: 0 },
     currentMonthEarnings: { type: Number, default: 0 },
+    lastCommissionMonth: { type: String }, // YYYY-MM tracking for reset
     lastSettlementDate: { type: Date },
     razorpayContactId: { type: String },
     fundAccountId: { type: String },

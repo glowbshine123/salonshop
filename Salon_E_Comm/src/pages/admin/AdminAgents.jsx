@@ -91,10 +91,10 @@ export default function AdminAgents() {
         toast.success('Password copied to clipboard');
     };
 
-    const fetchAgents = async () => {
+    const fetchAgents = async (search = searchTerm) => {
         try {
             setLoading(true);
-            const res = await userAPI.getAll({ role: 'AGENT' });
+            const res = await userAPI.getAll({ role: 'AGENT', search });
             setAgents(res.data.users || []);
         } catch (err) {
             console.error('Failed to fetch agents:', err);
@@ -106,8 +106,12 @@ export default function AdminAgents() {
     };
 
     useEffect(() => {
-        fetchAgents();
-    }, []);
+        const delaySearch = setTimeout(() => {
+            fetchAgents(searchTerm);
+        }, 500);
+
+        return () => clearTimeout(delaySearch);
+    }, [searchTerm]);
 
     const handleRegisterAgent = async (e) => {
         e.preventDefault();
@@ -155,29 +159,9 @@ export default function AdminAgents() {
         }
     };
 
-    const deriveTier = (earnings) => {
-        if (earnings >= 150000) return 'PLATINUM';
-        if (earnings >= 50000) return 'GOLD';
-        return 'SILVER';
-    };
-
-    const getTierColor = (tier) => {
-        const tiers = {
-            'SILVER': 'bg-neutral-50 text-neutral-600',
-            'GOLD': 'bg-amber-50 text-amber-700',
-            'PLATINUM': 'bg-emerald-50 text-emerald-700',
-        };
-        return tiers[tier] || 'bg-neutral-50 text-neutral-600';
-    };
-
     const filteredAgents = agents.filter(agent => {
-        const fullName = `${agent.firstName} ${agent.lastName}`.toLowerCase();
-        const matchesSearch =
-            fullName.includes(searchTerm.toLowerCase()) ||
-            agent.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            agent.phone?.includes(searchTerm);
         const matchesStatus = filterStatus === 'All' || agent.status === filterStatus;
-        return matchesSearch && matchesStatus;
+        return matchesStatus;
     });
 
     const stats = {
@@ -242,7 +226,7 @@ export default function AdminAgents() {
                             <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-500 transition-colors" />
                             <input
                                 type="text"
-                                placeholder="SEARCH AGENTS..."
+                                placeholder="SEARCH BY NAME, EMAIL, PHONE OR ADDRESS..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 h-10 bg-white border border-neutral-100 rounded-xl text-[10px] font-bold uppercase tracking-widest outline-none shadow-sm focus:border-emerald-500 transition-all placeholder:text-neutral-300"
@@ -273,9 +257,9 @@ export default function AdminAgents() {
                             <tr className="bg-neutral-50/30">
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Agent</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Contact</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Performance</th>
+                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Monthly Earnings</th>
+                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Address</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Status</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50 text-right">actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-50">
@@ -303,7 +287,7 @@ export default function AdminAgents() {
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-4">
                                                 <Avatar className="w-10 h-10 border border-neutral-100">
-                                                    <AvatarImage src={agent.avatar || agent.avatarUrl} />
+                                                    <AvatarImage src={agent.avatarUrl} />
                                                     <AvatarFallback className="bg-emerald-50 text-emerald-700 text-xs font-black">
                                                         {agent.firstName?.[0]}{agent.lastName?.[0]}
                                                     </AvatarFallback>
@@ -311,7 +295,6 @@ export default function AdminAgents() {
                                                 <div className="flex flex-col">
                                                     <span className="text-sm font-bold text-neutral-900 leading-tight">{agent.firstName} {agent.lastName}</span>
                                                     <div className="flex items-center gap-1.5 mt-0.5 text-neutral-400">
-                                                        <MapPin size={10} />
                                                         <span className="text-[10px] uppercase font-medium tracking-wide">ID: {agent._id?.slice(-8)}</span>
                                                     </div>
                                                 </div>
@@ -321,7 +304,7 @@ export default function AdminAgents() {
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2 text-neutral-600">
                                                     <Mail size={12} className="text-neutral-300 shrink-0" />
-                                                    <span className="text-xs font-medium truncate max-w-[180px]">{agent.email}</span>
+                                                    <span className="text-xs font-medium truncate max-w-[150px]">{agent.email}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-neutral-600">
                                                     <Phone size={12} className="text-neutral-300 shrink-0" />
@@ -330,16 +313,18 @@ export default function AdminAgents() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-black text-neutral-900 tracking-tighter">₹{(agent.agentProfile?.totalEarnings || 0).toLocaleString()}</span>
-                                                    <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider">Total Earnings</span>
-                                                </div>
-                                                <span className={cn(
-                                                    "px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest",
-                                                    getTierColor(deriveTier(agent.agentProfile?.totalEarnings || 0))
-                                                )}>
-                                                    {deriveTier(agent.agentProfile?.totalEarnings || 0)}
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-black text-neutral-900 tracking-tighter">₹{(agent.agentProfile?.currentMonthEarnings || 0).toLocaleString()}</span>
+                                                <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider">Current Month</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-start gap-2 max-w-[200px]">
+                                                <MapPin size={12} className="text-neutral-300 mt-0.5 shrink-0" />
+                                                <span className="text-[11px] text-neutral-600 leading-relaxed italic">
+                                                    {agent.agentProfile?.address ? (
+                                                        `${agent.agentProfile.address.street || ''}, ${agent.agentProfile.address.city || ''}, ${agent.agentProfile.address.state || ''} ${agent.agentProfile.address.zip || ''}`
+                                                    ) : 'NO ADDRESS PROVIDED'}
                                                 </span>
                                             </div>
                                         </td>
@@ -368,19 +353,10 @@ export default function AdminAgents() {
                                                 </SelectContent>
                                             </Select>
                                         </td>
-                                        <td className="px-6 py-5 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button className="p-2.5 bg-neutral-50 hover:bg-white border border-neutral-100 hover:border-neutral-200 text-neutral-400 hover:text-neutral-900 rounded-lg transition-all active:scale-95 group">
-                                                    <MessageSquare size={14} className="group-hover:scale-110 transition-transform" />
-                                                </button>
-                                                <button className="p-2.5 bg-neutral-50 hover:bg-emerald-50 border border-neutral-100 hover:border-emerald-200 text-neutral-400 hover:text-emerald-700 rounded-lg transition-all active:scale-95 group">
-                                                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                                </button>
-                                            </div>
-                                        </td>
                                     </tr>
                                 ))
-                            )}
+                            )
+                            }
                         </tbody>
                     </table>
                 </div>

@@ -6,18 +6,17 @@ import {
     Clock,
     Mail,
     Phone,
-    Briefcase,
     TrendingUp,
-    UserPlus,
-    Loader2,
     ShieldCheck,
-    ChevronDown,
-    MapPin
+    MapPin,
+    IndianRupee,
+    Loader2,
+    Calendar,
+    ArrowUpRight
 } from 'lucide-react';
 import { userAPI } from '../../services/apiService';
 import { useLoading } from '../../context/LoadingContext';
 import StatCard from '../../components/admin/StatCard';
-import AssignAgentModal from '../../components/admin/AssignAgentModal';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import {
     Select,
@@ -34,19 +33,26 @@ export default function AdminUsers() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
-    const [selectedSalon, setSelectedSalon] = useState(null);
-    const { startLoading, finishLoading } = useLoading();
-    const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
+    const { finishLoading } = useLoading();
     const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
     useEffect(() => {
-        fetchSalons();
-    }, []);
+        const timer = setTimeout(() => {
+            fetchSalons();
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm, filterStatus]);
 
     const fetchSalons = async () => {
         try {
             setLoading(true);
-            const res = await userAPI.getAll({ role: 'SALON_OWNER' });
+            const params = {
+                role: 'SALON_OWNER',
+                search: searchTerm,
+                status: filterStatus !== 'All' ? filterStatus : undefined
+            };
+            const res = await userAPI.getAll(params);
             setSalons(res.data.users || []);
         } catch (err) {
             console.error('Failed to fetch salons:', err);
@@ -72,20 +78,10 @@ export default function AdminUsers() {
         }
     };
 
-    const filteredSalons = salons.filter(salon => {
-        const fullName = `${salon.firstName} ${salon.lastName}`.toLowerCase();
-        const matchesSearch =
-            fullName.includes(searchTerm.toLowerCase()) ||
-            salon.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            salon.phone?.includes(searchTerm);
-        const matchesStatus = filterStatus === 'All' || salon.status === filterStatus;
-        return matchesSearch && matchesStatus;
-    });
-
     const stats = {
         total: salons.length,
         pending: salons.filter(s => s.status === 'PENDING').length,
-        growth: '+8%'
+        growth: '+12%'
     };
 
     const statusOptions = [
@@ -96,16 +92,17 @@ export default function AdminUsers() {
     ];
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-10 animate-in fade-in duration-700 pb-20">
+            {/* Header & Search */}
+            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-900 tracking-wide">Salon Owners</h1>
-                    <p className="text-base font-bold text-neutral-400 tracking-wide mt-1">Professional Partner Onboarding & Management</p>
+                    <h1 className="text-3xl font-black text-neutral-900 tracking-tighter uppercase leading-none">Salon <span className="text-emerald-600">Registry</span></h1>
+                    <p className="text-sm font-medium text-neutral-500 mt-2">Professional Partner Onboarding & Management</p>
                 </div>
             </div>
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatCard
                     title="Total Partners"
                     value={stats.total}
@@ -128,143 +125,120 @@ export default function AdminUsers() {
                 />
             </div>
 
-            {/* Consolidated Registry Container */}
-            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
-                {/* Search & Filter Header */}
-                <div className="p-6 border-b border-neutral-50 flex flex-col md:flex-row md:items-center justify-end gap-4">
-                    <div className="relative group w-full md:w-80">
-                        <Search className="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-500 transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search in registry..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 h-11 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-500 transition-all"
-                        />
+            {/* Registry Table */}
+            <div className="bg-white rounded-[32px] border border-neutral-100 shadow-sm overflow-hidden flex flex-col">
+                <div className="p-5 border-b border-neutral-50 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-neutral-50/20">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+                        <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-widest">Salon Database</h2>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="px-3 h-11 bg-neutral-50 rounded-xl flex items-center gap-3 border border-neutral-100 min-w-[140px]">
-                            <Filter size={14} className="text-neutral-400" />
-                            <select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                                className="bg-transparent text-[11px] font-bold uppercase tracking-wider outline-none cursor-pointer text-neutral-600 flex-1"
-                            >
-                                <option value="All">All Status</option>
-                                <option value="ACTIVE">Active</option>
-                                <option value="PENDING">Pending</option>
-                                <option value="REJECTED">Rejected</option>
-                                <option value="DEACTIVE">Deactive</option>
-                            </select>
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <div className="relative group min-w-[280px]">
+                            <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-500 transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="SEARCH PARTNER, PHONE OR CITY..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 h-10 bg-white border border-neutral-100 rounded-xl text-[10px] font-bold uppercase tracking-widest outline-none shadow-sm focus:border-emerald-500 transition-all placeholder:text-neutral-300"
+                            />
                         </div>
+                        <Select value={filterStatus} onValueChange={setFilterStatus}>
+                            <SelectTrigger className="w-32 h-10 bg-white border-neutral-100 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                                <div className="flex items-center gap-2">
+                                    <Filter size={12} className="text-neutral-400" />
+                                    <SelectValue placeholder="STATUS" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                <SelectItem value="All" className="text-[10px] font-bold uppercase tracking-widest cursor-pointer focus:bg-neutral-50">ALL STATUS</SelectItem>
+                                {statusOptions.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value} className="text-[10px] font-bold uppercase tracking-widest cursor-pointer focus:bg-neutral-50">
+                                        {opt.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto scrollbar-hide">
+                <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-neutral-50/30">
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Salon Owner</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Contact</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Categories</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Assigned Agent</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Status</th>
-                                {/* <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50 text-right">actions</th> */}
+                                <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Salon Identity</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Email Address</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Phone Number</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Full Address</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-20 text-center">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+                                    <td colSpan="5" className="px-6 py-24 text-center">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
                                             <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Synchronizing Registry...</p>
                                         </div>
                                     </td>
                                 </tr>
-                            ) : filteredSalons.length === 0 ? (
+                            ) : salons.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-20 text-center">
-                                        <div className="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <td colSpan="5" className="px-6 py-24 text-center">
+                                        <div className="w-16 h-16 bg-neutral-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
                                             <ShieldCheck size={32} className="text-neutral-200" />
                                         </div>
-                                        <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest">No matching records found.</p>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">No matching records found.</p>
                                     </td>
                                 </tr>
                             ) : (
-                                filteredSalons.map((salon) => (
-                                    <tr key={salon._id} className="hover:bg-neutral-50/30 transition-all duration-200">
+                                salons.map((salon) => (
+                                    <tr key={salon._id} className="hover:bg-neutral-50/50 transition-colors group">
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-4">
-                                                <Avatar className="w-10 h-10 border border-neutral-100">
-                                                    <AvatarImage src={salon.avatar || salon.avatarUrl} />
-                                                    <AvatarFallback className="bg-emerald-50 text-emerald-700 text-xs font-black">
+                                                <Avatar className="w-10 h-10 rounded-xl border-2 border-white shadow-sm ring-1 ring-neutral-100">
+                                                    <AvatarImage src={salon.avatarUrl} />
+                                                    <AvatarFallback className="bg-neutral-100 text-neutral-400 font-bold text-xs uppercase group-hover:bg-emerald-500 group-hover:text-white transition-all">
                                                         {salon.firstName?.[0]}{salon.lastName?.[0]}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-neutral-900 leading-tight">{salon.firstName} {salon.lastName}</span>
-                                                    <div className="flex items-center gap-1.5 mt-0.5 text-neutral-400">
-                                                        <MapPin size={10} />
-                                                        <span className="text-[10px] uppercase font-medium tracking-wide">ID: {salon._id?.slice(-8)}</span>
-                                                    </div>
+                                                    <span className="font-black text-[11px] text-neutral-900 uppercase tracking-tight">{salon.firstName} {salon.lastName}</span>
+                                                    <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest">ID: {salon._id?.slice(-8).toUpperCase()}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2 text-neutral-600">
-                                                    <Mail size={12} className="text-neutral-300 shrink-0" />
-                                                    <span className="text-xs font-medium truncate max-w-[180px]">{salon.email}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-neutral-600">
-                                                    <Phone size={12} className="text-neutral-300 shrink-0" />
-                                                    <span className="text-xs font-medium">{salon.phone || 'N/A'}</span>
-                                                </div>
+                                            <div className="flex items-center gap-2 text-neutral-600">
+                                                <Mail size={12} className="text-neutral-300 shrink-0" />
+                                                <span className="text-[10px] font-bold uppercase tracking-widest truncate max-w-[200px]">{salon.email}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex flex-wrap gap-1.5 max-w-[200px]">
-                                                {(salon.salonOwnerProfile?.categories || []).slice(0, 3).map((cat, i) => (
-                                                    <span key={i} className="px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md text-[9px] font-bold uppercase tracking-wider border border-neutral-200">
-                                                        {cat}
-                                                    </span>
-                                                ))}
-                                                {(salon.salonOwnerProfile?.categories || []).length > 3 && (
-                                                    <div className="relative group/tooltip">
-                                                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black uppercase tracking-wider border border-emerald-100 cursor-help">
-                                                            +{(salon.salonOwnerProfile?.categories || []).length - 3}
-                                                        </span>
-                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-neutral-900 text-white text-[10px] rounded-xl opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-neutral-800">
-                                                            <div className="font-black uppercase tracking-widest mb-2 border-b border-white/10 pb-1 text-emerald-400">All Categories</div>
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {salon.salonOwnerProfile.categories.map((cat, i) => (
-                                                                    <span key={i} className="bg-white/10 px-1.5 py-0.5 rounded uppercase tracking-wider">{cat}</span>
-                                                                ))}
-                                                            </div>
-                                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-neutral-900" />
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {(salon.salonOwnerProfile?.categories || []).length === 0 && (
-                                                    <span className="text-[10px] text-neutral-300 italic font-medium">None specified</span>
-                                                )}
+                                            <div className="flex items-center gap-2 text-neutral-600">
+                                                <Phone size={12} className="text-neutral-300 shrink-0" />
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">{salon.phone || 'N/A'}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2">
-                                                {salon.salonOwnerProfile?.agentId ? (
-                                                    <div className="flex items-center gap-2 px-2.5 py-1 bg-neutral-900 rounded-lg text-white border border-neutral-800 shadow-sm">
-                                                        <Briefcase size={10} className="text-emerald-400 shrink-0" />
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider truncate max-w-[120px]">
-                                                            {typeof salon.salonOwnerProfile.agentId === 'object'
-                                                                ? `${salon.salonOwnerProfile.agentId.firstName} ${salon.salonOwnerProfile.agentId.lastName}`
-                                                                : 'Active Agent'}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-[11px] font-medium text-neutral-300 italic">Unassigned</span>
-                                                )}
+                                            <div className="flex items-start gap-2 max-w-[250px]">
+                                                <MapPin size={12} className="text-neutral-300 mt-0.5 shrink-0" />
+                                                <div className="flex flex-col">
+                                                    {(() => {
+                                                        const addr = salon.salonOwnerProfile?.shippingAddresses?.find(a => a.isDefault) ||
+                                                            salon.salonOwnerProfile?.shippingAddresses?.[0];
+                                                        if (!addr) return <span className="text-[11px] text-neutral-300 italic uppercase">ADDRESS NOT PROVIDED</span>;
+                                                        return (
+                                                            <>
+                                                                <span className="text-[11px] text-neutral-900 font-bold uppercase tracking-tight leading-tight">{addr.street || 'No Street'}</span>
+                                                                <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-widest italic mt-0.5">
+                                                                    {addr.city || ''}{addr.city && addr.state ? ', ' : ''}{addr.state || ''} {addr.zip || ''}
+                                                                </span>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
@@ -292,18 +266,6 @@ export default function AdminUsers() {
                                                 </SelectContent>
                                             </Select>
                                         </td>
-                                        {/* <td className="px-6 py-5 text-right">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedSalon(salon);
-                                                    setIsAgentModalOpen(true);
-                                                }}
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-50 hover:bg-emerald-50 text-neutral-600 hover:text-emerald-700 rounded-lg border border-neutral-100 hover:border-emerald-200 transition-all text-[10px] font-bold uppercase tracking-wider group"
-                                            >
-                                                <UserPlus size={14} className="group-hover:scale-110 transition-transform" />
-                                                Assign Agent
-                                            </button>
-                                        </td> */}
                                     </tr>
                                 ))
                             )}
@@ -311,19 +273,6 @@ export default function AdminUsers() {
                     </table>
                 </div>
             </div>
-
-            {/* Modals */}
-            {/* {selectedSalon && (
-                <AssignAgentModal
-                    isOpen={isAgentModalOpen}
-                    onClose={() => {
-                        setIsAgentModalOpen(false);
-                        setSelectedSalon(null);
-                    }}
-                    salon={selectedSalon}
-                    onAssign={fetchSalons}
-                />
-            )} */}
         </div>
     );
 }

@@ -205,13 +205,13 @@ export const createInternalUser = async (creatorRole, creatorId, userData) => {
     return createdUser;
 };
 
-export const updateSalonStatus = async (salonId, status) => {
-    const salon = await User.findById(salonId);
-    if (!salon || salon.role !== 'SALON_OWNER') throw new Error('Salon Owner not found');
+export const updateSalonStatus = async (userId, status) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
 
-    salon.status = status;
-    await salon.save();
-    return salon;
+    user.status = status;
+    await user.save();
+    return user;
 };
 
 export const assignAgent = async (salonId, agentId) => {

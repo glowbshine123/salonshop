@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     User,
     Shield,
-    CreditCard,
-    Settings,
-    ChevronRight
+    CreditCard
 } from 'lucide-react';
 import {
     NavigationMenu,
@@ -71,18 +69,18 @@ export default function AgentSettings() {
             </div>
 
             {/* Bottom Guidance */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
-                <div className="p-6 bg-neutral-50 rounded-[32px] border border-neutral-100 group hover:border-emerald-500/20 transition-all duration-500">
-                    <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2 group-hover:text-emerald-600 transition-colors">Data Privacy</h4>
-                    <p className="text-[9px] font-bold text-neutral-500 leading-relaxed uppercase tracking-tight">Your coordinates are encrypted and only used for contractual fulfillment and disbursements.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 py-6 px-2">
+                <div>
+                    <h4 className="text-xs font-bold text-neutral-500 capitalize tracking-wide mb-1">Data Privacy</h4>
+                    <p className="text-xs font-semibold text-neutral-400 leading-relaxed capitalize tracking-wide">Your coordinates are encrypted and only used for contractual fulfillment and disbursements.</p>
                 </div>
-                <div className="p-6 bg-neutral-50 rounded-[32px] border border-neutral-100 group hover:border-emerald-500/20 transition-all duration-500">
-                    <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2 group-hover:text-emerald-600 transition-colors">Synchronization</h4>
-                    <p className="text-[9px] font-bold text-neutral-500 leading-relaxed uppercase tracking-tight">Profile updates are instantaneous across the platform ledger. Financial sync may take 24h.</p>
+                <div>
+                    <h4 className="text-xs font-bold text-neutral-500 capitalize tracking-wide mb-1">Synchronization</h4>
+                    <p className="text-xs font-semibold text-neutral-400 leading-relaxed capitalize tracking-wide">Profile updates are instantaneous across the platform ledger. Financial sync may take 24h.</p>
                 </div>
-                <div className="p-6 bg-neutral-50 rounded-[32px] border border-neutral-100 group hover:border-emerald-500/20 transition-all duration-500">
-                    <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2 group-hover:text-emerald-600 transition-colors">Security</h4>
-                    <p className="text-[9px] font-bold text-neutral-500 leading-relaxed uppercase tracking-tight">Multi-factor authentication is recommended for all financial nodal changes.</p>
+                <div>
+                    <h4 className="text-xs font-bold text-neutral-500 capitalize tracking-wide mb-1">Security</h4>
+                    <p className="text-xs font-semibold text-neutral-400 leading-relaxed capitalize tracking-wide">Multi-factor authentication is recommended for all financial nodal changes.</p>
                 </div>
             </div>
         </div>

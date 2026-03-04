@@ -17,7 +17,7 @@ export default function CategoryCard({ category }) {
   const navigate = useNavigate();
 
   const handleCategoryClick = () => {
-    navigate(`/category/${category.name}`);
+    navigate(`/products?category=${encodeURIComponent(category.name)}&page=1`);
   };
 
   const icon = categoryIcons[category.name] || '📦';

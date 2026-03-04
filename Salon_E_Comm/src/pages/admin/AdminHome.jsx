@@ -16,7 +16,7 @@ import {
     BarChart3
 } from 'lucide-react';
 import StatCard from '../../components/admin/StatCard';
-import { orderAPI, productAPI, userAPI, commissionAPI } from '../../services/apiService';
+import { orderAPI, userAPI, commissionAPI } from '../../services/apiService';
 import { Link } from 'react-router-dom';
 
 export default function AdminHome() {
