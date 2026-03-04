@@ -5,6 +5,10 @@ export const getAgentStats = async (agentId) => {
     const user = await User.findById(agentId);
     if (!user) throw new Error('Agent not found');
 
+    // Sync stats from transactions to ensure accuracy and handle month resets
+    const { syncAgentStats } = await import('./commission.service.js');
+    await syncAgentStats(agentId);
+
     const AgentProfile = (await import('../models/AgentProfile.js')).default;
     const agentProfile = await AgentProfile.findOne({ userId: agentId });
     if (!agentProfile) throw new Error('Agent profile missing');
