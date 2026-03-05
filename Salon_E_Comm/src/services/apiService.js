@@ -126,6 +126,8 @@ export const orderAPI = {
     getById: (id) => api.get(`/orders/${id}`),
     create: (orderData) => api.post('/orders', orderData),
     updateStatus: (id, status) => api.patch(`/orders/${id}/status`, { status }),
+    getUnreadCount: () => api.get('/orders/unread-count'),
+    markAsViewed: () => api.patch('/orders/mark-as-viewed'),
 };
 
 

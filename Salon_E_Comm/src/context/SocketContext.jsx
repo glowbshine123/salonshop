@@ -3,6 +3,7 @@ import socket from '../services/socket';
 import { toast } from 'react-hot-toast';
 import { Bell } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import { orderAPI } from '../services/apiService';
 
 const SocketContext = createContext();
 
@@ -12,15 +13,34 @@ export const SocketProvider = ({ children }) => {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [unreadOrderCount, setUnreadOrderCount] = useState(0);
 
     useEffect(() => {
         if (user?._id) {
             socket.connect();
             socket.emit('join', user._id);
 
+            // If Admin, fetch unread order count
+            if (user.role === 'ADMIN') {
+                const fetchUnreadOrders = async () => {
+                    try {
+                        const res = await orderAPI.getUnreadCount();
+                        setUnreadOrderCount(res.data.count);
+                    } catch (err) {
+                        console.error('Failed to fetch unread orders:', err);
+                    }
+                };
+                fetchUnreadOrders();
+            }
+
             socket.on('new-notification', (notification) => {
                 setNotifications(prev => [notification, ...prev]);
                 setUnreadCount(prev => prev + 1);
+
+                // If notification is about an order and user is ADMIN, increment order count
+                if (notification.type === 'ORDER' && user.role === 'ADMIN') {
+                    setUnreadOrderCount(prev => prev + 1);
+                }
 
                 // Show floating notification
                 toast.custom((t) => (
@@ -50,7 +70,15 @@ export const SocketProvider = ({ children }) => {
     }, [user]);
 
     return (
-        <SocketContext.Provider value={{ socket, notifications, setNotifications, unreadCount, setUnreadCount }}>
+        <SocketContext.Provider value={{
+            socket,
+            notifications,
+            setNotifications,
+            unreadCount,
+            setUnreadCount,
+            unreadOrderCount,
+            setUnreadOrderCount
+        }}>
             {children}
         </SocketContext.Provider>
     );

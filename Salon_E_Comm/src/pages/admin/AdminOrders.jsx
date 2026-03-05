@@ -21,12 +21,14 @@ import {
 } from 'lucide-react';
 import { orderAPI, userAPI } from '../../services/apiService';
 import { useLoading } from '../../context/LoadingContext';
+import { useSocket } from '../../context/SocketContext';
 import { toast } from 'react-hot-toast';
 import { Skeleton } from "@/components/ui/skeleton";
 import TableRowSkeleton from '../../components/common/TableRowSkeleton';
 import OrderInvoiceModal from '../../components/admin/OrderInvoiceModal';
 
 export default function AdminOrders() {
+    const { setUnreadOrderCount } = useSocket();
     const [orders, setOrders] = useState([]);
     const [agents, setAgents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -85,7 +87,20 @@ export default function AdminOrders() {
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, searchTerm, statusFilter, fetchData]);
+
+        // Mark orders as viewed when admin opens this tab
+        const markAsViewed = async () => {
+            try {
+                await orderAPI.markAsViewed();
+                setUnreadOrderCount(0);
+                // Dispatch event to update sidebar count
+                window.dispatchEvent(new CustomEvent('ordersViewed'));
+            } catch (err) {
+                console.error('Failed to mark orders as viewed:', err);
+            }
+        };
+        markAsViewed();
+    }, [currentPage, searchTerm, statusFilter, fetchData, setUnreadOrderCount]);
 
     const handleAssignAgent = async (orderId, agentId) => {
         if (!agentId) return;

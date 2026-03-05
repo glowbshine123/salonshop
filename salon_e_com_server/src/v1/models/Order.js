@@ -66,7 +66,8 @@ const orderSchema = new mongoose.Schema({
     },
 
     commissionCalculated: { type: Boolean, default: false },
-    stockRestored: { type: Boolean, default: false }
+    stockRestored: { type: Boolean, default: false },
+    isAdminViewed: { type: Boolean, default: false }
 
 }, { timestamps: true });
 

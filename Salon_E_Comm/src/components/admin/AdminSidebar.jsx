@@ -21,11 +21,21 @@ import {
 } from '../ui/tooltip';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
+import { orderAPI } from '../../services/apiService';
 import { cn } from '@/lib/utils';
 
 export default function AdminSidebar() {
     const { logout, user } = useAuth();
-    const { unreadCount } = useSocket();
+    const { unreadCount, unreadOrderCount, setUnreadOrderCount } = useSocket();
+
+    React.useEffect(() => {
+        if (user?.role === 'ADMIN') {
+            // Listen for custom event from AdminOrders when marked as viewed
+            const handleOrdersViewed = () => setUnreadOrderCount(0);
+            window.addEventListener('ordersViewed', handleOrdersViewed);
+            return () => window.removeEventListener('ordersViewed', handleOrdersViewed);
+        }
+    }, [user, setUnreadOrderCount]);
 
     const navGroups = [
         {
@@ -90,7 +100,12 @@ export default function AdminSidebar() {
                                 )}
                             >
                                 <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                <span className="font-bold text-xs uppercase tracking-wider">{item.label}</span>
+                                <span className="font-bold text-xs uppercase tracking-wider flex-1 text-left">{item.label}</span>
+                                {item.label === 'Orders' && unreadOrderCount > 0 && (
+                                    <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex items-center justify-center min-w-[18px] animate-pulse">
+                                        {unreadOrderCount > 99 ? '99+' : unreadOrderCount}
+                                    </span>
+                                )}
                             </NavLink>
                         ))}
                     </div>

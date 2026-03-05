@@ -77,3 +77,21 @@ export const updateStatus = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+export const getUnreadOrdersCount = async (req, res) => {
+    try {
+        const count = await orderService.getUnreadOrdersCount();
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const markOrdersAsViewed = async (req, res) => {
+    try {
+        await orderService.markOrdersAsViewed();
+        res.json({ message: 'Orders marked as viewed' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

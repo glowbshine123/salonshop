@@ -18,6 +18,8 @@ router.get('/agent', protect, authorize('AGENT'), orderController.getAgentOrders
 
 // Admin routes
 router.get('/', protect, authorize('ADMIN'), orderController.getAllOrders);
+router.get('/unread-count', protect, authorize('ADMIN'), orderController.getUnreadOrdersCount);
+router.patch('/mark-as-viewed', protect, authorize('ADMIN'), orderController.markOrdersAsViewed);
 router.patch('/:id/status', protect, authorize('ADMIN'), orderController.updateStatus);
 // Alias for PUT as requested
 router.put('/:id/status', protect, authorize('ADMIN'), orderController.updateStatus);

@@ -364,3 +364,11 @@ export const updateOrderStatus = async (orderId, status) => {
     await order.save();
     return order;
 };
+
+export const getUnreadOrdersCount = async () => {
+    return await Order.countDocuments({ isAdminViewed: false });
+};
+
+export const markOrdersAsViewed = async () => {
+    return await Order.updateMany({ isAdminViewed: false }, { isAdminViewed: true });
+};
