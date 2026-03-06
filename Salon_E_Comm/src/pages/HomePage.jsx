@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/common/ProductCard';
-import { productAPI } from '../services/apiService';
+import { productAPI, categoryAPI } from '../services/apiService';
 import { useLoading } from '../context/LoadingContext';
 import { Button } from '../components/ui/button';
 import { ArrowRight, Sparkles, ShieldCheck, Zap, Heart, TrendingUp, Star, Truck, Coins, Lock } from 'lucide-react';
@@ -13,16 +13,10 @@ import 'swiper/css';
 import 'swiper/css/autoplay';
 import 'swiper/css/effect-fade';
 
-const SectionHeader = ({ icon: Icon, iconColor, label, title, actionText, onAction, actionIconColor = "text-emerald-600" }) => (
-  <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 md:gap-6 mb-2 md:mb-8">
-    <div className="space-y-1 max-w-2xl">
-      <div className={`flex items-center gap-2 ${iconColor} mb-2`}>
-        <Icon size={18} fill="currentColor" />
-        <span className="text-[10px] font-black uppercase tracking-[0.3em]">{label}</span>
-      </div>
-      <h2 className="text-4xl md:text-5xl font-black text-neutral-900 leading-[0.9] tracking-tighter">{title}</h2>
-    </div>
-    <Button onClick={onAction} variant="ghost" className="group flex items-center gap-1 text-sm font-bold text-neutral-500 hover:text-neutral-900 duration-100 transition-colors self-end">
+const SectionHeader = ({ icon: Icon, iconColor, label, title, actionText, onAction, actionIconColor = "text-primary" }) => (
+  <div className="flex flex-row items-center justify-between gap-2 md:gap-6 mb-2">
+    <h2 className="text-xl md:text-2xl font-bold tracking-wide text-foreground">{title}</h2>
+    <Button onClick={onAction} variant="ghost" className="group flex items-center gap-1 text-sm font-bold text-neutral-500 hover:text-neutral-900 duration-100 transition-colors">
       {actionText}
       <ArrowRight size={16} className={`group-hover:translate-x-1 transition-transform ${actionIconColor}`} />
     </Button>
@@ -197,17 +191,92 @@ const StatsSection = () => (
   </section>
 );
 
+const CategoriesSection = ({ categories, loading, onAction }) => {
+  const navigate = useNavigate();
+
+  if (loading && categories.length === 0) {
+    return (
+      <section className="py-12 md:py-20 border-b border-neutral-100 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-8 md:mb-12">
+            <div className="space-y-3">
+              <div className="h-4 w-32 bg-neutral-100 animate-pulse rounded-full" />
+              <div className="h-10 w-64 bg-neutral-100 animate-pulse rounded-lg" />
+            </div>
+            <div className="h-10 w-24 bg-neutral-100 animate-pulse rounded-lg hidden md:block" />
+          </div>
+          <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="shrink-0 w-[140px] md:w-[180px] aspect-square bg-neutral-50 animate-pulse rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (categories.length === 0 && !loading) return null;
+
+  return (
+    <section className="py-6 md:py-10 border-b border-neutral-100 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          icon={Sparkles}
+          iconColor="text-emerald-500"
+          label="Professional Grade"
+          title="Shop by Category"
+          actionText="View All"
+          onAction={onAction}
+        />
+
+        <div className="flex items-start gap-2 md:gap-6 overflow-x-auto scrollbar-hide">
+          {categories.map((cat, i) => (
+            <button
+              key={i}
+              onClick={() => cat.onSelect()}
+              className="shrink-0 w-[100px] md:w-[120px] group"
+            >
+              <div className="relative aspect-square rounded-md md:rounded-lg overflow-hidden mb-1 bg-neutral-50 border border-neutral-100 group-hover:border-primary/20 transition-all duration-300">
+                <img
+                  src={cat.image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=200&auto=format&fit=crop&q=60'}
+                  alt={cat.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                  <span className="text-white text-[10px] font-bold uppercase tracking-widest translate-y-2 group-hover:translate-y-0 transition-transform duration-300">Explore</span>
+                </div>
+              </div>
+              <h3 className="text-sm font-bold text-neutral-900 group-hover:text-primary transition-colors text-center capitalize tracking-tight px-1 line-clamp-2">{cat.name}</h3>
+            </button>
+          ))}
+          <button
+            onClick={() => navigate(`/products`)}
+            className="shrink-0 w-[100px] md:w-[120px] group"
+          >
+            <div className="relative aspect-square rounded-md md:rounded-lg overflow-hidden mb-1 bg-primary-muted border border-neutral-100 group-hover:border-primary/20 transition-all duration-300 flex items-center justify-center">
+              <div className='flex items-center justify-center p-4 rounded-full bg-primary text-white'>
+                <ArrowRight size={32} />
+              </div>
+            </div>
+            <h3 className="text-xs md:text-sm font-bold text-neutral-900 group-hover:text-primary transition-colors text-center capitalize tracking-tight px-1 line-clamp-2">View All</h3>
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [latestProducts, setLatestProducts] = useState([]);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { startLoading, finishLoading } = useLoading();
 
   const fetchProducts = async () => {
-    // startLoading(); // Triggered on initial mount in useEffect
     setLoading(true);
     setError('');
     try {
@@ -219,6 +288,29 @@ export default function HomePage() {
 
       const latestRes = await productAPI.getAll({ status: 'ACTIVE', limit: 5, sort: 'newest' });
       setLatestProducts(latestRes.data?.products || []);
+
+      // Fetch Categories
+      const categoriesRes = await categoryAPI.getAll();
+      const allCategories = categoriesRes.data || [];
+      const parentCategories = allCategories.filter(cat => !cat.parent);
+
+      // Fetch representative image for each category
+      const categoriesWithImages = await Promise.all(parentCategories.map(async (cat) => {
+        try {
+          const prodRes = await productAPI.getAll({ category: cat.name, limit: 1 });
+          const firstProduct = prodRes.data?.products?.[0];
+          return {
+            name: cat.name,
+            image: firstProduct?.images?.[0] || firstProduct?.image || null,
+            onSelect: () => navigate(`/products?category=${encodeURIComponent(cat.name)}`)
+          };
+        } catch (err) {
+          console.error(`Failed to fetch image for category ${cat.name}`, err);
+          return { name: cat.name, image: null, onSelect: () => navigate(`/products?category=${encodeURIComponent(cat.name)}`) };
+        }
+      }));
+
+      setCategories(categoriesWithImages);
 
     } catch (err) {
       console.error('[HomePage] Failed to fetch products:', err);
@@ -237,6 +329,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-neutral-50/50">
       <HeroSection navigate={navigate} />
+
+      <CategoriesSection
+        categories={categories}
+        loading={loading}
+        onAction={() => navigate('/products')}
+      />
 
       <ProductsSection
         loading={loading}
