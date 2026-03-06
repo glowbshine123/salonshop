@@ -55,6 +55,7 @@ export default function AdminPayouts() {
     const [status, setStatus] = useState('all');
     const [totalPages, setTotalPages] = useState(1);
     const [stats, setStats] = useState(null);
+    const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
     const { finishLoading } = useLoading();
 
@@ -106,6 +107,21 @@ export default function AdminPayouts() {
     useEffect(() => {
         fetchStats();
     }, [fetchStats]);
+
+    const handleStatusUpdate = async (settlementId, newStatus) => {
+        setUpdatingStatusId(settlementId);
+        try {
+            await adminAPI.updateSettlement(settlementId, { status: newStatus });
+            toast.success(`Settlement status updated to ${newStatus}`);
+            fetchSettlements();
+            fetchStats(); // Update gross disbursed if status became 'paid'
+        } catch (err) {
+            console.error('Failed to update settlement status', err);
+            toast.error('Status update protocol failed');
+        } finally {
+            setUpdatingStatusId(null);
+        }
+    };
 
     const statusOptions = [
         { label: 'All Status', value: 'all' },
@@ -285,14 +301,27 @@ export default function AdminPayouts() {
                                                 {settlement.payoutMethod || 'razorpay'}
                                             </td>
                                             <td className="px-8 py-6">
-                                                <span className={cn(
-                                                    "px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ring-1 ring-inset shadow-sm",
-                                                    settlement.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 ring-emerald-600/10' :
-                                                        settlement.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100 ring-amber-600/10' :
-                                                            'bg-neutral-50 text-neutral-700 border-neutral-100 ring-neutral-900/10'
-                                                )}>
-                                                    {settlement.status}
-                                                </span>
+                                                <Select
+                                                    disabled={updatingStatusId === settlement._id}
+                                                    value={settlement.status}
+                                                    onValueChange={(v) => handleStatusUpdate(settlement._id, v)}
+                                                >
+                                                    <SelectTrigger className={cn(
+                                                        "w-36 h-10 rounded-xl text-[10px] font-black uppercase tracking-widest border ring-1 ring-inset shadow-sm",
+                                                        settlement.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 ring-emerald-600/10' :
+                                                            settlement.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100 ring-amber-600/10' :
+                                                                'bg-neutral-50 text-neutral-700 border-neutral-100 ring-neutral-900/10'
+                                                    )}>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                                        {statusOptions.filter(opt => opt.value !== 'all').map(opt => (
+                                                            <SelectItem key={opt.value} value={opt.value} className="text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                                                                {opt.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </td>
                                             <td className="px-8 py-6 text-right">
                                                 <div className="flex flex-col items-end">

@@ -189,21 +189,25 @@ export const updateSettlementStatus = async (settlementId, updateData) => {
     Object.assign(settlement, updateData);
 
     if (newStatus === 'paid' && previousStatus !== 'paid') {
-        settlement.status = 'paid';
         settlement.settledAt = new Date();
-        await settlement.save(); // Save first so aggregation in applySettlementAccounting picks it up
-        await applySettlementAccounting(settlement.agentId, settlement.amount);
-        return settlement; // Already saved
+    } else if (newStatus !== 'paid' && previousStatus === 'paid') {
+        settlement.settledAt = null;
     }
 
     await settlement.save();
+
+    // Always sync accounting if either the old or new status is 'paid'
+    if (newStatus === 'paid' || previousStatus === 'paid') {
+        await applySettlementAccounting(settlement.agentId, settlement.amount, newStatus === 'paid' && previousStatus !== 'paid');
+    }
+
     return settlement;
 };
 
 /**
  * Internal accounting helper for paid settlements.
  */
-async function applySettlementAccounting(agentId, amount) {
+async function applySettlementAccounting(agentId, amount, isMarkingAsPaid = true) {
     const agentProfile = await AgentProfile.findOne({ userId: agentId });
     if (agentProfile) {
         // Recalculate lifetime total earnings from all PAID settlements
@@ -211,8 +215,21 @@ async function applySettlementAccounting(agentId, amount) {
         const totalLifetimeSettled = paidSettlements.reduce((sum, s) => sum + s.amount, 0);
 
         agentProfile.totalEarnings = totalLifetimeSettled;
-        agentProfile.currentMonthEarnings = Math.max(0, (agentProfile.currentMonthEarnings || 0) - amount);
-        agentProfile.lastSettlementDate = new Date();
+
+        if (isMarkingAsPaid) {
+            agentProfile.currentMonthEarnings = Math.max(0, (agentProfile.currentMonthEarnings || 0) - amount);
+            agentProfile.lastSettlementDate = new Date();
+
+            // Update all PENDING transactions to SETTLED
+            await CommissionTransaction.updateMany(
+                { agentId, status: 'PENDING' },
+                { $set: { status: 'SETTLED' } }
+            );
+        } else {
+            // Reverting status away from 'paid'
+            agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) + amount;
+        }
+
         await agentProfile.save();
     }
 }
