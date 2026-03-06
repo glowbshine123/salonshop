@@ -32,16 +32,29 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+
 
 export default function AdminPayouts() {
     const [settlements, setSettlements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [selectedSettlement, setSelectedSettlement] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [monthFilter, setMonthFilter] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [page, setPage] = useState(1);
+    const [search, setSearch] = useState('');
+    const [month, setMonth] = useState('all');
+    const [year, setYear] = useState(new Date().getFullYear().toString());
+    const [status, setStatus] = useState('all');
     const [totalPages, setTotalPages] = useState(1);
+    const [stats, setStats] = useState(null);
 
     const { finishLoading } = useLoading();
 
@@ -49,11 +62,13 @@ export default function AdminPayouts() {
         setLoading(true);
         try {
             const params = {
-                page: currentPage,
+                page,
                 limit: 10,
-                search: searchTerm,
-                month: monthFilter
+                search
             };
+            if (month && month !== 'all') params.month = month;
+            if (year) params.year = year;
+            if (status && status !== 'all') params.status = status;
             const res = await adminAPI.getSettlements(params);
 
             // Handle both legacy and paginated responses
@@ -72,29 +87,36 @@ export default function AdminPayouts() {
             setLoading(false);
             finishLoading();
         }
-    }, [currentPage, searchTerm, monthFilter, finishLoading]);
+    }, [page, search, month, year, status, finishLoading]);
+
+    const fetchStats = useCallback(async () => {
+        try {
+            const res = await adminAPI.getSettlementStats();
+            setStats(res.data);
+        } catch (err) {
+            console.error('Failed to fetch settlement stats', err);
+            toast.error('Failed to fetch settlement statistics');
+        }
+    }, []);
 
     useEffect(() => {
         fetchSettlements();
     }, [fetchSettlements]);
 
-    const handleTriggerAutoSettlement = async () => {
-        if (!window.confirm('Trigger manual monthly settlement batch? This will settle all pending agent balances for the previous month.')) {
-            return;
-        }
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
 
-        setProcessing(true);
-        try {
-            const res = await adminAPI.triggerAutoSettlement();
-            toast.success(`Batch Complete: ${res.data.results.success} agents settled, ₹${res.data.results.totalAmount.toLocaleString()} disbursed.`);
-            fetchSettlements();
-        } catch (err) {
-            console.error('Settlement error:', err);
-            toast.error(err.response?.data?.message || 'Failed to trigger settlement batch');
-        } finally {
-            setProcessing(false);
-        }
-    };
+    const statusOptions = [
+        { label: 'All Status', value: 'all' },
+        { label: 'Pending', value: 'pending' },
+        { label: 'Paid', value: 'paid' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Rejected', value: 'rejected' },
+        { label: 'Cancelled', value: 'cancelled' }
+    ];
+
+    const years = Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString());
 
     return (
         <TooltipProvider>
@@ -104,73 +126,92 @@ export default function AdminPayouts() {
                     <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-50/30 rounded-full -mr-24 -mt-24 blur-3xl"></div>
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
-                            <h1 className="text-3xl font-black text-neutral-900 tracking-tighter uppercase">Automated Settlements</h1>
-                            <p className="text-sm font-medium text-neutral-500 mt-1">Monthly Financial Reconciliation Ledger</p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3">
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        onClick={handleTriggerAutoSettlement}
-                                        disabled={processing}
-                                        className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20 active:scale-95 disabled:opacity-50"
-                                    >
-                                        {processing ? <Loader2 className="animate-spin" size={14} /> : <ArrowRightCircle size={14} />}
-                                        {processing ? 'Processing...' : 'Trigger Batch'}
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom" className="bg-neutral-900 text-white font-bold text-[9px] uppercase tracking-widest px-4 py-2 rounded-lg border border-white/10">
-                                    Process all pending commissions for the previous month immediately
-                                </TooltipContent>
-                            </Tooltip>
+                            <h1 className="text-3xl font-black text-neutral-900 tracking-tighter uppercase leading-none">Settlement <span className="text-emerald-600">Registry</span></h1>
+                            <p className="text-sm font-medium text-neutral-500 mt-2">Historical audit trail of all manual and legacy payouts.</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Summary Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <StatCard
-                        title="System Protocol"
-                        value="FULLY AUTOMATED"
-                        icon={ShieldCheck}
+                        title="Gross Disbursed"
+                        value={`₹${(stats?.totalSettled || 0).toLocaleString()}`}
+                        icon={TrendingUp}
                         color="emerald"
                     />
                     <StatCard
                         title="Active Settlements"
-                        value={settlements.length.toString()}
-                        icon={TrendingUp}
+                        value={stats?.settlementCount || 0}
+                        icon={History}
+                        color="blue"
+                    />
+                    <StatCard
+                        title="Last Batch Date"
+                        value={stats?.lastSettlementDate ? new Date(stats.lastSettlementDate).toLocaleDateString() : 'N/A'}
+                        icon={Calendar}
                         color="neutral"
                     />
                 </div>
 
-                {/* Search & Filter Bar */}
-                <div className="flex flex-col justify-end md:flex-row items-center gap-4 mb-2">
-                    <div className="h-10 px-5 bg-white rounded-md flex items-center gap-3 border border-neutral-100 w-full md:max-w-md group focus-within:border-emerald-500/50 focus-within:ring-4 focus-within:ring-emerald-500/5 transition-all shadow-sm">
-                        <Search className="w-4 h-4 text-neutral-400 group-focus-within:text-emerald-500" />
-                        <input
-                            type="text"
-                            placeholder="SEARCH SETTLEMENTS (ID, AGENT)..."
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            className="bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest w-full text-neutral-600 placeholder:text-neutral-300"
-                        />
-                    </div>
+                {/* Advanced Filters */}
+                <div className="bg-white p-6 rounded-[32px] border border-neutral-100 shadow-sm space-y-6 mb-6">
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex-1 min-w-[300px] relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                            <input
+                                type="text"
+                                placeholder="SEARCH BY AGENT NAME OR EMAIL..."
+                                className="w-full pl-12 pr-4 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-emerald-500 focus:bg-white transition-all placeholder:text-neutral-200 shadow-inner"
+                                value={search}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    setPage(1);
+                                }}
+                            />
+                        </div>
 
-                    <div className="h-10 px-4 bg-white border border-neutral-100 rounded-md flex items-center gap-3 hover:border-emerald-500/30 transition-all cursor-pointer shadow-sm">
-                        <Calendar size={14} className="text-neutral-400" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Month:</span>
-                        <input
-                            type="month"
-                            value={monthFilter}
-                            onChange={(e) => {
-                                setMonthFilter(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-emerald-600 appearance-none min-w-[120px]"
-                        />
+                        <div className="flex items-center gap-2">
+                            <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+                                <SelectTrigger className="w-40 h-14 bg-neutral-50 border-neutral-100 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                                    <SelectValue placeholder="All Status" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                    {statusOptions.map(opt => (
+                                        <SelectItem key={opt.value} value={opt.value} className="text-[10px] font-black uppercase tracking-widest">
+                                            {opt.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={month} onValueChange={(v) => { setMonth(v); setPage(1); }}>
+                                <SelectTrigger className="w-36 h-14 bg-neutral-50 border-neutral-100 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                                    <SelectValue placeholder="All Months" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                    <SelectItem value="all" className="text-[10px] font-black uppercase tracking-widest">All Months</SelectItem>
+                                    {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                                        <SelectItem key={m} value={m} className="text-[10px] font-black uppercase tracking-widest">
+                                            {m}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={year} onValueChange={(v) => { setYear(v); setPage(1); }}>
+                                <SelectTrigger className="w-28 h-14 bg-neutral-50 border-neutral-100 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                    {years.map(y => (
+                                        <SelectItem key={y} value={y} className="text-[10px] font-black uppercase tracking-widest">
+                                            {y}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </div>
 
@@ -180,12 +221,12 @@ export default function AdminPayouts() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-neutral-50/50 border-b border-neutral-100 uppercase">
-                                    <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest">Agent Entity</th>
-                                    <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest">Settlement ID</th>
-                                    <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest">Amount</th>
-                                    <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest text-center">Month</th>
-                                    <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest text-center">Status</th>
-                                    <th className="px-8 py-5 text-[11px] font-black text-neutral-400 tracking-widest text-right">Ops</th>
+                                    <th className="px-8 py-6 text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Agent Entity</th>
+                                    <th className="px-8 py-6 text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Amount Yield</th>
+                                    <th className="px-8 py-6 text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Reference</th>
+                                    <th className="px-8 py-6 text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Method</th>
+                                    <th className="px-8 py-6 text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Status</th>
+                                    <th className="px-8 py-6 text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 text-right">Processed On</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-50">
@@ -195,63 +236,74 @@ export default function AdminPayouts() {
                                     ))
                                 ) : settlements.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="px-10 py-32 text-center text-neutral-400 font-black uppercase tracking-widest italic leading-loose">
-                                            <div className="w-16 h-16 bg-neutral-50 rounded-2xl flex items-center justify-center text-neutral-300 mx-auto mb-4">
-                                                <Package size={32} />
+                                        <td colSpan="6" className="px-8 py-32 text-center">
+                                            <div className="w-20 h-20 bg-neutral-50 rounded-[32px] flex items-center justify-center text-neutral-200 mx-auto mb-6">
+                                                <History size={32} />
                                             </div>
-                                            No matching settlements found in registry.
+                                            <p className="text-neutral-400 font-extrabold uppercase tracking-widest text-xs">No settlements found in this index.</p>
                                         </td>
                                     </tr>
                                 ) : (
-                                    settlements.map((sett) => (
-                                        <tr key={sett._id} className="hover:bg-neutral-50/50 transition-all duration-300 group">
+                                    settlements.map((settlement) => (
+                                        <tr key={settlement._id} className="hover:bg-neutral-50/50 transition-all group">
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-100 shrink-0 capitalize text-[14px] font-black shadow-sm group-hover:scale-105 transition-transform">
-                                                        {sett.agentId?.firstName?.[0] || 'A'}
-                                                    </div>
+                                                    <Avatar className="w-12 h-12 border-2 border-white shadow-sm ring-1 ring-neutral-100">
+                                                        <AvatarImage src={settlement.agentId?.avatarUrl} />
+                                                        <AvatarFallback className="bg-neutral-900 text-white font-black text-[10px] italic">
+                                                            {settlement.agentId?.firstName?.[0]}{settlement.agentId?.lastName?.[0]}
+                                                        </AvatarFallback>
+                                                    </Avatar>
                                                     <div className="flex flex-col">
-                                                        <span className="text-sm font-black text-neutral-900 uppercase tracking-tight leading-tight">{sett.agentId?.firstName} {sett.agentId?.lastName}</span>
-                                                        <span className="text-[10px] font-bold text-neutral-400 lowercase italic opacity-80 leading-none mt-1">{sett.agentId?.email}</span>
+                                                        <span className="font-black text-xs uppercase tracking-tight text-neutral-900 leading-none">
+                                                            {settlement.agentId?.firstName} {settlement.agentId?.lastName}
+                                                        </span>
+                                                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1.5">
+                                                            {settlement.agentId?.email}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6">
-                                                <code className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50/50 px-3 py-1.5 rounded-lg border border-emerald-100/50">
-                                                    {sett.setid || `SET-${sett._id?.slice(-8).toUpperCase()}`}
-                                                </code>
-                                            </td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-xs font-black text-emerald-600">₹</span>
-                                                    <span className="text-xl font-black text-neutral-900 tracking-tighter">
-                                                        {sett.amount.toLocaleString()}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-6 text-center">
-                                                <span className="px-3 py-1.5 bg-neutral-50 border border-neutral-100 rounded-lg text-[10px] font-black text-neutral-500 uppercase tracking-widest">
-                                                    {sett.month}
+                                                <span className="font-black text-neutral-900 text-lg tracking-tighter group-hover:text-emerald-600 transition-colors">
+                                                    ₹{settlement.amount.toLocaleString()}
                                                 </span>
                                             </td>
-                                            <td className="px-8 py-6 text-center">
+                                            <td className="px-8 py-6">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">
+                                                        {settlement.month}
+                                                    </span>
+                                                    {settlement.transactionId && (
+                                                        <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest mt-1">
+                                                            ID: {settlement.transactionId.slice(-12).toUpperCase()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6 uppercase text-[10px] font-black text-neutral-500 tracking-widest">
+                                                {settlement.payoutMethod || 'razorpay'}
+                                            </td>
+                                            <td className="px-8 py-6">
                                                 <span className={cn(
-                                                    "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border",
-                                                    sett.status === 'SUCCESS' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                                                        sett.status === 'PROCESSING' ? "bg-blue-50 text-blue-600 border-blue-100" :
-                                                            sett.status === 'FAILED' ? "bg-red-50 text-red-600 border-red-100" :
-                                                                "bg-neutral-50 text-neutral-500 border-neutral-100"
+                                                    "px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ring-1 ring-inset shadow-sm",
+                                                    settlement.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 ring-emerald-600/10' :
+                                                        settlement.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100 ring-amber-600/10' :
+                                                            'bg-neutral-50 text-neutral-700 border-neutral-100 ring-neutral-900/10'
                                                 )}>
-                                                    {sett.status}
+                                                    {settlement.status}
                                                 </span>
                                             </td>
                                             <td className="px-8 py-6 text-right">
-                                                <button
-                                                    onClick={() => setSelectedSettlement(sett)}
-                                                    className="p-3 bg-neutral-50 hover:bg-emerald-600 text-neutral-400 hover:text-white rounded-xl transition-all border border-neutral-100 hover:border-emerald-600 active:scale-90"
-                                                >
-                                                    <History size={16} />
-                                                </button>
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-tight flex items-center gap-2 group-hover:text-emerald-600 transition-colors">
+                                                        <CheckCircle2 size={12} className={settlement.status === 'paid' ? "text-emerald-500" : "text-neutral-300"} />
+                                                        {new Date(settlement.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                    </span>
+                                                    <span className="text-[9px] text-neutral-300 font-bold uppercase tracking-tighter mt-1">
+                                                        {new Date(settlement.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -264,19 +316,19 @@ export default function AdminPayouts() {
                     {totalPages > 1 && (
                         <div className="px-8 py-6 bg-neutral-50/50 border-t border-neutral-100 flex items-center justify-between">
                             <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em]">
-                                Page {currentPage} of {totalPages}
+                                Page {page} of {totalPages}
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={currentPage === 1}
+                                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                                    disabled={page === 1}
                                     className="p-2 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-emerald-600 disabled:opacity-30 disabled:hover:text-neutral-400 transition-all shadow-sm"
                                 >
                                     <ChevronLeft size={16} />
                                 </button>
                                 <button
-                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
+                                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                                    disabled={page === totalPages}
                                     className="p-2 bg-white border border-neutral-200 rounded-lg text-neutral-400 hover:text-emerald-600 disabled:opacity-30 disabled:hover:text-neutral-400 transition-all shadow-sm"
                                 >
                                     <ChevronRight size={16} />

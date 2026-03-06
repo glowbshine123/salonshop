@@ -16,36 +16,40 @@ export const getAllSettlements = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-        const { search, month } = req.query;
+        const { search, month, year, status } = req.query;
 
         let query = {};
         if (month) query.month = month;
         if (search) {
-            query.$or = [
-                { setid: { $regex: search, $options: 'i' } },
-                // Note: Searching by populated field (agentId.firstName/lastName) in Mongoose 
-                // requires either aggregation or a two-step query. For simplicity here, 
-                // we'll use a regex on setid and handle name search if possible.
-                // A better approach is to find matching users first.
-            ];
-
-            // Search users by name first
-            const matchingUsers = await User.find({
-                role: 'AGENT',
+            const userQuery = {
                 $or: [
                     { firstName: { $regex: search, $options: 'i' } },
-                    { lastName: { $regex: search, $options: 'i' } }
+                    { lastName: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
                 ]
-            }).select('_id');
+            };
+            const users = await User.find(userQuery).select('_id');
+            query.agentId = { $in: users.map(u => u._id) };
+        }
 
-            if (matchingUsers.length > 0) {
-                query.$or.push({ agentId: { $in: matchingUsers.map(u => u._id) } });
-            }
+        if (month) {
+            query.month = { $regex: month, $options: 'i' };
+        }
+
+        if (year) {
+            // Check if month already has a year (YYYY-MM), if not, filter by created year
+            const startYear = new Date(`${year}-01-01`);
+            const endYear = new Date(`${year}-12-31T23:59:59`);
+            query.createdAt = { $gte: startYear, $lte: endYear };
+        }
+
+        if (status) {
+            query.status = status;
         }
 
         const [settlements, total] = await Promise.all([
             Settlement.find(query)
-                .populate('agentId', 'firstName lastName email')
+                .populate('agentId', 'firstName lastName email avatarUrl')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit),
@@ -100,6 +104,50 @@ export const triggerAutoDisbursement = async (req, res) => {
         res.json({
             message: 'Automated monthly settlement batch completed',
             results
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const createManualSettlement = async (req, res) => {
+    try {
+        const settlement = await settlementService.createManualSettlement(req.body);
+        res.status(201).json(settlement);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const updateSettlement = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const settlement = await settlementService.updateSettlementStatus(id, req.body);
+        res.json(settlement);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const getSettlementStats = async (req, res) => {
+    try {
+        const stats = await Settlement.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalSettled: {
+                        $sum: { $cond: [{ $eq: ["$status", "paid"] }, "$amount", 0] }
+                    },
+                    settlementCount: { $sum: 1 },
+                    lastSettlementDate: { $max: "$settledAt" }
+                }
+            }
+        ]);
+
+        res.json(stats[0] || {
+            totalSettled: 0,
+            settlementCount: 0,
+            lastSettlementDate: null
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

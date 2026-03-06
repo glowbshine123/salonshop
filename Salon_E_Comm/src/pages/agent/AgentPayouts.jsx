@@ -151,7 +151,7 @@ export default function AgentPayouts() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-3xl font-black text-neutral-900 tracking-tighter uppercase leading-none">Earnings & <span className="text-emerald-600">Settlements</span></h1>
-                    <p className="text-sm font-medium text-neutral-500 mt-2">Automated monthly settlement tracking engine.</p>
+                    <p className="text-sm font-medium text-neutral-500 mt-2">Manual settlement tracking and clearance audit.</p>
                 </div>
             </div>
 
@@ -190,14 +190,14 @@ export default function AgentPayouts() {
                             <ShieldCheck size={12} />
                             Settlement Policy
                         </div>
-                        <h3 className="text-2xl font-black tracking-tight uppercase">Automated Yield Engine</h3>
+                        <h3 className="text-2xl font-black tracking-tight uppercase">Manual Clearance Protocol</h3>
                         <p className="text-neutral-400 text-sm font-medium leading-relaxed">
-                            Your commissions are calculated instantly on order completion and settled automatically to your registered bank account on the <span className="text-white font-bold underline decoration-emerald-500 underline-offset-4">1st of every month</span>.
+                            Your commissions are calculated instantly on order completion. Settlements are processed manually by the admin to your registered bank account or UPI after verification.
                         </p>
                     </div>
                     <div className="flex flex-col items-center xl:items-end">
-                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Estimated Next Release</span>
-                        <span className="text-2xl font-black text-emerald-400 tracking-tighter uppercase">{nextSettlementDate()}</span>
+                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Status Protocol</span>
+                        <span className="text-2xl font-black text-emerald-400 tracking-tighter uppercase">MANUAL CLEARANCE</span>
                     </div>
                 </div>
             </div>
@@ -370,8 +370,9 @@ export default function AgentPayouts() {
                                 <thead>
                                     <tr className="bg-neutral-50/30">
                                         <th className="px-8 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Settlement ID</th>
-                                        <th className="px-8 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Disbursed Amount</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Asset Yield</th>
                                         <th className="px-8 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 text-center">Batch Month</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">Status / Method</th>
                                         <th className="px-8 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 text-right">Clearance Date</th>
                                     </tr>
                                 </thead>
@@ -393,9 +394,14 @@ export default function AgentPayouts() {
                                         settlements.map((sett) => (
                                             <tr key={sett?._id || Math.random()} className="hover:bg-neutral-50/50 transition-all group">
                                                 <td className="px-8 py-6">
-                                                    <code className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 shadow-inner">
-                                                        {sett?.setid || (sett?._id ? `SET-${sett._id.slice(-8).toUpperCase()}` : 'N/A')}
-                                                    </code>
+                                                    <div className="flex flex-col">
+                                                        <code className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 shadow-inner w-fit">
+                                                            {sett?.setid || (sett?._id ? `SET-${sett._id.slice(-8).toUpperCase()}` : 'N/A')}
+                                                        </code>
+                                                        {sett?.transactionId && (
+                                                            <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-2">TRX: {sett.transactionId}</span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <span className="font-black text-neutral-900 text-xl tracking-tighter group-hover:text-emerald-600 transition-colors">₹{(sett?.amount || 0).toLocaleString()}</span>
@@ -403,9 +409,22 @@ export default function AgentPayouts() {
                                                 <td className="px-8 py-6 text-center">
                                                     <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">{sett?.month || 'N/A'}</span>
                                                 </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex flex-col gap-2">
+                                                        <span className={cn(
+                                                            "px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border ring-1 ring-inset shadow-sm w-fit",
+                                                            sett?.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 ring-emerald-600/10' : 'bg-neutral-900 text-white border-white/10 ring-white/10'
+                                                        )}>
+                                                            {sett?.status || 'PAID'}
+                                                        </span>
+                                                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest leading-none">
+                                                            {sett?.payoutMethod || 'Direct'}
+                                                        </span>
+                                                    </div>
+                                                </td>
                                                 <td className="px-8 py-6 text-right">
                                                     <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-tight flex items-center justify-end gap-2 group-hover:text-emerald-600 transition-colors">
-                                                        <CheckCircle2 size={12} className="text-emerald-500" />
+                                                        <CheckCircle2 size={12} className={sett?.status === 'paid' ? "text-emerald-500" : "text-neutral-300"} />
                                                         {(sett?.settledAt || sett?.createdAt) ? new Date(sett?.settledAt || sett?.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                                                     </span>
                                                 </td>

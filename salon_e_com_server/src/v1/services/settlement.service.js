@@ -151,3 +151,68 @@ export const processMonthlySettlement = async (manualMonth = null) => {
 
     return results;
 };
+
+/**
+ * Creates a manual settlement record.
+ */
+export const createManualSettlement = async (data) => {
+    const { agentId, amount, month, payoutMethod, transactionId, notes, status } = data;
+
+    const settlement = await Settlement.create({
+        agentId,
+        amount,
+        month,
+        payoutMethod,
+        transactionId,
+        notes,
+        status,
+        settledAt: status === 'paid' ? new Date() : null
+    });
+
+    if (status === 'paid') {
+        await applySettlementAccounting(agentId, amount);
+    }
+
+    return settlement;
+};
+
+/**
+ * Updates an existing settlement record and handles accounting if status changes to 'paid'.
+ */
+export const updateSettlementStatus = async (settlementId, updateData) => {
+    const settlement = await Settlement.findById(settlementId);
+    if (!settlement) throw new Error('Settlement not found');
+
+    const previousStatus = settlement.status;
+    const newStatus = updateData.status;
+
+    Object.assign(settlement, updateData);
+
+    if (newStatus === 'paid' && previousStatus !== 'paid') {
+        settlement.status = 'paid';
+        settlement.settledAt = new Date();
+        await settlement.save(); // Save first so aggregation in applySettlementAccounting picks it up
+        await applySettlementAccounting(settlement.agentId, settlement.amount);
+        return settlement; // Already saved
+    }
+
+    await settlement.save();
+    return settlement;
+};
+
+/**
+ * Internal accounting helper for paid settlements.
+ */
+async function applySettlementAccounting(agentId, amount) {
+    const agentProfile = await AgentProfile.findOne({ userId: agentId });
+    if (agentProfile) {
+        // Recalculate lifetime total earnings from all PAID settlements
+        const paidSettlements = await Settlement.find({ agentId, status: 'paid' });
+        const totalLifetimeSettled = paidSettlements.reduce((sum, s) => sum + s.amount, 0);
+
+        agentProfile.totalEarnings = totalLifetimeSettled;
+        agentProfile.currentMonthEarnings = Math.max(0, (agentProfile.currentMonthEarnings || 0) - amount);
+        agentProfile.lastSettlementDate = new Date();
+        await agentProfile.save();
+    }
+}
