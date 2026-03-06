@@ -184,6 +184,9 @@ export const agentAPI = {
 
 export const adminAPI = {
     getSettlements: (params) => api.get('/admin/settlements', { params }),
+    getSettlementStats: () => api.get('/admin/settlements/stats'),
+    createSettlement: (data) => api.post('/admin/settlements', data),
+    updateSettlement: (id, data) => api.patch(`/admin/settlements/${id}`, data),
     triggerAutoSettlement: () => api.post('/admin/settlements/trigger-auto'),
     createAgent: (data) => userAPI.createInternal({ ...data, role: 'AGENT' }),
     getSlabs: () => api.get('/admin/commission-slabs'),

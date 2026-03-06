@@ -49,13 +49,9 @@ export const calculateCommission = async (order) => {
         });
     }
 
-    // Month Reset Logic using explicit tracking field
-    if (agentProfile.lastCommissionMonth !== month) {
-        agentProfile.currentMonthEarnings = 0;
-        agentProfile.lastCommissionMonth = month;
-    }
+    // NOTE: Removed auto-reset logic based on month string lastCommissionMonth.
+    // Resetting currentMonthEarnings now happens ONLY on manual settlement payout.
 
-    agentProfile.totalEarnings += amountEarned;
     agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) + amountEarned;
     agentProfile.points = (agentProfile.points || 0) + Math.round(amountEarned);
 
@@ -83,9 +79,12 @@ export const syncAgentStats = async (agentId) => {
         .filter(t => t.month === currentMonth)
         .reduce((sum, t) => sum + t.amount, 0);
 
-    agentProfile.totalEarnings = totalEarnings;
+    const Settlement = (await import('../models/Settlement.js')).default;
+    const paidSettlements = await Settlement.find({ agentId, status: 'paid' });
+    const totalLifetimeSettled = paidSettlements.reduce((sum, s) => sum + s.amount, 0);
+
     agentProfile.currentMonthEarnings = monthEarnings;
-    agentProfile.lastCommissionMonth = currentMonth;
+    agentProfile.totalEarnings = totalLifetimeSettled;
 
     await agentProfile.save();
     return agentProfile;
@@ -112,7 +111,6 @@ export const deductCommission = async (order) => {
     const agentProfile = await AgentProfile.findOne({ userId: agent._id });
 
     if (agentProfile) {
-        agentProfile.totalEarnings -= deductionAmount;
         agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) - deductionAmount;
         await agentProfile.save();
     }

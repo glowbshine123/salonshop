@@ -9,10 +9,16 @@ const settlementSchema = new mongoose.Schema({
     razorpayPayoutId: { type: String },
     setid: { type: String },
     settledAt: { type: Date },
+    payoutMethod: {
+        type: String,
+        enum: ["gpay", "upi", "bank_transfer", "other"]
+    },
+    transactionId: { type: String },
+    notes: { type: String },
     status: {
         type: String,
-        enum: ['PENDING', 'PROCESSING', 'SUCCESS', 'FAILED', 'REJECTED'],
-        default: 'PENDING'
+        enum: ['pending', 'processing', 'paid', 'rejected', 'cancelled'],
+        default: 'pending'
     }
 }, { timestamps: true });
 

@@ -151,3 +151,85 @@ export const processMonthlySettlement = async (manualMonth = null) => {
 
     return results;
 };
+
+/**
+ * Creates a manual settlement record.
+ */
+export const createManualSettlement = async (data) => {
+    const { agentId, amount, month, payoutMethod, transactionId, notes, status } = data;
+
+    const settlement = await Settlement.create({
+        agentId,
+        amount,
+        month,
+        payoutMethod,
+        transactionId,
+        notes,
+        status,
+        settledAt: status === 'paid' ? new Date() : null
+    });
+
+    if (status === 'paid') {
+        await applySettlementAccounting(agentId, amount);
+    }
+
+    return settlement;
+};
+
+/**
+ * Updates an existing settlement record and handles accounting if status changes to 'paid'.
+ */
+export const updateSettlementStatus = async (settlementId, updateData) => {
+    const settlement = await Settlement.findById(settlementId);
+    if (!settlement) throw new Error('Settlement not found');
+
+    const previousStatus = settlement.status;
+    const newStatus = updateData.status;
+
+    Object.assign(settlement, updateData);
+
+    if (newStatus === 'paid' && previousStatus !== 'paid') {
+        settlement.settledAt = new Date();
+    } else if (newStatus !== 'paid' && previousStatus === 'paid') {
+        settlement.settledAt = null;
+    }
+
+    await settlement.save();
+
+    // Always sync accounting if either the old or new status is 'paid'
+    if (newStatus === 'paid' || previousStatus === 'paid') {
+        await applySettlementAccounting(settlement.agentId, settlement.amount, newStatus === 'paid' && previousStatus !== 'paid');
+    }
+
+    return settlement;
+};
+
+/**
+ * Internal accounting helper for paid settlements.
+ */
+async function applySettlementAccounting(agentId, amount, isMarkingAsPaid = true) {
+    const agentProfile = await AgentProfile.findOne({ userId: agentId });
+    if (agentProfile) {
+        // Recalculate lifetime total earnings from all PAID settlements
+        const paidSettlements = await Settlement.find({ agentId, status: 'paid' });
+        const totalLifetimeSettled = paidSettlements.reduce((sum, s) => sum + s.amount, 0);
+
+        agentProfile.totalEarnings = totalLifetimeSettled;
+
+        if (isMarkingAsPaid) {
+            agentProfile.currentMonthEarnings = Math.max(0, (agentProfile.currentMonthEarnings || 0) - amount);
+            agentProfile.lastSettlementDate = new Date();
+
+            // Update all PENDING transactions to SETTLED
+            await CommissionTransaction.updateMany(
+                { agentId, status: 'PENDING' },
+                { $set: { status: 'SETTLED' } }
+            );
+        } else {
+            // Reverting status away from 'paid'
+            agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) + amount;
+        }
+
+        await agentProfile.save();
+    }
+}

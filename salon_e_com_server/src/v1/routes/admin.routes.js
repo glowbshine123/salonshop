@@ -9,6 +9,9 @@ router.use(protect);
 router.use(authorize('ADMIN'));
 
 router.get('/settlements', adminController.getAllSettlements);
+router.get('/settlements/stats', adminController.getSettlementStats);
+router.post('/settlements', adminController.createManualSettlement);
+router.patch('/settlements/:id', adminController.updateSettlement);
 router.post('/settlements/trigger-auto', adminController.triggerAutoDisbursement);
 
 router.get('/commission-slabs', adminController.getSlabs);

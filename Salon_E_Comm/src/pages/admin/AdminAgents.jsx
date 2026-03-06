@@ -12,6 +12,13 @@ import {
     ChevronRight,
     Plus,
     X,
+    MessageCircle,
+    CreditCard,
+    Smartphone,
+    AlertCircle,
+    Calendar,
+    Send,
+    CheckCircle,
     Mail,
     Phone,
     User as UserIcon,
@@ -71,6 +78,17 @@ export default function AdminAgents() {
             country: 'India'
         }
     });
+
+    // Payout Modal State
+    const [showSettlementModal, setShowSettlementModal] = useState(false);
+    const [selectedAgentForPayout, setSelectedAgentForPayout] = useState(null);
+    const [payoutData, setPayoutData] = useState({
+        transactionId: '',
+        payoutMethod: 'upi',
+        notes: '',
+        status: 'pending'
+    });
+    const [payoutLoading, setPayoutLoading] = useState(false);
 
     const generatePassword = () => {
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
@@ -156,6 +174,43 @@ export default function AdminAgents() {
             toast.error('Status override failed');
         } finally {
             setUpdatingStatusId(null);
+        }
+    };
+
+    const openPayoutModal = (agent) => {
+        setSelectedAgentForPayout(agent);
+        setPayoutData({
+            transactionId: '',
+            payoutMethod: 'upi',
+            notes: '',
+            status: 'pending'
+        });
+        setShowSettlementModal(true);
+    };
+
+    const handleProcessPayout = async (e) => {
+        e.preventDefault();
+        if (!selectedAgentForPayout) return;
+
+        setPayoutLoading(true);
+        try {
+            const now = new Date();
+            const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            await adminAPI.createSettlement({
+                agentId: selectedAgentForPayout._id,
+                amount: selectedAgentForPayout.agentProfile?.currentMonthEarnings || 0,
+                month: month,
+                ...payoutData
+            });
+
+            toast.success('Payout settlement recorded successfully!');
+            setShowSettlementModal(false);
+            fetchAgents(); // Refresh to see updated earnings and last settlement date
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Payout settlement failed');
+        } finally {
+            setPayoutLoading(false);
         }
     };
 
@@ -259,7 +314,9 @@ export default function AdminAgents() {
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Contact</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Monthly Earnings</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Address</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50">Status</th>
+                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50 text-center">Last Settlement</th>
+                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50 text-center">Status</th>
+                                <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest border-b border-neutral-50 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-50">
@@ -328,30 +385,51 @@ export default function AdminAgents() {
                                                 </span>
                                             </div>
                                         </td>
+                                        <td className="px-6 py-5 text-center">
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-bold text-neutral-900 leading-tight">
+                                                    {agent.agentProfile?.lastSettlementDate
+                                                        ? new Date(agent.agentProfile.lastSettlementDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                                                        : 'NEVER'}
+                                                </span>
+                                            </div>
+                                        </td>
                                         <td className="px-6 py-5">
-                                            <Select
-                                                disabled={updatingStatusId === agent._id}
-                                                value={agent.status}
-                                                onValueChange={(value) => handleStatusUpdate(agent._id, value)}
+                                            <div className="flex justify-center">
+                                                <Select
+                                                    disabled={updatingStatusId === agent._id}
+                                                    value={agent.status}
+                                                    onValueChange={(value) => handleStatusUpdate(agent._id, value)}
+                                                >
+                                                    <SelectTrigger className={cn(
+                                                        "w-32 h-9 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
+                                                        statusOptions.find(opt => opt.value === agent.status)?.color || "bg-neutral-50 text-neutral-500"
+                                                    )}>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                                        {statusOptions.map(option => (
+                                                            <SelectItem
+                                                                key={option.value}
+                                                                value={option.value}
+                                                                className="text-[10px] font-bold uppercase tracking-widest cursor-pointer focus:bg-neutral-50"
+                                                            >
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 text-right">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-8 rounded-lg border-emerald-100 hover:bg-emerald-50 text-emerald-600 font-bold text-[9px] uppercase tracking-widest"
+                                                onClick={() => openPayoutModal(agent)}
                                             >
-                                                <SelectTrigger className={cn(
-                                                    "w-32 h-9 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
-                                                    statusOptions.find(opt => opt.value === agent.status)?.color || "bg-neutral-50 text-neutral-500"
-                                                )}>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
-                                                    {statusOptions.map(option => (
-                                                        <SelectItem
-                                                            key={option.value}
-                                                            value={option.value}
-                                                            className="text-[10px] font-bold uppercase tracking-widest cursor-pointer focus:bg-neutral-50"
-                                                        >
-                                                            {option.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                                Trigger Payout
+                                            </Button>
                                         </td>
                                     </tr>
                                 ))
@@ -573,6 +651,208 @@ export default function AdminAgents() {
                                     )}
                                 </button>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Settlement Modal */}
+            {showSettlementModal && selectedAgentForPayout && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-4xl rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-neutral-100 flex flex-col max-h-[90vh]">
+                        <div className="p-8 border-b border-neutral-50 flex items-center justify-between bg-neutral-50/30">
+                            <div>
+                                <h3 className="text-xl font-black text-neutral-900 tracking-tighter uppercase">Settle Commission</h3>
+                                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Manual Payout Clearance Protocol</p>
+                            </div>
+                            <button
+                                onClick={() => setShowSettlementModal(false)}
+                                className="p-3 hover:bg-neutral-100 rounded-2xl transition-all shadow-sm active:scale-90 text-neutral-400 hover:text-neutral-900"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-0 scrollbar-hide flex flex-col md:flex-row">
+                            {/* Left Section: Agent Data */}
+                            <div className="flex-1 p-8 border-r border-neutral-50 bg-neutral-50/20">
+                                <div className="space-y-8">
+                                    <div className="flex items-center gap-5 pb-6 border-b border-neutral-100">
+                                        <Avatar className="w-20 h-20 border-4 border-white shadow-xl ring-2 ring-emerald-500/10">
+                                            <AvatarImage src={selectedAgentForPayout.avatarUrl} />
+                                            <AvatarFallback className="bg-emerald-600 text-white text-2xl font-black italic">
+                                                {selectedAgentForPayout.firstName?.[0]}{selectedAgentForPayout.lastName?.[0]}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <h4 className="text-2xl font-black text-neutral-900 tracking-tighter uppercase leading-none">
+                                                {selectedAgentForPayout.firstName} {selectedAgentForPayout.lastName}
+                                            </h4>
+                                            <p className="text-xs font-bold text-neutral-400 mt-2 uppercase tracking-wider">{selectedAgentForPayout.email}</p>
+                                            <p className="text-[10px] font-black text-emerald-600 mt-1 uppercase tracking-widest flex items-center gap-1">
+                                                <Phone size={10} className="inline" /> {selectedAgentForPayout.phone || 'N/A'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h5 className="text-[11px] font-black text-neutral-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <CreditCard size={14} className="text-emerald-500" />
+                                            Bank & Payment Details
+                                        </h5>
+
+                                        {!selectedAgentForPayout.agentProfile?.bankDetails?.accountNumber && !selectedAgentForPayout.agentProfile?.upiId ? (
+                                            <div className="p-6 bg-red-50 border border-red-100 rounded-3xl flex flex-col items-center text-center gap-3 animate-pulse">
+                                                <AlertCircle className="text-red-500" size={32} />
+                                                <p className="text-[11px] font-bold text-red-600 uppercase tracking-widest leading-relaxed">
+                                                    Agent hasn't added bank details.<br />
+                                                    Please notify to provide clearance data.
+                                                </p>
+                                                <Button size="sm" variant="outline" className="h-8 border-red-200 text-red-600 hover:bg-red-100 text-[9px] font-black uppercase tracking-widest">
+                                                    <Send size={10} className="mr-2" /> Notify Agent
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {selectedAgentForPayout.agentProfile?.bankDetails?.accountNumber && (
+                                                    <div className="p-5 bg-white border border-neutral-100 rounded-2xl shadow-sm space-y-2">
+                                                        <p className="text-[9px] font-black text-neutral-400 uppercase tracking-[0.2em]">Bank Transfer</p>
+                                                        <div className="space-y-1">
+                                                            <div className="flex justify-between">
+                                                                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Bank:</span>
+                                                                <span className="text-[11px] font-black text-neutral-900 uppercase">{selectedAgentForPayout.agentProfile.bankDetails.bankName}</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">A/C:</span>
+                                                                <span className="text-[11px] font-black text-emerald-600 tabular-nums">{selectedAgentForPayout.agentProfile.bankDetails.accountNumber}</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">IFSC:</span>
+                                                                <span className="text-[11px] font-black text-neutral-900 uppercase">{selectedAgentForPayout.agentProfile.bankDetails.ifscCode}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {selectedAgentForPayout.agentProfile?.upiId && (
+                                                    <div className="p-5 bg-white border border-neutral-100 rounded-2xl shadow-sm space-y-2">
+                                                        <p className="text-[9px] font-black text-neutral-400 uppercase tracking-[0.2em]">UPI Payment</p>
+                                                        <div className="flex items-center gap-3">
+                                                            <Smartphone size={16} className="text-emerald-500" />
+                                                            <span className="text-[11px] font-black text-neutral-900 tracking-widest uppercase">{selectedAgentForPayout.agentProfile.upiId}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="p-7 bg-emerald-600 rounded-[32px] text-white shadow-xl shadow-emerald-600/20 group relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-all"></div>
+                                        <p className="text-[10px] font-black text-emerald-200 uppercase tracking-[0.2em] mb-2">Unsettled Commissions</p>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-xs font-bold text-emerald-200">₹</span>
+                                            <h4 className="text-4xl font-black tracking-tighter leading-none italic">
+                                                {(selectedAgentForPayout.agentProfile?.currentMonthEarnings || 0).toLocaleString()}
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Section: Input Form */}
+                            <div className="flex-1 p-8 bg-white">
+                                <form onSubmit={handleProcessPayout} className="space-y-6">
+                                    <div className="space-y-4">
+                                        <h5 className="text-[11px] font-black text-neutral-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <CheckCircle size={14} className="text-emerald-500" />
+                                            Clearance Data
+                                        </h5>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest ml-1">Transaction ID</label>
+                                            <div className="relative group/input">
+                                                <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within/input:text-emerald-500 transition-colors" size={14} />
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="UTR / REF NO..."
+                                                    className="w-full pl-11 pr-4 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl text-xs font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all placeholder:text-neutral-200 shadow-sm"
+                                                    value={payoutData.transactionId}
+                                                    onChange={e => setPayoutData({ ...payoutData, transactionId: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest ml-1">Payout Method</label>
+                                                <Select value={payoutData.payoutMethod} onValueChange={(v) => setPayoutData({ ...payoutData, payoutMethod: v })}>
+                                                    <SelectTrigger className="h-12 bg-neutral-50 border-neutral-100 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                                        <SelectItem value="upi" className="text-[10px] font-black uppercase tracking-widest">UPI</SelectItem>
+                                                        <SelectItem value="gpay" className="text-[10px] font-black uppercase tracking-widest">GPay</SelectItem>
+                                                        <SelectItem value="bank_transfer" className="text-[10px] font-black uppercase tracking-widest">Bank Transfer</SelectItem>
+                                                        <SelectItem value="other" className="text-[10px] font-black uppercase tracking-widest">Other</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest ml-1">Current Status</label>
+                                                <Select value={payoutData.status} onValueChange={(v) => setPayoutData({ ...payoutData, status: v })}>
+                                                    <SelectTrigger className={cn(
+                                                        "h-12 border-neutral-100 rounded-2xl text-[10px] font-black uppercase tracking-widest",
+                                                        payoutData.status === 'paid' ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                                                    )}>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white border-neutral-100 rounded-xl shadow-xl">
+                                                        <SelectItem value="pending" className="text-[10px] font-black uppercase tracking-widest">Pending</SelectItem>
+                                                        <SelectItem value="processing" className="text-[10px] font-black uppercase tracking-widest">Processing</SelectItem>
+                                                        <SelectItem value="paid" className="text-[10px] font-black uppercase tracking-widest">Paid</SelectItem>
+                                                        <SelectItem value="cancelled" className="text-[10px] font-black uppercase tracking-widest">Cancelled</SelectItem>
+                                                        <SelectItem value="rejected" className="text-[10px] font-black uppercase tracking-widest">Rejected</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest ml-1">Internal Notes</label>
+                                            <textarea
+                                                rows="3"
+                                                placeholder="ADD CLEARANCE NOTES..."
+                                                className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl text-xs font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all placeholder:text-neutral-200 resize-none shadow-sm"
+                                                value={payoutData.notes}
+                                                onChange={e => setPayoutData({ ...payoutData, notes: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="p-5 bg-neutral-50 rounded-2xl border border-neutral-100 flex items-center justify-between">
+                                            <div className="flex items-center gap-3 text-neutral-400">
+                                                <Calendar size={14} />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Timestamp</span>
+                                            </div>
+                                            <span className="text-[11px] font-black text-neutral-900 tabular-nums">
+                                                {new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).toUpperCase()}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={payoutLoading}
+                                        className="w-full py-4.5 bg-neutral-900 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-neutral-900/10 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                                    >
+                                        {payoutLoading ? <Loader2 className="animate-spin" size={16} /> : (
+                                            <>
+                                                PROCEED PAYOUT CLEARANCE
+                                                <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
