@@ -100,14 +100,12 @@ export default function Header() {
           {/* Left Section: Mobile Hamburger / Desktop Logo */}
           <div className="flex-1 flex items-center justify-start">
             {/* Hamburger (Mobile Only) */}
-            {user && (
-              <button
-                onClick={toggleSidebar}
-                className="md:hidden p-2 text-foreground-secondary hover:bg-secondary rounded-xl transition-colors"
-              >
-                <Menu size={24} />
-              </button>
-            )}
+            <button
+              onClick={toggleSidebar}
+              className="md:hidden p-2 text-foreground-secondary hover:bg-secondary rounded-xl transition-colors"
+            >
+              <Menu size={24} />
+            </button>
 
             {/* Logo (Desktop Only) */}
             <div className="hidden md:block">
@@ -247,11 +245,6 @@ export default function Header() {
             </div>
           </div>
 
-          {!user && (
-            <Link to="/auth/signin" className="md:hidden">
-              <Button size="sm">Login</Button>
-            </Link>
-          )}
 
         </div>
       </header>
