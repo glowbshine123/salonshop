@@ -1,37 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { settingsAPI } from '../../utils/apiClient';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
+import { Button } from '../ui/button';
 
 export default function Footer() {
-  const footerSections = [
-    {
-      title: 'Shop',
-      links: [
-        { label: 'Hair Care', path: '/products/?category=Hair+Care&page=1' },
-        { label: 'Skin Care', path: '/products/?category=Skin+Care&page=1' },
-        { label: 'Equipments', path: '/products/?category=Professional+Equipment&page=1' },
-        { label: 'Professional Tools', path: '/products/?category=Salon+Tools&page=1' },
-      ],
-    },
-    {
-      title: 'Company',
-      links: [
-        { label: 'Contact Us', path: '/contact' },
-        { label: 'About Us', path: '/about' },
-      ],
-    },
-    {
-      title: 'Legal',
-      links: [
-        { label: 'Terms of Use', path: '/terms' },
-        { label: 'Privacy Policy', path: '/privacy' },
-        { label: 'Shipping Policy', path: '/shipping' },
-        { label: 'Return Policy', path: '/returns' },
-      ],
-    },
-  ];
-
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {
@@ -46,98 +19,147 @@ export default function Footer() {
     fetchSettings();
   }, []);
 
+  const quickLinks = [
+    { label: 'Home', path: '/' },
+    { label: 'Shop', path: '/products' },
+    { label: 'Contact Us', path: '/contact' },
+  ];
+
+  const customerService = [
+    { label: 'FAQ', path: '/#faq' },
+    { label: 'Shipping & Returns', path: '/shipping' },
+    { label: 'Privacy Policy', path: '/privacy' },
+    { label: 'Terms & Conditions', path: '/terms' },
+  ];
+
   return (
-    <footer className="bg-white text-neutral-900 border-t border-neutral-200 mt-auto">
-      {/* Upper Section */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
+    <footer className="w-full bg-white pb-2">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+        {/* Main Footer Box */}
+        <div
+          className="relative rounded-lg overflow-hidden border border-neutral-100 shadow-md h-fit flex flex-col justify-between"
+          style={{
+            backgroundImage: 'url("/bg/b6.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          {/* Subtle Overlay to ensure readability if bg is too busy */}
+          <div className="absolute inset-0 bg-white/20 pointer-events-none" />
 
-          {/* Brand & Contact Column */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Logo & Name */}
-            <Link to="/" className="flex items-center gap-3 group">
-              {settings?.logoUrl ? (
-                <img src={settings.logoUrl} alt="Logo" className="w-12 h-12 rounded-xl object-cover" />
-              ) : (
-                <div className="w-10 h-10 bg-neutral-900 rounded-lg flex items-center justify-center shadow-sm">
-                  <span className="text-white font-black text-xl">S</span>
-                </div>
-              )}
-              <span className="text-2xl font-black tracking-tighter text-neutral-900">
-                {settings?.appName || 'Salon E-Comm'}
-              </span>
-            </Link>
+          {/* Top Sections Container */}
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 p-8">
 
-            {/* Contact Details */}
-            <div className="space-y-2 text-sm font-medium text-neutral-500">
-              {settings?.supportEmail && (
-                <p className='hover:text-neutral-900 transition-colors'>
-                  <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>
-                </p>
-              )}
+            {/* Brand & Contact */}
+            <div className="space-y-4">
+              <Link to="/" className="flex items-center gap-3 group">
+                <img src='/logo.jpeg' alt="Logo" className="w-fit h-16 rounded-md object-cover" />
+              </Link>
 
-              {settings?.address && (
-                <p className="max-w-xs leading-relaxed">
-                  {[
-                    settings.address.street,
-                    settings.address.city,
-                    settings.address.state,
-                    settings.address.zip,
-                    settings.address.country
-                  ].filter(Boolean).join(', ')}
-                </p>
-              )}
+              <div className="space-y-3 text-sm font-medium text-neutral-500">
+                {settings?.supportEmail && (
+                  <p className='hover:text-pink-500 transition-colors'>
+                    <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>
+                  </p>
+                )}
+                {settings?.address && (
+                  <p className="max-w-xs leading-relaxed">
+                    {[
+                      settings.address.street,
+                      settings.address.city,
+                      settings.address.state,
+                      settings.address.zip,
+                      settings.address.country
+                    ].filter(Boolean).join(', ')}
+                  </p>
+                )}
+              </div>
             </div>
 
-            {/* Social Icons */}
-            <div className="flex gap-4">
-              {settings?.socialLinks?.facebook && (
-                <a href={settings.socialLinks.facebook} target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-neutral-900 transition-colors">
-                  <Facebook size={24} fill="currentColor" strokeWidth={0} />
-                </a>
-              )}
-              {settings?.socialLinks?.twitter && (
-                <a href={settings.socialLinks.twitter} target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-neutral-900 transition-colors">
-                  <Twitter size={24} fill="currentColor" strokeWidth={0} />
-                </a>
-              )}
-              {settings?.socialLinks?.instagram && (
-                <a href={settings.socialLinks.instagram} target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-neutral-900 transition-colors">
-                  <Instagram size={24} fill="currentColor" stroke="white" strokeWidth={2} />
-                </a>
-              )}
-              {settings?.socialLinks?.linkedin && (
-                <a href={settings.socialLinks.linkedin} target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-neutral-900 transition-colors">
-                  <Linkedin size={24} fill="currentColor" strokeWidth={0} />
-                </a>
-              )}
-            </div>
-          </div>
+            {/* Vertical Divider for Desktop */}
+            <div className="hidden lg:block w-px h-full bg-neutral-200/50 absolute left-1/4" />
 
-          {/* Navigation Links */}
-          {footerSections.map((section) => (
-            <div key={section.title} className="space-y-4">
-              <h4 className="font-bold tracking-wide text-lg text-neutral-900">{section.title}</h4>
-              <ul className="space-y-2">
-                {section.links.map((link) => (
-                  <li key={link.label}>
-                    <Link to={link.path} className="text-sm font-medium text-neutral-400 hover:text-neutral-900 transition-colors">
+            {/* Quick Links */}
+            <div className="space-y-6 lg:pl-8">
+              <div className="space-y-2">
+                <h4 className="text-xl font-bold text-neutral-800">Quick Links</h4>
+                <div className="h-px w-full bg-neutral-200/50" />
+              </div>
+              <ul className="space-y-3">
+                {quickLinks.map((link) => (
+                  <li key={link.label} className="flex items-center gap-2 group">
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 shrink-0" />
+                    <Link to={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-neutral-100 bg-neutral-50/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex flex-col items-center gap-6">
-          <p className="text-xs font-semibold tracking-widest text-neutral-400 uppercase">
-            © 2026 Salon E-Comm. ALL RIGHTS RESERVED.
-          </p>
+            {/* Vertical Divider for Desktop */}
+            <div className="hidden lg:block w-px h-full bg-neutral-200/50 absolute left-1/2" />
+
+            {/* Customer Service */}
+            <div className="space-y-6 lg:pl-8">
+              <div className="space-y-2">
+                <h4 className="text-xl font-bold text-neutral-800">Customer Service</h4>
+                <div className="h-px w-full bg-neutral-200/50" />
+              </div>
+              <ul className="space-y-3">
+                {customerService.map((link) => (
+                  <li key={link.label} className="flex items-center gap-2 group">
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 shrink-0" />
+                    <Link to={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Vertical Divider for Desktop */}
+            <div className="hidden lg:block w-px h-full bg-neutral-200/50 absolute left-3/4" />
+
+            {/* Follow Us */}
+            <div className="space-y-6 lg:pl-8">
+              <div className="space-y-2">
+                <h4 className="text-xl font-bold text-neutral-800">Follow Us</h4>
+                <div className="h-px w-full bg-neutral-200/50" />
+              </div>
+              <div className="flex gap-4">
+                {[
+                  { icon: <Facebook size={20} />, color: 'bg-[#5B7AB7]', path: settings?.socialLinks?.facebook },
+                  { icon: <Instagram size={20} />, color: 'bg-[#C25E6B]', path: settings?.socialLinks?.instagram },
+                  { icon: <Twitter size={20} />, color: 'bg-[#89B1D5]', path: settings?.socialLinks?.twitter }
+                ].map((social, i) => (
+                  <a
+                    key={i}
+                    href={social.path || '#'}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`${social.color} text-white w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-md`}
+                  >
+                    {social.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar Container */}
+          <div className="relative z-10 px-10 md:px-14 pb-6 flex flex-col items-center">
+            <div className="h-px w-full bg-neutral-200/30 mb-3" />
+            <div className="flex flex-col md:flex-row items-center gap-2 text-sm font-medium text-neutral-500">
+              <span>© 2024 {settings?.appName || 'Glow B Shine'}. All Rights Reserved.</span>
+              <div className="hidden md:block w-px h-4 bg-neutral-300 mx-2" />
+              <div className="flex gap-4">
+                <Link to="/privacy" className="hover:text-pink-500 transition-colors">Privacy Policy</Link>
+                <div className="w-px h-4 bg-neutral-300" />
+                <Link to="/terms" className="hover:text-pink-500 transition-colors">Terms & Conditions</Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

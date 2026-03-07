@@ -75,7 +75,7 @@ const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState(0);
 
     return (
-        <section className="py-6 bg-white">
+        <section className="py-6 bg-white" id='faq'>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col lg:flex-row gap-4 lg:gap-24">
                     {/* Heading and Description - Right Side (1/4) */}
