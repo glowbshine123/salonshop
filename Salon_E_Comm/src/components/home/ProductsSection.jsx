@@ -16,7 +16,7 @@ const ProductsSection = ({
     onAction,
     onRetry
 }) => (
-    <section className="py-8 relative">
+    <section className="py-6 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <SectionHeader
                 icon={icon}

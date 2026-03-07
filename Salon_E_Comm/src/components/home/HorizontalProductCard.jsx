@@ -14,7 +14,7 @@ const HorizontalProductCard = ({ product, index }) => {
         <div
             onClick={() => navigate(`/products/${product._id}`)}
             style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-            className="relative shrink-0 w-[300px] md:w-[350px] rounded-md border border-neutral-100 overflow-hidden flex cursor-pointer transition-shadow duration-300 group shadow-foreground-muted shadow-sm mb-2"
+            className="relative shrink-0 w-[300px] md:w-[350px] rounded-md border border-neutral-100 overflow-hidden flex cursor-pointer transition-shadow duration-300 group shadow-md mb-2"
         >
             {/* Background Overlay for better text readability */}
             <div className="absolute inset-0 bg-white/40 group-hover:bg-white/20 transition-colors duration-300 -z-10" />
