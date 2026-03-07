@@ -17,8 +17,8 @@ const StatsSection = () => (
                     { value: "₹10L+", label: "Monthly Orders" }
                 ].map((stat, i) => (
                     <div key={i} className="space-y-2">
-                        <h3 className="text-5xl md:text-6xl font-black text-emerald-600 tracking-tighter">{stat.value}</h3>
-                        <p className="text-neutral-900 font-bold uppercase tracking-widest text-sm">{stat.label}</p>
+                        <h3 className="text-5xl md:text-6xl font-black text-primary tracking-tighter">{stat.value}</h3>
+                        <p className="text-foreground font-bold uppercase tracking-widest text-sm">{stat.label}</p>
                     </div>
                 ))}
             </div>
