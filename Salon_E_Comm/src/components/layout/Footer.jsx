@@ -26,7 +26,7 @@ export default function Footer() {
   ];
 
   const customerService = [
-    { label: 'FAQ', path: '/#faq' },
+    { label: 'FAQ', path: '#faq' },
     { label: 'Shipping & Returns', path: '/shipping' },
     { label: 'Privacy Policy', path: '/privacy' },
     { label: 'Terms & Conditions', path: '/terms' },
@@ -89,9 +89,15 @@ export default function Footer() {
                 {quickLinks.map((link) => (
                   <li key={link.label} className="flex items-center gap-2 group">
                     <span className="w-1.5 h-1.5 rounded-full bg-pink-400 shrink-0" />
-                    <Link to={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
-                      {link.label}
-                    </Link>
+                    {link.path.startsWith('#') ? (
+                      <a href={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link to={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -110,9 +116,15 @@ export default function Footer() {
                 {customerService.map((link) => (
                   <li key={link.label} className="flex items-center gap-2 group">
                     <span className="w-1.5 h-1.5 rounded-full bg-pink-400 shrink-0" />
-                    <Link to={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
-                      {link.label}
-                    </Link>
+                    {link.path.startsWith('#') ? (
+                      <a href={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link to={link.path} className="text-neutral-600 font-semibold hover:text-pink-500 transition-colors">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
