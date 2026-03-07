@@ -103,11 +103,11 @@ export default function SignupPage() {
     <div className="flex min-h-screen bg-white">
       {/* Left Side - Form */}
       <div className="w-full lg:w-1/2 p-2 h-screen sticky top-0">
-        <div className="h-full bg-neutral-50/50 p-4 md:p-12 flex flex-col justify-center relative overflow-y-auto scrollbar-hide">
+        <div className="h-full bg-input-bg p-4 md:p-12 flex flex-col justify-center relative overflow-y-auto scrollbar-hide">
 
           {/* Back Button */}
           <Link to="/" className="absolute top-4 left-4">
-            <Button variant="outline" className="border-neutral-800 border rounded-sm hover:bg-transparent gap-1">
+            <Button variant="outline" className="border-border-strong border rounded-sm hover:bg-transparent gap-1">
               <ChevronLeft size={20} />
               Home
             </Button>
@@ -122,27 +122,27 @@ export default function SignupPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" placeholder="John" className="h-12 bg-white border-neutral-200 rounded-sm" value={firstName} onChange={e => setFirstName(e.target.value)} required />
+                  <Input id="firstName" placeholder="John" className="h-12 bg-input-bg border-border-strong rounded-sm" value={firstName} onChange={e => setFirstName(e.target.value)} required />
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" placeholder="Doe" className="h-12 bg-white border-neutral-200 rounded-sm" value={lastName} onChange={e => setLastName(e.target.value)} required />
+                  <Input id="lastName" placeholder="Doe" className="h-12 bg-input-bg border-border-strong rounded-sm" value={lastName} onChange={e => setLastName(e.target.value)} required />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" placeholder="name@example.com" className="h-12 bg-white border-neutral-200 rounded-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+                <Input id="email" type="email" placeholder="name@example.com" className="h-12 bg-input-bg border-border-strong rounded-sm" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
 
               <div className="space-y-1">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="+91 00000 00000" className="h-12 bg-white border-neutral-200 rounded-sm" value={phone} onChange={e => setPhone(e.target.value)} required />
+                <Input id="phone" type="tel" placeholder="+91 00000 00000" className="h-12 bg-input-bg border-border-strong rounded-sm" value={phone} onChange={e => setPhone(e.target.value)} required />
               </div>
 
               <div className="space-y-1">
                 <Label htmlFor="categories">Categories (What you are selling, comma separated)</Label>
-                <Input id="categories" placeholder="Chair, hair brush, etc." className="h-12 bg-white border-neutral-200 rounded-sm" value={categories} onChange={e => setCategories(e.target.value)} />
+                <Input id="categories" placeholder="Chair, hair brush, etc." className="h-12 bg-input-bg border-border-strong rounded-sm" value={categories} onChange={e => setCategories(e.target.value)} />
               </div>
 
               <div className="space-y-1">
@@ -152,7 +152,7 @@ export default function SignupPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="h-12 bg-white border-neutral-200 pr-10 rounded-sm"
+                    className="h-12 bg-input-bg border-border-strong pr-10 rounded-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -174,7 +174,7 @@ export default function SignupPage() {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="h-12 bg-white border-neutral-200 pr-10 rounded-sm"
+                    className="h-12 bg-input-bg border-border-strong pr-10 rounded-sm"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -201,9 +201,9 @@ export default function SignupPage() {
               </Button>
             </form>
 
-            <p className="text-center text-sm font-medium text-neutral-500">
+            <p className="text-center text-sm font-medium text-foreground">
               Already have an account?{' '}
-              <Link to="/auth/signin" className="text-neutral-900 font-bold hover:underline">
+              <Link to="/auth/signin" className="text-foreground font-bold hover:underline">
                 Sign In
               </Link>
             </p>

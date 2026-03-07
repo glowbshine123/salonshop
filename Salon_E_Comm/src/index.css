@@ -1,5 +1,124 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+
+  /* ========== BACKGROUNDS ========== */
+
+  --color-background: #f7f3f3;
+  /* main page bg */
+  --color-background-secondary: #fff6f8;
+  /* soft pink sections */
+
+  /* ========== PRIMARY COLORS ========== */
+
+  --color-primary: #ff5a8a;
+  /* main pink buttons */
+  --color-primary-hover: #ff3f78;
+  --color-primary-muted: #ffd3df;
+
+  /* ========== SECONDARY COLORS ========== */
+
+  --color-secondary: #f1ebe9;
+  /* category boxes */
+  --color-secondary-hover: #e8e1df;
+
+  /* ========== ACCENT ========== */
+
+  --color-accent: #ff7fa6;
+  /* highlight tags (popular etc) */
+
+  /* ========== CARD COLORS ========== */
+
+  --color-card: #ffffff;
+  /* main product cards */
+  --color-card-secondary: #faf6f6;
+  /* product containers */
+  --color-card-muted: #f2ecec;
+  /* muted blocks */
+
+  /* ========== TEXT COLORS ========== */
+
+  --color-foreground: #2b2b2b;
+  /* main text */
+  --color-foreground-secondary: #6a6a6a;
+  /* subtext */
+  --color-foreground-muted: #9a9a9a;
+  /* labels */
+
+  /* ========== BORDER COLORS ========== */
+
+  --color-border: #ece4e4;
+  --color-border-soft: #f2eded;
+  --color-border-strong: #e3d9d9;
+
+  /* ========== INPUT COLORS ========== */
+
+  --color-input-bg: #ffffff;
+  --color-input-border: #e8e2e2;
+  --color-input-placeholder: #a8a8a8;
+
+  /* ========== TAG COLORS ========== */
+
+  --color-tag-popular-bg: #ffd6e3;
+  --color-tag-popular-text: #ff4a7f;
+
+  --color-tag-new-bg: #dff7e8;
+  --color-tag-new-text: #2f9e62;
+
+  --color-tag-trending-bg: #ffe7d4;
+  --color-tag-trending-text: #ff8a3d;
+
+  /* ================= STATUS COLORS ================= */
+
+  /* Success (soft green) */
+  --color-success: #34c38f;
+  --color-success-bg: #e8f9f2;
+  --color-success-border: #bdf0dd;
+  --color-success-foreground: #1d7f5f;
+
+  /* Destructive / Error (soft red) */
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-bg: #ffe9ea;
+  --color-destructive-border: #ffc9cc;
+  --color-destructive-foreground: #b42330;
+
+  /* Warning (soft yellow) */
+  --color-warning: #f5b942;
+  --color-warning-bg: #fff4dc;
+  --color-warning-border: #ffe3a8;
+  --color-warning-foreground: #9a6a00;
+
+  /* Info (soft blue) */
+  --color-info: #4da3ff;
+  --color-info-bg: #eaf3ff;
+  --color-info-border: #cfe2ff;
+  --color-info-foreground: #1b5fbf;
+  --color-sidebar-ring: var(--color-sidebar-ring);
+  --color-sidebar-border: var(--color-sidebar-border);
+  --color-sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+  --color-sidebar-accent: var(--color-sidebar-accent);
+  --color-sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+  --color-sidebar-primary: var(--color-sidebar-primary);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+
+  /* ========== SHADOWS ========== */
+
+  /* --shadow-card: 0 6px 16px rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.04); */
+
+  /* ========== RADIUS ========== */
+
+  /* --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px; */
+
+}
+
 :root {
   color-scheme: light !important;
   --primary-color: #0066cc;
@@ -126,13 +245,13 @@ textarea {
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --color-background: var(--background);
+  /* --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  --color-card-foreground: var(--card-foreground); */
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
+  /* --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -140,9 +259,9 @@ textarea {
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
+  --color-destructive: var(--destructive); */
+  /* --color-border: var(--border); */
+  /* --color-input: var(--input); */
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -159,7 +278,6 @@ textarea {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -168,4 +286,24 @@ textarea {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.dark {
+
+  --sidebar: hsl(240 5.9% 10%);
+
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+
+  --sidebar-border: hsl(240 3.7% 15.9%);
+
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
 }

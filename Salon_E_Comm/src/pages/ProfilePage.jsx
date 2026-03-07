@@ -256,26 +256,26 @@ export default function ProfilePage() {
     ];
 
     return (
-        <div className="bg-neutral-50/50 min-h-screen py-20 px-4">
-            <div className="px-8 max-w-7xl mx-auto">
+        <div className="bg-white min-h-screen py-20 px-4">
+            <div className="max-w-7xl mx-auto space-y-6 px-4 md:px-6">
                 <div className="mb-2 text-center lg:text-left">
-                    <h1 className="text-4xl font-black text-neutral-900 tracking-tight">My <span className="text-emerald-600">Profile</span></h1>
-                    <p className="text-neutral-400 font-bold uppercase tracking-widest text-[10px] mt-2">Manage your account information and preferences</p>
+                    <h1 className="text-4xl font-black text-foreground tracking-tight">My <span className="text-primary">Profile</span></h1>
+                    <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] mt-2">Manage your account information and preferences</p>
                 </div>
 
-                <div className="w-fit pb-8">
+                <div className="w-fit pb-6">
                     <NavigationMenu>
                         <NavigationMenuList>
                             {tabs.map((tab) => (
                                 <NavigationMenuItem key={tab.id}>
                                     <NavigationMenuLink
-                                        className={`${navigationMenuTriggerStyle()} ${activeTab === tab.id && 'bg-emerald-500/5'} cursor-pointer`}
+                                        className={`${navigationMenuTriggerStyle()} ${activeTab === tab.id && 'bg-primary/5'} cursor-pointer rounded-md!`}
                                         active={activeTab === tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <tab.icon size={14} />
-                                            <span className="font-bold text-xs uppercase tracking-wider">{tab.label}</span>
+                                            <tab.icon size={14} className={activeTab === tab.id ? 'text-primary' : 'text-muted-foreground'} />
+                                            <span className={`font-black text-[10px] uppercase tracking-wider ${activeTab === tab.id ? 'text-primary' : 'text-muted-foreground'}`}>{tab.label}</span>
                                         </div>
                                     </NavigationMenuLink>
                                 </NavigationMenuItem>
@@ -286,19 +286,19 @@ export default function ProfilePage() {
 
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {activeTab === 'PROFILE' && (
-                        <div className="space-y-8 grid grid-cols-1 lg:grid-cols-4 gap-4">
+                        <div className="space-y-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
                             {/* Profile Header Cards */}
                             <div className="flex flex-col gap-4">
-                                <div className="bg-white p-8 rounded-xl border border-neutral-100 shadow-sm flex items-center gap-6">
+                                <div className="bg-card p-6 rounded-lg border border-border shadow-sm flex items-center gap-6">
                                     <div className="relative group cursor-pointer">
-                                        <div className="w-20 h-20 bg-emerald-50 rounded-[24px] flex items-center justify-center text-emerald-600 font-black text-2xl border border-emerald-100 shadow-inner group-hover:scale-105 transition-transform duration-500 overflow-hidden">
+                                        <div className="w-20 h-20 bg-primary/5 rounded-lg flex items-center justify-center text-primary font-black text-2xl border border-primary/10 shadow-inner group-hover:scale-105 transition-transform duration-500 overflow-hidden">
                                             {previewUrl ? (
                                                 <img src={previewUrl} alt="Profile" className="w-full h-full object-cover" />
                                             ) : (
                                                 user?.firstName?.[0] || 'U'
                                             )}
                                         </div>
-                                        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-neutral-900 text-white rounded-xl flex items-center justify-center border-4 border-white shadow-lg group-hover:bg-emerald-600 transition-colors">
+                                        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-foreground text-background rounded-md flex items-center justify-center border-4 border-card shadow-lg group-hover:bg-primary transition-colors">
                                             <Camera size={14} />
                                         </div>
                                         <input
@@ -310,126 +310,129 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <h2 className="text-2xl font-black text-neutral-900">{user?.firstName} {user?.lastName}</h2>
-                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Authorized Member</p>
+                                        <h2 className="text-xl font-black text-foreground tracking-tight">{user?.firstName} {user?.lastName}</h2>
+                                        <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Authorized Member</p>
                                     </div>
                                 </div>
-
                             </div>
 
-                            <div className="col-span-3 bg-white p-10 rounded-xl border border-neutral-100 shadow-sm space-y-4">
+                            <div className="col-span-1 lg:col-span-3 bg-card p-6 md:p-10 rounded-lg border border-border shadow-sm space-y-6">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Profile Configuration</h3>
+                                    <h3 className="text-xs font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+                                        <User size={16} className="text-primary" /> Profile Configuration
+                                    </h3>
                                     {success && (
-                                        <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
+                                        <div className="flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
                                             <CheckCircle2 size={16} />
                                             Profile Updated
                                         </div>
                                     )}
                                 </div>
 
-                                <form onSubmit={handleUpdate} className="space-y-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <form onSubmit={handleUpdate} className="space-y-6 md:space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">First Name</label>
+                                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">First Name</label>
                                             <div className="relative">
-                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                                                 <input
                                                     type="text"
                                                     name="firstName"
                                                     value={formData.firstName}
                                                     onChange={handleChange}
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                    className="w-full bg-muted/30 border border-border rounded-md p-3 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
                                                 />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Last Name</label>
+                                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Last Name</label>
                                             <div className="relative">
-                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                                                 <input
                                                     type="text"
                                                     name="lastName"
                                                     value={formData.lastName}
                                                     onChange={handleChange}
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                    className="w-full bg-muted/30 border border-border rounded-md p-3 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
                                                 />
                                             </div>
                                         </div>
                                         <div className="md:col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Email Address</label>
+                                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Email Address</label>
                                             <div className="relative">
-                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                                                 <input
                                                     type="email"
                                                     disabled
                                                     name="email"
                                                     value={formData.email}
-                                                    className="w-full bg-neutral-100 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold text-neutral-400 cursor-not-allowed"
+                                                    className="w-full bg-muted border border-border rounded-md p-3 pl-12 text-sm font-bold text-muted-foreground cursor-not-allowed"
                                                 />
                                             </div>
                                         </div>
                                         <div className="md:col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Phone Number</label>
+                                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Phone Number</label>
                                             <div className="relative">
-                                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                                                 <input
                                                     type="tel"
                                                     name="phone"
                                                     value={formData.phone}
                                                     onChange={handleChange}
-                                                    className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                    className="w-full bg-muted/30 border border-border rounded-md p-3 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="border-t border-neutral-100 pt-6">
-                                        <h4 className="text-sm font-black text-neutral-900 uppercase tracking-wide mb-6">Address Information</h4>
-                                        <div className="space-y-6">
+                                    <div className="border-t border-border pt-6">
+                                        <h4 className="flex items-center gap-2 text-[10px] font-black text-foreground uppercase tracking-widest mb-6">
+                                            <MapPin size={14} className="text-primary" /> Address Information
+                                        </h4>
+                                        <div className="space-y-4 md:space-y-6">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Street Address</label>
+                                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Street Address</label>
                                                 <div className="relative">
-                                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
+                                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                                                     <input
                                                         type="text"
                                                         name="address.street"
                                                         value={formData.address.street}
                                                         onChange={handleChange}
                                                         placeholder="123 Main St"
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        className="w-full bg-muted/30 border border-border rounded-md p-3 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">City</label>
+                                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">City</label>
                                                     <input
                                                         type="text"
                                                         name="address.city"
                                                         value={formData.address.city}
                                                         onChange={handleChange}
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        className="w-full bg-muted/30 border border-border rounded-md p-3 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">State</label>
+                                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">State</label>
                                                     <input
                                                         type="text"
                                                         name="address.state"
                                                         value={formData.address.state}
                                                         onChange={handleChange}
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        className="w-full bg-muted/30 border border-border rounded-md p-3 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Zip Code</label>
+                                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Zip Code</label>
                                                     <input
                                                         type="text"
                                                         name="address.zip"
                                                         value={formData.address.zip}
                                                         onChange={handleChange}
-                                                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 px-6 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                                                        className="w-full bg-muted/30 border border-border rounded-md p-3 px-4 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -440,9 +443,9 @@ export default function ProfilePage() {
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="w-full h-16 bg-neutral-900 text-white rounded-[24px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-neutral-900/20 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
+                                            className="w-full h-12 text-base! bg-primary text-background rounded-md font-black hover:bg-primary-hover transition-all shadow-lg shadow-foreground/10 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
                                         >
-                                            {loading ? <Loader2 className="animate-spin" size={20} /> : 'UPDATE CONFIGURATION'}
+                                            {loading ? <Loader2 className="animate-spin" size={16} /> : 'UPDATE CONFIGURATION'}
                                         </button>
                                     </div>
                                 </form>
@@ -451,7 +454,7 @@ export default function ProfilePage() {
                     )}
 
                     {activeTab === 'SECURITY' && (
-                        <div className="max-w-7xl px-8 bg-white p-10 rounded-xl border border-neutral-100 shadow-sm ">
+                        <div className="bg-card p-6 md:p-10 rounded-lg border border-border shadow-sm">
                             <SecuritySettings />
                         </div>
                     )}

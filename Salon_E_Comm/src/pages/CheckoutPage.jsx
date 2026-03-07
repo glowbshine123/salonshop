@@ -35,6 +35,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [shippingAddress, setShippingAddress] = useState({ name: '', street: '', city: '', state: '', zip: '', phone: '' });
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
 
   const [rewardWallet, setRewardWallet] = useState(null);
@@ -291,133 +292,136 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50/50 py-20 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-12">
-          <h1 className="text-4xl font-black text-neutral-900 tracking-tight">Checkout <span className="text-emerald-600">& Attribution</span></h1>
-          <p className="text-neutral-400 font-bold uppercase tracking-widest text-[10px] mt-2">Finalize your professional inventory acquisition</p>
+    <div className="min-h-screen bg-white py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="mb-6">
+          <h1 className="text-4xl font-black text-foreground tracking-tight">Checkout <span className="text-primary">& Attribution</span></h1>
+          <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] mt-2">Finalize your Cart.</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left Section - Form */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white rounded-[40px] border border-neutral-100 shadow-sm overflow-hidden">
-              <div className="p-8 border-b border-neutral-50 flex items-center gap-4 bg-neutral-50/50">
-                <div className="w-10 h-10 bg-neutral-900 text-white rounded-2xl flex items-center justify-center font-black">1</div>
-                <h2 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Shipping Logistics</h2>
-              </div>
-              <div className="p-8 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Recipient Name</label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
-                      <input
-                        type="text"
-                        placeholder="John Doe"
-                        value={shippingAddress.name}
-                        onChange={e => setShippingAddress(s => ({ ...s, name: e.target.value }))}
-                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Contact Phone</label>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
-                      <input
-                        type="tel"
-                        placeholder="+91 00000 00000"
-                        value={shippingAddress.phone}
-                        onChange={e => setShippingAddress(s => ({ ...s, phone: e.target.value }))}
-                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2 space-y-2">
-                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Street Address</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300" size={18} />
-                      <input
-                        type="text"
-                        placeholder="123 Luxury Lane, Business District"
-                        value={shippingAddress.street}
-                        onChange={e => setShippingAddress(s => ({ ...s, street: e.target.value }))}
-                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 pl-12 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">City</label>
-                    <input
-                      type="text"
-                      placeholder="Mumbai"
-                      value={shippingAddress.city}
-                      onChange={e => setShippingAddress(s => ({ ...s, city: e.target.value }))}
-                      className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">State</label>
-                      <input
-                        type="text"
-                        placeholder="MH"
-                        value={shippingAddress.state}
-                        onChange={e => setShippingAddress(s => ({ ...s, state: e.target.value }))}
-                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">ZIP / PIN</label>
-                      <input
-                        type="text"
-                        placeholder="400001"
-                        value={shippingAddress.zip}
-                        onChange={e => setShippingAddress(s => ({ ...s, zip: e.target.value }))}
-                        className="w-full bg-neutral-50 border border-neutral-100 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+              <div className="p-2 px-4 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-sm font-bold text-foreground capitalize tracking-wide">Shipping Address</h2>
                 </div>
+                {!isEditingAddress && (
+                  <button
+                    onClick={() => setIsEditingAddress(true)}
+                    className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
+                  >
+                    Edit Address
+                  </button>
+                )}
+              </div>
+              <div className="p-4">
+                {isEditingAddress ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-foreground-muted capitalize tracking-wide ml-1">Recipient Name</label>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                          <input
+                            type="text"
+                            placeholder="John Doe"
+                            value={shippingAddress.name}
+                            onChange={e => setShippingAddress(s => ({ ...s, name: e.target.value }))}
+                            className="w-full bg-input-bg border border-border-strong rounded-md p-2 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-foreground-muted capitalize tracking-wide ml-1">Contact Phone</label>
+                        <div className="relative">
+                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                          <input
+                            type="tel"
+                            placeholder="+91 00000 00000"
+                            value={shippingAddress.phone}
+                            onChange={e => setShippingAddress(s => ({ ...s, phone: e.target.value }))}
+                            className="w-full bg-input-bg border border-border-strong rounded-md p-2 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-xs font-bold text-foreground-muted capitalize tracking-wide ml-1">Street Address</label>
+                        <div className="relative">
+                          <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                          <input
+                            type="text"
+                            placeholder="123 Luxury Lane, Business District"
+                            value={shippingAddress.street}
+                            onChange={e => setShippingAddress(s => ({ ...s, street: e.target.value }))}
+                            className="w-full bg-input-bg border border-border-strong rounded-md p-2 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-foreground-muted capitalize tracking-wide ml-1">City</label>
+                        <input
+                          type="text"
+                          placeholder="Mumbai"
+                          value={shippingAddress.city}
+                          onChange={e => setShippingAddress(s => ({ ...s, city: e.target.value }))}
+                          className="w-full bg-input-bg border border-border-strong rounded-md p-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-foreground-muted capitalize tracking-wide ml-1">State</label>
+                          <input
+                            type="text"
+                            placeholder="MH"
+                            value={shippingAddress.state}
+                            onChange={e => setShippingAddress(s => ({ ...s, state: e.target.value }))}
+                            className="w-full bg-input-bg border border-border-strong rounded-md p-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-foreground-muted capitalize tracking-wide ml-1">ZIP / PIN</label>
+                          <input
+                            type="text"
+                            placeholder="400001"
+                            value={shippingAddress.zip}
+                            onChange={e => setShippingAddress(s => ({ ...s, zip: e.target.value }))}
+                            className="w-full bg-input-bg border border-border-strong rounded-md p-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setIsEditingAddress(false)}
+                      className="w-full py-3 bg-foreground text-white rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-all"
+                    >
+                      Save Address
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    <p className="text-lg font-bold text-foreground">{shippingAddress.name}</p>
+                    <p className="text-sm font-semibold text-muted-foreground">{shippingAddress.street}, {shippingAddress.city}</p>
+                    <p className="text-sm font-semibold text-muted-foreground">{shippingAddress.state}, {shippingAddress.zip}</p>
+                    <p className="text-sm font-semibold text-muted-foreground mt-2 flex items-center gap-2">
+                      <Phone size={14} className="text-primary" />
+                      {shippingAddress.phone}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Step 2: Agent - Only visible if assigned */}
-            {user?.role === 'SALON_OWNER' && user?.salonOwnerProfile?.agentId && (
-              <div className="bg-white rounded-[40px] border border-neutral-100 shadow-sm overflow-hidden">
-                <div className="p-8 border-b border-neutral-50 flex items-center gap-4 bg-neutral-50/50">
-                  <div className="w-10 h-10 bg-neutral-900 text-white rounded-2xl flex items-center justify-center font-black">2</div>
-                  <h2 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Agent Attribution</h2>
-                </div>
-                <div className="p-8 space-y-6">
-                  <div className="p-8 bg-emerald-50 border border-emerald-100 rounded-[32px] flex items-center gap-6 shadow-sm border-dashed">
-                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100 animate-pulse">
-                      <Link2 size={32} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1 items-center flex gap-2">
-                        <ShieldCheck size={12} />
-                        Identity Verified Relationship
-                      </p>
-                      <h4 className="text-xl font-black text-neutral-900 tracking-tight">
-                        {getAgentName()}
-                      </h4>
-                      <p className="text-[10px] font-bold text-neutral-400 mt-1 uppercase tracking-widest">Your Dedicated Professional Agent</p>
-                    </div>
-                  </div>
+            {/* Payment Method - Now 2nd */}
+            <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+              <div className="p-2 px-4 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-sm font-bold text-foreground capitalize tracking-wide">Payment Method</h2>
                 </div>
               </div>
-            )}
-
-            {/* Step 3: Payment */}
-            <div className="bg-white rounded-[40px] border border-neutral-100 shadow-sm overflow-hidden">
-              <div className="p-8 border-b border-neutral-50 flex items-center gap-4 bg-neutral-50/50">
-                <div className="w-10 h-10 bg-neutral-900 text-white rounded-2xl flex items-center justify-center font-black">3</div>
-                <h2 className="text-lg font-black text-neutral-900 uppercase tracking-widest">Payment Protocol</h2>
-              </div>
-              <div className="p-8">
-                <div className="grid grid-cols-1 gap-4">
+              <div className="p-4">
+                <div className="grid grid-cols-2 gap-4">
                   {[
                     { id: 'ONLINE', label: 'ONLINE PAYMENT', icon: Zap, sub: 'UPI/QR, CARD' },
                     { id: 'COD', label: 'COD', icon: Truck, sub: 'Pay on arrival' }
@@ -431,23 +435,23 @@ export default function CheckoutPage() {
                           setPointsToRedeem(0);
                         }
                       }}
-                      className={`cursor-pointer p-6 rounded-[32px] border-2 transition-all flex items-center gap-6 ${paymentMethod === method.id
-                        ? 'bg-emerald-50 border-emerald-500 shadow-lg shadow-emerald-500/10'
-                        : 'bg-white border-neutral-100 hover:border-neutral-200'
+                      className={`cursor-pointer p-2 rounded-md border-2 transition-all flex items-center gap-3 ${paymentMethod === method.id
+                        ? 'bg-primary/5 border-primary shadow-md'
+                        : 'bg-card border-border hover:border-border-strong'
                         }`}
                     >
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${paymentMethod === method.id ? 'bg-emerald-500 text-white' : 'bg-neutral-50 text-neutral-400'
+                      <div className={`w-14 h-14 rounded-md flex items-center justify-center shrink-0 ${paymentMethod === method.id ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
                         }`}>
                         <method.icon size={28} />
                       </div>
                       <div className="text-left">
-                        <p className={`text-sm font-black uppercase tracking-widest ${paymentMethod === method.id ? 'text-emerald-700' : 'text-neutral-900'
+                        <p className={`text-sm font-bold uppercase tracking-wide ${paymentMethod === method.id ? 'text-primary' : 'text-foreground'
                           }`}>{method.label}</p>
-                        <p className="text-[10px] font-bold text-neutral-400 mt-1 uppercase tracking-widest">{method.sub}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">{method.sub}</p>
                       </div>
                       {paymentMethod === method.id && (
-                        <div className="ml-auto">
-                          <CheckCircle2 className="text-emerald-500" size={24} />
+                        <div className="ml-auto hidden md:block">
+                          <CheckCircle2 className="text-primary" size={24} />
                         </div>
                       )}
                     </div>
@@ -455,7 +459,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {paymentMethod === 'COD' && (
-                  <div className="mt-6 p-4 bg-amber-50/50 rounded-2xl border border-amber-100 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                  <div className="mt-4 p-4 bg-amber-50/50 rounded-lg border border-amber-100 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
                     <Info size={16} className="text-amber-600 mt-0.5 shrink-0" />
                     <div>
                       <p className="text-xs font-black text-amber-800 uppercase tracking-tight mb-1">
@@ -471,45 +475,69 @@ export default function CheckoutPage() {
                 )}
               </div>
             </div>
+
+            {/* Agent Attribution - Now 3rd */}
+            {user?.role === 'SALON_OWNER' && user?.salonOwnerProfile?.agentId && (
+              <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+                <div className="p-2 px-4 border-b border-border flex items-center gap-4 bg-muted/30">
+                  <h2 className="text-sm font-bold text-foreground capitalize tracking-wide">Agent Attribution</h2>
+                </div>
+                <div className="p-4 space-y-6">
+                  <div className="p-2 bg-primary/5 border border-primary/10 rounded-lg flex items-center gap-6 shadow-sm border-dashed">
+                    <div className="w-16 h-16 bg-card rounded-md flex items-center justify-center text-primary shadow-sm border border-border">
+                      <Link2 size={32} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1 items-center flex gap-2">
+                        <ShieldCheck size={12} />
+                        Identity Verified Relationship
+                      </p>
+                      <h4 className="text-xl font-black text-foreground tracking-tight">
+                        {getAgentName()}
+                      </h4>
+                      <p className="text-[10px] font-noraml text-foreground-muted mt-1 capitalize tracking-wider">Your Assigned Professional Agent</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-white p-6 rounded-[32px] border border-neutral-100 shadow-2xl shadow-neutral-900/10 max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar flex flex-col">
-              <h3 className="text-lg font-black text-neutral-900 uppercase tracking-widest mb-6 border-b border-neutral-50 pb-4">Master Invoice</h3>
+          <div className="space-y-4">
+            <div className="bg-card p-4 rounded-lg border border-border shadow-sm max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar flex flex-col">
+              <h3 className="text-lg font-bold text-foreground capitalize tracking-wide mb-3 border-b border-border pb-1">Order Summary</h3>
 
-              <div className="space-y-4 mb-6 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar shrink-0">
+              <div className="space-y-3 mb-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar shrink-0">
                 {displayItems.map((item, idx) => (
-                  <div key={idx} className="flex gap-4 items-center group">
-                    <div className="relative">
-                      <img
-                        src={item.productImage || item.image || 'https://via.placeholder.com/64?text=Product'}
-                        alt={item.productName || item.name || 'Product'}
-                        className="w-16 h-16 rounded-2xl object-cover border border-neutral-100 group-hover:scale-105 transition-transform"
-                      />
-                      <span className="absolute -top-2 -right-2 w-6 h-6 bg-neutral-900 text-white rounded-lg flex items-center justify-center text-[10px] font-bold">
-                        {item.quantity}
-                      </span>
-                    </div>
+                  <div key={idx} className="flex gap-3 items-center group">
+                    <img
+                      src={item.productImage || item.image || 'https://via.placeholder.com/64?text=Product'}
+                      alt={item.productName || item.name || 'Product'}
+                      className="w-12 md:w-16 h-12 md:h-16 rounded-lg object-cover border border-border"
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-neutral-900 truncate uppercase tracking-tight">{item.productName || item.name}</p>
-                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">₹{item.price?.toLocaleString()}</p>
+                      <p className="text-xs font-black text-foreground truncate uppercase tracking-tight">{item.productName || item.name}</p>
+                      <div className="flex justify-between items-center mt-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">₹{item.price?.toLocaleString()} × {item.quantity}</p>
+                        <p className="text-[11px] font-black text-foreground tracking-tighter">₹{(item.price * item.quantity).toLocaleString()}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t border-neutral-50 pt-6 space-y-4">
+              <div className="border-t border-border pt-6 space-y-4">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-black text-neutral-400 uppercase tracking-widest">Inventory Total</span>
-                  <span className="font-black text-neutral-900">₹{subtotal.toLocaleString()}</span>
+                  <span className="font-bold text-foreground-muted capitalize tracking-wide">Order Total</span>
+                  <span className="font-black text-foreground">₹{subtotal.toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Rewards Redemption UI */}
-              <div className="pt-4 border-t border-neutral-50">
+              <div className="pt-8 border-t border-neutral-50">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-[10px] font-black text-neutral-900 uppercase tracking-widest flex items-center gap-1">
-                    <Zap size={12} className="text-emerald-500" />
+                    <Zap size={12} className="text-success" />
                     Loyalty Rewards
                   </span>
                   {rewardWallet && (
@@ -521,9 +549,9 @@ export default function CheckoutPage() {
 
                 {rewardWallet ? (
                   !rewardWallet.isUnlocked ? (
-                    <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-100 flex items-start gap-3">
-                      <div className="p-2 bg-neutral-200 rounded-lg text-neutral-500">
-                        <ShieldCheck size={14} />
+                    <div className="bg-primary/10 p-2 rounded-md border border-border-strong flex items-start gap-2">
+                      <div className="p-2 bg-secondary rounded-lg text-neutral-500">
+                        <ShieldCheck size={16} />
                       </div>
                       <div>
                         <p className="text-xs font-black text-neutral-900 uppercase tracking-tight">Rewards Locked</p>
@@ -551,7 +579,7 @@ export default function CheckoutPage() {
                                   setPointsToRedeem(0);
                                 }
                               }}
-                              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 border-gray-300 disabled:opacity-50"
+                              className="w-4 h-4 text-success rounded-md focus:ring-emerald-500 border-border disabled:opacity-50"
                             />
                             <label className="text-xs font-black uppercase tracking-wide text-neutral-900">
                               Redeem Rewards
@@ -580,11 +608,11 @@ export default function CheckoutPage() {
                                       setPointsToRedeem(val);
                                     }
                                   }}
-                                  className="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                                  className="w-full bg-white border border-success rounded-md px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-success-bg/50 outline-none"
                                 />
                               </div>
                               {pointsError && <p className="text-[9px] text-red-500 font-bold">{pointsError}</p>}
-                              <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-widest">
+                              <p className="text-[9px] text-success font-bold uppercase tracking-widest">
                                 Max Redeemable: {Math.min(rewardWallet.balance, Math.floor(subtotal * (rewardConfig.maxRedemptionPercentage / 100)))}
                               </p>
                             </div>
@@ -602,9 +630,9 @@ export default function CheckoutPage() {
                 )}
 
                 {rewardWallet && (
-                  <div className="mt-4 p-3 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
-                    <Info size={14} className="text-blue-600 mt-0.5 shrink-0" />
-                    <div className="text-[10px] font-bold text-blue-800 leading-tight">
+                  <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/10 flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
+                    <Info size={14} className="text-primary mt-0.5 shrink-0" />
+                    <div className="text-[10px] font-bold text-primary leading-tight">
                       {rewardWallet.deliveredOrdersCount === 0
                         ? "First Order Special: Earn 10% rewards on orders above ₹300."
                         : `Note: To earn rewards on this order, total value must be above ₹${rewardConfig.minOrderAmountForRewards}.`}
@@ -614,24 +642,24 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="border-t border-neutral-900 border-dashed mt-6 pt-6 mb-8">
+            <div className="border-t border-foreground border-dashed mt-6 pt-6 mb-8">
               <div className="flex justify-between items-end">
                 <div>
-                  <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-1">Grand Payable</p>
-                  <p className="text-3xl font-black text-neutral-900 tracking-tighter flex items-center gap-1">
-                    <IndianRupee size={24} className="text-emerald-500" />
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Grand Payable</p>
+                  <p className="text-3xl font-black text-foreground tracking-tighter flex items-center gap-1">
+                    <IndianRupee size={24} className="text-primary" />
                     {total.toLocaleString()}
                   </p>
                 </div>
-                <div className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                <div className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-[9px] font-black uppercase tracking-widest">
                   Verified Checkout
                 </div>
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 mb-6 animate-in shake duration-500">
-                <AlertCircle size={18} />
+              <div className="p-2 bg-destructive-bg border border-red-100 rounded-md flex items-center gap-3 text-destructive mb-6 animate-in shake duration-500">
+                <AlertCircle size={16} />
                 <p className="text-[10px] font-black uppercase tracking-widest text-center">{error}</p>
               </div>
             )}
@@ -639,7 +667,7 @@ export default function CheckoutPage() {
             <button
               onClick={handlePlaceOrder}
               disabled={loading || paymentProcessing || (!agentVerified && agentId)}
-              className="w-full h-16 bg-neutral-900 text-white rounded-[24px] font-black hover:bg-emerald-600 transition-all shadow-2xl shadow-neutral-900/20 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs disabled:opacity-50"
+              className="w-full h-12 bg-primary text-white rounded-md font-black hover:bg-primary-hover transition-all shadow-xl shadow-primary/10 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs disabled:opacity-50"
             >
               {loading || paymentProcessing ? (
                 <Loader2 className="animate-spin" size={20} />
@@ -652,9 +680,9 @@ export default function CheckoutPage() {
             </button>
 
             <div className="mt-4 flex flex-col items-center gap-2 pb-4">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50/50 rounded-full border border-emerald-100/50">
-                <ShieldCheck size={10} className="text-emerald-600" />
-                <span className="text-[8px] font-black text-emerald-800 uppercase tracking-widest">SECURE 256-BIT SSL ENCRYPTION</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/5 rounded-full border border-primary/10">
+                <ShieldCheck size={10} className="text-primary" />
+                <span className="text-[8px] font-black text-primary uppercase tracking-widest">SECURE 256-BIT SSL ENCRYPTION</span>
               </div>
             </div>
           </div>

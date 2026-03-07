@@ -114,7 +114,7 @@ export default function NotificationsPage() {
 
     return (
         <div className={cn(
-            "min-h-screen bg-neutral-50/50 px-4",
+            "min-h-screen bg-white px-4",
             isDashboard ? "py-0 bg-transparent min-h-0 px-0" : "py-20"
         )}>
             <div className={cn("mx-auto", !isDashboard && "max-w-4xl")}>
@@ -124,26 +124,19 @@ export default function NotificationsPage() {
                 )}>
                     <div>
                         <h1 className={cn(
-                            "text-4xl font-black text-neutral-900 tracking-tight",
+                            "text-4xl font-black text-foreground tracking-tight",
                             isDashboard && "text-2xl"
-                        )}>System <span className="text-emerald-600">Notifications</span></h1>
-                        <p className="text-neutral-400 font-bold uppercase tracking-widest text-[10px] mt-2">Stay updated with your professional activity</p>
+                        )}>System <span className="text-primary">Notifications</span></h1>
+                        <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] mt-2">Stay updated with your professional activity</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button
                             variant="outline"
                             onClick={markAllRead}
-                            className="rounded-xl border-neutral-200 text-[10px] font-black uppercase tracking-widest px-6 h-12 hover:bg-white active:scale-[0.98] transition-all"
+                            className="rounded-md border-border text-[10px] font-black uppercase tracking-widest px-6 h-12 hover:bg-muted active:scale-[0.98] transition-all"
                         >
                             Mark all as read
                         </Button>
-                        {!isDashboard && (
-                            <Button
-                                className="rounded-xl bg-neutral-900 text-white text-[10px] font-black uppercase tracking-widest px-6 h-12 shadow-lg shadow-neutral-900/20 active:scale-[0.98] transition-all"
-                            >
-                                Preferences
-                            </Button>
-                        )}
                     </div>
                 </div>
 
@@ -161,15 +154,15 @@ export default function NotificationsPage() {
                                 return (
                                     <div
                                         key={notif._id}
-                                        className={`group relative bg-white p-6 rounded-[32px] border ${notif.isRead ? 'border-neutral-100' : 'border-emerald-100 bg-emerald-50/10'} shadow-sm hover:shadow-xl hover:shadow-neutral-900/5 transition-all duration-500 cursor-pointer`}
+                                        className={`group relative bg-card p-4 rounded-lg border ${notif.isRead ? 'border-border' : 'border-primary/20 bg-primary/5'} shadow-sm hover:shadow-xl hover:shadow-foreground/5 transition-all duration-500 cursor-pointer`}
                                         onClick={() => markSingleRead(notif)}
                                     >
                                         {!notif.isRead && (
-                                            <div className="absolute top-6 right-6 w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                            <div className="absolute top-6 right-6 w-2 h-2 bg-primary rounded-full animate-pulse" />
                                         )}
 
                                         <div className="flex gap-6">
-                                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${colorClass === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                                            <div className={`w-14 h-14 rounded-md flex items-center justify-center shrink-0 ${colorClass === 'emerald' ? 'bg-primary/5 text-primary' :
                                                 colorClass === 'blue' ? 'bg-blue-50 text-blue-600' :
                                                     'bg-amber-50 text-amber-600'
                                                 }`}>
@@ -178,27 +171,27 @@ export default function NotificationsPage() {
 
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-1">
-                                                    <h3 className={`font-black uppercase tracking-tight ${notif.isRead ? 'text-neutral-900' : 'text-emerald-900'}`}>
+                                                    <h3 className={`font-black uppercase tracking-tight ${notif.isRead ? 'text-foreground' : 'text-primary'}`}>
                                                         {notif.title}
                                                     </h3>
-                                                    <span className="flex items-center gap-1 text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                                                    <span className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                                                         <Clock size={10} />
                                                         {new Date(notif.createdAt).toLocaleDateString()}
                                                     </span>
                                                 </div>
-                                                <p className="text-sm font-semibold text-neutral-500 leading-relaxed max-w-2xl">
+                                                <p className="text-sm font-semibold text-muted-foreground leading-relaxed max-w-2xl">
                                                     {notif.description}
                                                 </p>
 
-                                                <div className="mt-4 flex items-center gap-4">
+                                                <div className="mt-4 flex items-center justify-between gap-4">
                                                     {notif.actionLink && (
-                                                        <div className="px-5 py-2.5 bg-neutral-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-600 transition-all flex items-center gap-2">
+                                                        <div className="px-5 py-2.5 bg-foreground text-background text-[10px] font-black uppercase tracking-widest rounded-md hover:bg-primary transition-all flex items-center gap-2">
                                                             {notif.actionText || 'View Details'} <ChevronRight size={14} />
                                                         </div>
                                                     )}
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); deleteNotification(notif._id); }}
-                                                        className="text-[10px] font-black text-neutral-400 uppercase tracking-widest flex items-center gap-1 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                                        className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all ml-auto"
                                                     >
                                                         <Trash2 size={12} />
                                                         Remove
@@ -213,35 +206,35 @@ export default function NotificationsPage() {
                                 <Button
                                     variant="ghost"
                                     onClick={() => { setPage(p => p + 1); fetchNotifications(page + 1, true); }}
-                                    className="w-full py-8 text-[10px] font-black text-neutral-400 uppercase tracking-widest hover:text-emerald-600"
+                                    className="w-full py-8 text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-primary"
                                 >
                                     Load More History
                                 </Button>
                             )}
                         </>
                     ) : (
-                        <div className="py-20 text-center bg-white rounded-[40px] border border-neutral-100">
-                            <div className="w-20 h-20 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-6 text-neutral-300">
+                        <div className="py-20 text-center bg-card rounded-lg border border-border mt-8">
+                            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 text-muted-foreground/30">
                                 <Bell size={40} />
                             </div>
-                            <h3 className="text-xl font-black text-neutral-900 uppercase tracking-widest mb-2">Clean Slate</h3>
-                            <p className="text-neutral-400 font-bold">You're all caught up with your notifications.</p>
+                            <h3 className="text-xl font-black text-foreground uppercase tracking-widest mb-2">Clean Slate</h3>
+                            <p className="text-muted-foreground font-bold">You're all caught up with your notifications.</p>
                         </div>
                     )}
                 </div>
 
                 {!isDashboard && (
-                    <div className="mt-12 p-8 bg-neutral-900 rounded-[40px] border border-neutral-800 text-white relative overflow-hidden">
+                    <div className="mt-12 p-8 bg-foreground rounded-lg border border-border text-background relative overflow-hidden">
                         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                             <div className="text-center md:text-left">
                                 <h3 className="text-xl font-black tracking-tight mb-2">Automated Procurement?</h3>
-                                <p className="text-neutral-400 text-sm font-semibold max-w-md">Enable smart notifications to get alerted when your best-selling professional inventory is running low.</p>
+                                <p className="text-muted-foreground text-sm font-semibold max-w-md">Enable smart notifications to get alerted when your best-selling professional inventory is running low.</p>
                             </div>
-                            <Button className="h-14 px-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] border-none">
+                            <Button className="h-14 px-8 bg-primary hover:bg-primary-hover text-background rounded-md font-black uppercase tracking-widest text-[10px] border-none">
                                 Configure Alerts
                             </Button>
                         </div>
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
                     </div>
                 )}
             </div>

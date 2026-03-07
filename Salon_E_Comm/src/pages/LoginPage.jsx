@@ -83,7 +83,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   placeholder="name@example.com"
-                  className="h-12 bg-white border-neutral-200 rounded-sm"
+                  className="h-12 bg-input-bg border-border-strong rounded-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -102,7 +102,7 @@ export default function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="h-12 bg-white border-neutral-200 pr-10 rounded-sm"
+                    className="h-12 bg-input-bg border-border-strong pr-10 rounded-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -129,9 +129,9 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <p className="text-center text-sm font-medium text-neutral-500">
+            <p className="text-center text-sm font-medium text-foreground">
               Don't have an account?{' '}
-              <Link to="/auth/signup" className="text-neutral-900 font-bold hover:underline">
+              <Link to="/auth/signup" className="font-bold hover:underline">
                 Create Account
               </Link>
             </p>

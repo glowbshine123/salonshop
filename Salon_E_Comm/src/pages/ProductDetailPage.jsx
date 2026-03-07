@@ -129,6 +129,11 @@ export default function ProductDetailPage() {
     }
   };
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard!");
+  };
+
   const calculateDiscount = (original, price) => {
     if (!original || original <= price) return 0;
     return Math.round(((original - price) / original) * 100);
@@ -136,13 +141,12 @@ export default function ProductDetailPage() {
 
   if (loading) return <DetailSkeleton />;
   if (error || !product) return <ErrorState error={error} navigate={navigate} />;
-
   const images = product.images && product.images.length > 0 ? product.images : [product.image || 'https://via.placeholder.com/500'];
   const discount = calculateDiscount(product.originalPrice, product.price);
 
   return (
     <div className="bg-white min-h-screen pb-24 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
 
@@ -152,14 +156,14 @@ export default function ProductDetailPage() {
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`relative shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-neutral-900 ring-1 ring-neutral-900' : 'border-transparent hover:border-neutral-200'}`}
+                  className={`relative shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-md overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-primary ring-1 ring-primary' : 'border-transparent hover:border-border'}`}
                 >
                   <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
 
-            <div className="flex-1 relative aspect-square bg-neutral-50 rounded-lg overflow-hidden border border-neutral-100 z-0">
+            <div className="flex-1 relative aspect-square bg-muted/30 rounded-lg overflow-hidden border border-border z-0">
               <Swiper
                 modules={[Navigation, Pagination]}
                 spaceBetween={0}
@@ -185,105 +189,77 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="flex flex-col space-y-8">
+          <div className="flex flex-col space-y-6">
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex text-amber-500">
+                  <div className="flex text-yellow-300">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} fill={i < Math.round(reviewStats.averageRating) ? "currentColor" : "none"} className={i < Math.round(reviewStats.averageRating) ? "text-amber-500" : "text-neutral-300"} />
+                      <Star key={i} size={16} fill={i < Math.round(reviewStats.averageRating) ? "currentColor" : "none"} className={i < Math.round(reviewStats.averageRating) ? "text-rating" : "text-border"} />
                     ))}
                   </div>
-                  <span className="text-sm font-bold text-neutral-500">({reviewStats.totalReviews} Reviews)</span>
+                  <span className="text-sm font-bold text-muted-foreground">({reviewStats.totalReviews} Reviews)</span>
                 </div>
 
                 <div className="flex gap-2">
-                  <button className="p-3 bg-neutral-50 rounded-full hover:bg-neutral-100 transition-colors text-neutral-600">
+                  {/* <button className="p-3 bg-muted/50 rounded-full hover:bg-muted transition-colors text-foreground">
                     <Heart size={20} />
-                  </button>
-                  <button className="p-3 bg-neutral-50 rounded-full hover:bg-neutral-100 transition-colors text-neutral-600">
+                  </button> */}
+                  <button
+                    onClick={handleShare}
+                    className="p-2 hover:bg-background rounded-full transition-colors text-foreground "
+                  >
                     <Share2 size={20} />
                   </button>
                 </div>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-medium text-neutral-900 leading-tight capitalize">{product.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground leading-tight capitalize">{product.name}</h1>
 
-              <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
-                <span className="px-3 py-1 bg-neutral-100 text-neutral-600 rounded-lg">{product.category}</span>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                <span className="px-3 py-1 bg-background-secondary text-muted-foreground rounded-lg">{product.category}</span>
                 {product.subcategory && (
-                  <span className="px-3 py-1 bg-neutral-100 text-neutral-600 rounded-lg">{product.subcategory}</span>
+                  <span className="px-3 py-1 bg-background-secondary text-muted-foreground rounded-lg">{product.subcategory}</span>
+                )}
+                {product.weight && (
+                  <span className="ml-auto px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">{product.weight}</span>
                 )}
               </div>
             </div>
 
-            <p className="text-neutral-500 leading-relaxed text-base line-clamp-3">
+            <p className="text-muted-foreground leading-relaxed text-base line-clamp-3 font-medium">
               {product.description}
             </p>
 
-            <div className="h-px bg-neutral-100" />
+            <div className="h-px bg-border/50" />
 
             <div className="space-y-6">
               <div className="flex items-end gap-3">
-                <span className="text-4xl font-black text-neutral-900">₹{product.price.toLocaleString()}</span>
+                <span className="text-4xl font-black text-primary">₹{product.price.toLocaleString()}</span>
                 {product.originalPrice && (
-                  <span className="text-xl text-neutral-400 line-through mb-1">₹{product.originalPrice.toLocaleString()}</span>
+                  <span className="text-xl text-muted-foreground line-through mb-1">₹{product.originalPrice.toLocaleString()}</span>
                 )}
                 {discount > 0 && (
-                  <div className="text-neutral-900 text-xs font-black tracking-wider mb-2">
+                  <div className="text-primary text-xs font-black tracking-wider mb-2">
                     -{discount}% OFF
                   </div>
                 )}
               </div>
 
               <div className="flex flex-col space-y-3">
-                {/* Expiry & Weight Info */}
-                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-neutral-500 border-b border-neutral-100 pb-4">
-                  {product.weight && <div className="flex items-center gap-2">
-                    <span>Weight:</span>
-                    <span className="text-neutral-900">{product.weight}</span>
-                  </div>}
+                {/* Expiry Info */}
+                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/50 pb-4">
+                  {/* Container for future info */}
                 </div>
 
-                {/* <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-neutral-500">
-                  <span>Quantity</span>
-                  <span className={product.status === 'EXPIRED' ? "text-rose-500" : (product.inventoryCount < 10 ? "text-rose-500" : "text-emerald-600")}>
-                    {product.status === 'EXPIRED' ? "Product Expired" : (product.inventoryCount > 0 ? `${product.inventoryCount} Available` : "Out of Stock")}
-                  </span>
-                </div> */}
-
-                <div className="flex gap-4">
-                  {/* <div className={cn(
-                    "flex items-center bg-neutral-100 rounded-2xl p-1 h-14 w-fit",
-                    product.inventoryCount <= 0 ? "opacity-50 pointer-events-none" : ""
-                  )}>
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-12 h-full flex items-center justify-center hover:bg-white rounded-xl transition-all"
-                    >
-                      <Minus size={18} />
-                    </button>
-                    <input
-                      type="number"
-                      value={quantity}
-                      readOnly
-                      className="w-12 bg-transparent text-center font-bold outline-none"
-                    />
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="w-12 h-full flex items-center justify-center hover:bg-white rounded-xl transition-all"
-                    >
-                      <Plus size={18} />
-                    </button>
-                  </div> */}
-
+                <div className="">
                   <Button
                     onClick={handleAddToCart}
                     disabled={addingToCart || product.inventoryCount <= 0 || product.status === 'EXPIRED'}
                     className={cn(
-                      "flex-1 h-14 rounded-2xl bg-neutral-900 hover:bg-black text-white font-bold text-lg uppercase tracking-wide transition-all shadow-xl shadow-neutral-900/20",
-                      (product.inventoryCount <= 0 || product.status === 'EXPIRED') && "opacity-50 cursor-not-allowed"
+                      "h-12 px-32 rounded-md bg-primary hover:bg-primary-hover text-background font-bold text-lg uppercase tracking-wide transition-all shadow-md",
+                      (product.inventoryCount <= 0 || product.status === 'EXPIRED') && "bg-primary-muted hover:bg-primary-muted cursor-not-allowed"
                     )}
                   >
                     {addingToCart ? <Loader2 className="animate-spin mr-2" /> : <ShoppingCart className="mr-2" size={20} />}
@@ -295,31 +271,30 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        <div className="mt-20 border-t border-neutral-100 pt-16">
-          <h3 className="text-2xl font-black text-neutral-900 mb-8 uppercase tracking-tighter">Specifications & Content</h3>
+        <div className="mt-20 border-t border-border/50 pt-16">
+          <h3 className="text-2xl font-black text-foreground mb-8 uppercase tracking-tighter">Specifications & Content</h3>
 
           <div className="space-y-8 max-w-3xl">
             {product.contentSections && product.contentSections.length > 0 ? (
               product.contentSections.map((section, idx) => (
                 <div key={idx} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-1.5 h-6 bg-neutral-900 rounded-full"></div>
-                    <h4 className="text-lg font-black text-neutral-900 uppercase tracking-tight">{section.heading}</h4>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-1.5 h-6 bg-primary rounded-full"></div>
+                    <h4 className="text-lg font-black text-foreground uppercase tracking-tight">{section.heading}</h4>
                   </div>
 
                   {section.sectionType === 'PARAGRAPH' ? (
                     <div className="prose prose-neutral max-w-full">
-                      <p className="text-neutral-500 leading-relaxed font-medium whitespace-pre-wrap text-base">
+                      <p className="text-muted-foreground leading-relaxed font-medium whitespace-pre-wrap text-base">
                         {section.content}
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       {section.specs?.map((spec, sIdx) => (
-                        <div key={sIdx} className="flex items-center gap-4 py-0 group border-b border-neutral-300 last:border-0 border-dashed">
-                          <span className="text-sm font-bold capitalize tracking-wider text-neutral-400 min-w-fit">{spec.label}</span>
-                          <span className="text-neutral-300 font-black">:</span>
-                          <span className="text-base font-bold text-neutral-800 capitalize tracking-wide">{spec.value}</span>
+                        <div key={sIdx} className="flex items-center gap-4 py-2 border-b border-border/50 last:border-0 border-dashed">
+                          <span className="text-sm font-bold capitalize tracking-wider text-muted-foreground min-w-[120px]">{spec.label}</span>
+                          <span className="text-foreground font-bold capitalize tracking-wide">{spec.value}</span>
                         </div>
                       ))}
                     </div>
@@ -327,26 +302,26 @@ export default function ProductDetailPage() {
                 </div>
               ))
             ) : (
-              <div className="prose prose-neutral max-w-none text-neutral-500">
+              <div className="prose prose-neutral max-w-none text-muted-foreground">
                 <p className="font-medium leading-relaxed">{product.description}</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-20 border-t border-neutral-100 pt-16">
-          <h3 className="text-2xl font-black text-neutral-900 mb-10">Ratings & Reviews</h3>
+        <div className="mt-20 border-t border-border/50 pt-16">
+          <h3 className="text-2xl font-black text-foreground mb-10">Ratings & Reviews</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-4 space-y-8">
-              <div className="bg-neutral-50 rounded-[32px] p-8 text-center">
-                <div className="text-6xl font-black text-neutral-900 mb-2">{reviewStats.averageRating}</div>
-                <div className="flex justify-center gap-1 text-amber-500 mb-4">
+              <div className="bg-muted/30 rounded-[32px] p-8 text-center ring-1 ring-border/50">
+                <div className="text-6xl font-black text-foreground mb-2">{reviewStats.averageRating}</div>
+                <div className="flex justify-center gap-1 text-rating mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={20} fill={i < Math.round(reviewStats.averageRating) ? "currentColor" : "none"} className={i < Math.round(reviewStats.averageRating) ? "text-amber-500" : "text-neutral-300"} />
+                    <Star key={i} size={20} fill={i < Math.round(reviewStats.averageRating) ? "currentColor" : "none"} className={i < Math.round(reviewStats.averageRating) ? "text-rating" : "text-border"} />
                   ))}
                 </div>
-                <p className="text-sm font-bold text-neutral-500">{reviewStats.totalReviews} Verified Review{reviewStats.totalReviews !== 1 && 's'}</p>
+                <p className="text-sm font-bold text-muted-foreground">{reviewStats.totalReviews} Verified Review{reviewStats.totalReviews !== 1 && 's'}</p>
               </div>
 
               <div className="space-y-3">
@@ -356,13 +331,13 @@ export default function ProductDetailPage() {
                   return (
                     <div key={star} className="flex items-center gap-4">
                       <div className="flex items-center gap-1 w-12 cursor-default">
-                        <span className="text-sm font-bold text-neutral-900">{star}</span>
-                        <Star size={12} className="text-neutral-300" />
+                        <span className="text-sm font-bold text-foreground">{star}</span>
+                        <Star size={12} className="text-border" />
                       </div>
-                      <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${percent}%` }} />
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full transition-all duration-1000" style={{ width: `${percent}%` }} />
                       </div>
-                      <span className="text-xs font-bold text-neutral-400 w-8 text-right">{count}</span>
+                      <span className="text-xs font-bold text-muted-foreground w-8 text-right">{count}</span>
                     </div>
                   );
                 })}
@@ -372,32 +347,32 @@ export default function ProductDetailPage() {
             {/* Reviews List */}
             <div className="md:col-span-8 space-y-8">
               {reviews.length === 0 ? (
-                <div className="text-center py-12 bg-neutral-50 rounded-3xl border border-dashed border-neutral-200">
-                  <MessageSquare className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                  <p className="text-neutral-500 font-bold">No reviews yet. Be the first to review!</p>
-                  <Button variant="outline" className="mt-4">Write a Review</Button>
+                <div className="text-center py-16 bg-muted/20 rounded-[32px] border-2 border-dashed border-border/50">
+                  <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground font-bold">No reviews yet. Be the first to review!</p>
+                  <Button variant="outline" className="mt-6 border-border hover:bg-muted font-bold px-8">Write a Review</Button>
                 </div>
               ) : (
                 <div className="space-y-6">
                   {reviews.map((review) => (
-                    <div key={review._id} className="p-6 bg-neutral-50 rounded-3xl space-y-4">
+                    <div key={review._id} className="p-8 bg-muted/20 rounded-[32px] space-y-4 border border-border/30">
                       <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center font-bold text-neutral-500">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center font-bold text-primary">
                             {review.user?.firstName?.[0] || 'U'}
                           </div>
                           <div>
-                            <h4 className="text-sm font-bold text-neutral-900">{review.user?.firstName} {review.user?.lastName}</h4>
-                            <div className="flex gap-0.5 text-amber-500">
+                            <h4 className="text-sm font-bold text-foreground">{review.user?.firstName} {review.user?.lastName}</h4>
+                            <div className="flex gap-0.5 text-rating">
                               {[...Array(5)].map((_, i) => (
-                                <Star key={i} size={10} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "text-amber-500" : "text-neutral-300"} />
+                                <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "text-rating" : "text-border"} />
                               ))}
                             </div>
                           </div>
                         </div>
-                        <span className="text-xs font-bold text-neutral-400">{new Date(review.createdAt).toLocaleDateString()}</span>
+                        <span className="text-xs font-bold text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</span>
                       </div>
-                      <p className="text-neutral-600 text-sm leading-relaxed">{review.comment}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed font-medium">{review.comment}</p>
                     </div>
                   ))}
 
@@ -407,7 +382,7 @@ export default function ProductDetailPage() {
                         onClick={handleLoadMoreReviews}
                         disabled={loadingReviews}
                         variant="outline"
-                        className="rounded-xl px-8"
+                        className="rounded-2xl px-12 py-6 border-border hover:bg-muted font-bold transition-all"
                       >
                         {loadingReviews ? <Loader2 className="animate-spin" /> : "Read More Reviews"}
                       </Button>
@@ -420,16 +395,16 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Related Products */}
-        <div className="mt-24 border-t border-neutral-100 pt-16">
-          <h3 className="text-2xl font-black text-neutral-900 mb-10">Similar Professional Products</h3>
+        <div className="mt-24 border-t border-border/50 pt-16">
+          <h3 className="text-2xl font-black text-foreground mb-10 uppercase tracking-tighter">Similar Professional Products</h3>
           {relatedProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
               {relatedProducts.map(p => (
                 <ProductCard key={p._id} product={p} />
               ))}
             </div>
           ) : (
-            <p className="text-neutral-500">No related products found.</p>
+            <p className="text-muted-foreground font-medium">No related products found at the moment.</p>
           )}
         </div>
 
