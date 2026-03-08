@@ -27,6 +27,7 @@ export default function Footer() {
 
   const customerService = [
     { label: 'FAQ', path: '/faq' },
+    { label: 'Reward Policy', path: '/reward-policy' },
     { label: 'Shipping & Returns', path: '/shipping' },
     { label: 'Privacy Policy', path: '/privacy' },
     { label: 'Terms & Conditions', path: '/terms' },
