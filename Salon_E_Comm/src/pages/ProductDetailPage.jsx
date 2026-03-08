@@ -253,17 +253,37 @@ export default function ProductDetailPage() {
                   {/* Container for future info */}
                 </div>
 
-                <div className="">
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <div className="flex items-center gap-1 bg-neutral-50 rounded-lg p-1 border border-neutral-100 shadow-sm">
+                    <button
+                      onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                      disabled={quantity <= 1 || product.inventoryCount <= 0 || product.status === 'EXPIRED'}
+                      className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-neutral-600 transition-all active:scale-95 disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <div className="w-12 text-center font-black text-lg text-primary tracking-tighter">
+                      {quantity}
+                    </div>
+                    <button
+                      onClick={() => setQuantity(prev => Math.min(product.inventoryCount, prev + 1))}
+                      disabled={quantity >= product.inventoryCount || product.inventoryCount <= 0 || product.status === 'EXPIRED'}
+                      className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-neutral-600 transition-all active:scale-95 disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+
                   <Button
                     onClick={handleAddToCart}
                     disabled={addingToCart || product.inventoryCount <= 0 || product.status === 'EXPIRED'}
                     className={cn(
-                      "h-12 px-32 rounded-md bg-primary hover:bg-primary-hover text-background font-bold text-lg uppercase tracking-wide transition-all shadow-md",
-                      (product.inventoryCount <= 0 || product.status === 'EXPIRED') && "bg-primary-muted hover:bg-primary-muted cursor-not-allowed"
+                      "h-12 flex-1 px-12 rounded-lg bg-primary hover:bg-primary-hover text-background font-black text-sm uppercase tracking-[0.15em] transition-all shadow-xl shadow-primary/10",
+                      (product.inventoryCount <= 0 || product.status === 'EXPIRED') && "bg-neutral-200 hover:bg-neutral-200 cursor-not-allowed shadow-none text-neutral-400"
                     )}
                   >
-                    {addingToCart ? <Loader2 className="animate-spin mr-2" /> : <ShoppingCart className="mr-2" size={20} />}
-                    {product.status === 'EXPIRED' ? 'Item Expired' : (product.inventoryCount <= 0 ? 'Out of Stock' : 'Add to Basket')}
+                    {addingToCart ? <Loader2 className="animate-spin mr-3" size={18} /> : <ShoppingCart className="mr-3" size={18} />}
+                    {product.status === 'EXPIRED' ? 'Inactive Item' : (product.inventoryCount <= 0 ? 'Out of Stock' : 'Add to Salon Basket')}
                   </Button>
                 </div>
               </div>

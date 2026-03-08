@@ -3,19 +3,19 @@ import { Truck, Lock, ShieldCheck } from 'lucide-react';
 
 const benefitCards = [
     {
-        title: 'Natural Ingredients',
-        description: 'Made using herbal extracts',
+        title: '100% NATURAL EXTRACT',
+        description: 'Made using natural extracts',
         icon: '/benifits/benifits1.png',
         bg: '/bg/b4.png',
     },
     {
-        title: 'Clinically Tested',
+        title: 'SLES & PAraben FREE',
         description: 'Proven Safe and Effective',
         icon: '/benifits/benifits2.png',
-        bg: '/bg/b1.png',
+        bg: '/bg/b4.png',
     },
     {
-        title: 'Secure Payments',
+        title: 'SECURE PAYMENTS',
         description: '100% Secure Checkout',
         icon: '/benifits/benifits3.png',
         bg: '/bg/b4.png',
