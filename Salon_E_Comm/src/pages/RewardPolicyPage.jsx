@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
-import { ShieldCheck, Award, Clock, IndianRupee, CreditCard, Lock, Calendar, Star, MessageCircle } from 'lucide-react';
+import { ShieldCheck, Award, Clock, IndianRupee, CreditCard, Lock, Calendar, Star, MessageCircle, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const RewardPolicyPage = () => {
     useEffect(() => {
@@ -75,19 +77,41 @@ const RewardPolicyPage = () => {
             {/* Policy Content - Side by Side layout like FAQ */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
                 <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
-                    {/* Left Column - Heading & Description (1/4) */}
-                    <div className="lg:w-1/4 space-y-6">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
-                            <MessageCircle size={14} />
-                            <span>Program Rules</span>
+                    {/* Left Column - Heading & Navigation (1/4) */}
+                    <div className="lg:w-1/4 space-y-8">
+                        <div className="space-y-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+                                <MessageCircle size={14} />
+                                <span>Program Rules</span>
+                            </div>
+                            <h2 className="text-4xl font-black text-neutral-900 tracking-tight leading-tight uppercase">
+                                Loyalty Reward <span className="text-primary">Rules.</span>
+                            </h2>
+                            <p className="text-neutral-500 text-lg font-medium leading-relaxed">
+                                Transparent rules ensuring a fair and profitable experience for all salon partners.
+                            </p>
                         </div>
-                        <h2 className="text-4xl font-black text-neutral-900 tracking-tight leading-tight uppercase">
-                            Loyalty Reward <span className="text-primary">Rules.</span>
-                        </h2>
-                        <p className="text-neutral-500 text-lg font-medium leading-relaxed">
-                            To ensure a fair and consistent experience, our program is governed by the following rules.
-                        </p>
-                        <div className="pt-4 border-t border-neutral-100 italic">
+
+                        <div className="flex flex-col gap-3 pb-8 border-b border-neutral-100">
+                            <Link to="/terms" className="group flex items-center justify-between p-4 rounded-xl border border-neutral-100 hover:border-primary/20 hover:bg-primary/5 transition-all">
+                                <span className="text-sm font-bold text-neutral-600 group-hover:text-primary transition-colors">Terms & Conditions</span>
+                                <ChevronRight size={16} className="text-neutral-300 group-hover:text-primary transition-colors" />
+                            </Link>
+                            <Link to="/privacy" className="group flex items-center justify-between p-4 rounded-xl border border-neutral-100 hover:border-primary/20 hover:bg-primary/5 transition-all">
+                                <span className="text-sm font-bold text-neutral-600 group-hover:text-primary transition-colors">Privacy Policy</span>
+                                <ChevronRight size={16} className="text-neutral-300 group-hover:text-primary transition-colors" />
+                            </Link>
+                            <Link to="/shipping-policy" className="group flex items-center justify-between p-4 rounded-xl border border-neutral-100 hover:border-primary/20 hover:bg-primary/5 transition-all">
+                                <span className="text-sm font-bold text-neutral-600 group-hover:text-primary transition-colors">Shipping Policy</span>
+                                <ChevronRight size={16} className="text-neutral-300 group-hover:text-primary transition-colors" />
+                            </Link>
+                            <Link to="/faq" className="group flex items-center justify-between p-4 rounded-xl border border-neutral-100 hover:border-primary/20 hover:bg-primary/5 transition-all">
+                                <span className="text-sm font-bold text-neutral-600 group-hover:text-primary transition-colors">General FAQ</span>
+                                <ChevronRight size={16} className="text-neutral-300 group-hover:text-primary transition-colors" />
+                            </Link>
+                        </div>
+
+                        <div className="pt-4 italic">
                             <p className="text-xs text-neutral-400 font-medium">
                                 * Rules are subject to change to ensure program sustainability.
                             </p>
@@ -122,9 +146,9 @@ const RewardPolicyPage = () => {
                                         Start placing professional qualifying orders today and unlock rewards.
                                     </p>
                                 </div>
-                                <button className="h-12 px-10 rounded-lg bg-primary text-white font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 whitespace-nowrap">
-                                    Shop Collection
-                                </button>
+                                <Button asChild className="h-12 px-10 rounded-lg bg-primary hover:bg-primary-hover text-foreground-secondary font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 whitespace-nowrap border-none">
+                                    <Link to="/products">Shop Collection</Link>
+                                </Button>
                             </div>
                         </div>
                     </div>

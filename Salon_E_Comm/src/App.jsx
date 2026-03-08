@@ -12,6 +12,10 @@ import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import FAQPage from './pages/FAQPage';
 import RewardPolicyPage from './pages/RewardPolicyPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import ShippingPolicyPage from './pages/ShippingPolicyPage';
+import ContactPage from './pages/ContactPage';
 import MainLayout from './components/layout/MainLayout';
 import ScrollToTop from './components/ScrollToTop';
 import { CartProvider } from './context/CartContext';
@@ -41,6 +45,10 @@ const App = () => {
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/faq" element={<FAQPage />} />
                   <Route path="/reward-policy" element={<RewardPolicyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
 
                   <Route
                     path="/checkout"

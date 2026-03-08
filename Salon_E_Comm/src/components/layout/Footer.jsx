@@ -28,7 +28,7 @@ export default function Footer() {
   const customerService = [
     { label: 'FAQ', path: '/faq' },
     { label: 'Reward Policy', path: '/reward-policy' },
-    { label: 'Shipping & Returns', path: '/shipping' },
+    { label: 'Shipping & Returns', path: '/shipping-policy' },
     { label: 'Privacy Policy', path: '/privacy' },
     { label: 'Terms & Conditions', path: '/terms' },
   ];
@@ -164,12 +164,12 @@ export default function Footer() {
           <div className="relative z-10 px-10 md:px-14 pb-6 flex flex-col items-center">
             <div className="h-px w-full bg-neutral-200/30 mb-3" />
             <div className="flex flex-col md:flex-row items-center gap-2 text-sm font-medium text-neutral-500">
-              <span>© 2024 {settings?.appName || 'Glow B Shine'}. All Rights Reserved.</span>
+              <span>© {new Date().getFullYear()} {settings?.appName || 'Glow B Shine'}. All Rights Reserved.</span>
               <div className="hidden md:block w-px h-4 bg-neutral-300 mx-2" />
               <div className="flex gap-4">
                 <Link to="/privacy" className="hover:text-pink-500 transition-colors">Privacy Policy</Link>
-                <div className="w-px h-4 bg-neutral-300" />
-                <Link to="/terms" className="hover:text-pink-500 transition-colors">Terms & Conditions</Link>
+                <Link to="/shipping-policy" className="hover:text-primary transition-colors">Shipping & Returns</Link>
+                <Link to="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>
               </div>
             </div>
           </div>
