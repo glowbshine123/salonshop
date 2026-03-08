@@ -10,7 +10,7 @@ import AdminCommissionSlabs from './AdminCommissionSlabs';
 import AdminUsers from './AdminUsers';
 import AdminSettings from './AdminSettings';
 import AdminProfile from './AdminProfile';
-import NotificationsPage from '../NotificationsPage';
+import NotificationsPage from '../user/NotificationsPage';
 import AdminDashboard from './AdminDashboard';
 import AddProductPage from './AddProductPage';
 

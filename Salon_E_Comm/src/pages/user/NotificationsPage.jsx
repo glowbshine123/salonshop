@@ -13,10 +13,10 @@ import {
     Loader2,
     Shield
 } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { notificationAPI } from '../services/apiService';
-import { useLoading } from '../context/LoadingContext';
-import { useSocket } from '../context/SocketContext';
+import { Button } from '../../components/ui/button';
+import { notificationAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
+import { useSocket } from '../../context/SocketContext';
 import { toast } from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';

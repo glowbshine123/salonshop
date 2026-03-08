@@ -29,8 +29,8 @@ import {
 import { cn } from '@/lib/utils';
 import { productAPI, categoryAPI } from '../../services/apiService';
 import { useLoading } from '../../context/LoadingContext';
-import ProductModal from '../../components/admin/ProductModal';
-import StatCard from '../../components/admin/StatCard';
+import ProductModal from '../../components/product/ProductModal';
+import StatCard from '../../components/dashboard/StatCard';
 import { toast } from 'react-hot-toast';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from '@/components/ui/button';

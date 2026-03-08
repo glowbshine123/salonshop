@@ -23,9 +23,9 @@ import {
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
-import StatCard from '../../components/admin/StatCard';
+import StatCard from '../../components/dashboard/StatCard';
 import { toast } from 'react-hot-toast';
-import TableRowSkeleton from '../../components/common/TableRowSkeleton';
+import TableRowSkeleton from '../../components/dashboard/TableRowSkeleton';
 import {
     Tooltip,
     TooltipContent,

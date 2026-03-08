@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import { userAPI, adminAPI } from '../../services/apiService';
 import { useLoading } from '../../context/LoadingContext';
-import StatCard from '../../components/admin/StatCard';
+import StatCard from '../../components/dashboard/StatCard';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import {
     Select,

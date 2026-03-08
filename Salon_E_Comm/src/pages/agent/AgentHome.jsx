@@ -31,7 +31,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useLoading } from '../../context/LoadingContext';
 import { agentAPI, orderAPI } from '../../services/apiService';
-import StatCard from '../../components/admin/StatCard';
+import StatCard from '../../components/dashboard/StatCard';
 import { Button } from '../../components/ui/button';
 import { cn } from '@/lib/utils';
 import SalonRegistrationModal from '../../components/agent/SalonRegistrationModal';

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import MainLayout from '../components/layout/MainLayout';
-import { useLoading } from '../context/LoadingContext';
-import { productAPI, categoryAPI } from '../utils/apiClient';
-import ProductCard from '../components/common/ProductCard';
+import MainLayout from '../../components/layout/MainLayout';
+import { useLoading } from '../../context/LoadingContext';
+import { productAPI, categoryAPI } from '../../utils/apiClient';
+import ProductCard from '../../components/product/ProductCard';
 import { Search, Filter, X, ChevronDown, SlidersHorizontal } from 'lucide-react';
-import ProductCardSkeleton from '../components/common/ProductCardSkeleton';
-import { Button } from "../components/ui/button";
+import ProductCardSkeleton from '../../components/product/ProductCardSkeleton';
+import { Button } from "../../components/ui/button";
 
 const PriceRangeFilter = ({ min, max, onChange }) => {
     const [localMin, setLocalMin] = useState(min);

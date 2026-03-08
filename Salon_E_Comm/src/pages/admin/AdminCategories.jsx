@@ -22,7 +22,7 @@ import {
 import { categoryAPI } from '../../services/apiService';
 import { useLoading } from '../../context/LoadingContext';
 import { toast } from 'react-hot-toast';
-import AdminCardSkeleton from '../../components/common/AdminCardSkeleton';
+import AdminCardSkeleton from '../../components/dashboard/AdminCardSkeleton';
 import { cn } from '@/lib/utils';
 
 export default function AdminCategories() {

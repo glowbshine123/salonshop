@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { rewardAPI } from '../services/apiService';
-import { useLoading } from '../context/LoadingContext';
+import { rewardAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import {
     Zap,
     History,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { userAPI, authAPI, payoutAPI } from '../services/apiService';
-import { useLoading } from '../context/LoadingContext';
+import { useAuth } from '../../context/AuthContext';
+import { userAPI, authAPI, payoutAPI } from '../../services/apiService';
+import { useLoading } from '../../context/LoadingContext';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, MapPin, Camera, Shield, Bell, CreditCard, ChevronRight, Loader2, CheckCircle2, Zap, Upload, Wallet } from 'lucide-react';
 import {
@@ -10,10 +10,10 @@ import {
     NavigationMenuItem,
     NavigationMenuLink,
     navigationMenuTriggerStyle,
-} from '../components/ui/navigation-menu';
+} from '../../components/ui/navigation-menu';
 
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import SecuritySettings from '../components/common/SecuritySettings';
+import SecuritySettings from '../../components/user/SecuritySettings';
 
 export default function ProfilePage() {
     const navigate = useNavigate();

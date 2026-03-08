@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { toast } from 'react-hot-toast';
-import AdminCardSkeleton from '../../components/common/AdminCardSkeleton';
+import AdminCardSkeleton from '../../components/dashboard/AdminCardSkeleton';
 
 export default function AdminCommissionSlabs() {
     const [slabs, setSlabs] = useState([]);

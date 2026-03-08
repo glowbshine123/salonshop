@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from '../../context/AuthContext';
-import StatCard from '../../components/admin/StatCard';
+import StatCard from '../../components/dashboard/StatCard';
 import { Button } from '../../components/ui/button';
 import { cn } from '@/lib/utils';
 

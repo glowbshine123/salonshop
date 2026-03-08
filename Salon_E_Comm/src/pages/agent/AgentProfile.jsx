@@ -18,7 +18,7 @@ import { useAuth } from '../../context/AuthContext';
 import { userAPI } from '../../services/apiService';
 import { Button } from '../../components/ui/button';
 
-import SecuritySettings from '../../components/common/SecuritySettings';
+import SecuritySettings from '../../components/user/SecuritySettings';
 
 export default function AgentProfile() {
     const { user, setUser } = useAuth();

@@ -14,7 +14,7 @@ import {
 import { useSearchParams } from 'react-router-dom';
 import AgentProfileSettings from './settings/AgentProfileSettings';
 import AgentPayoutSettings from './settings/AgentPayoutSettings';
-import SecuritySettings from '../../components/common/SecuritySettings';
+import SecuritySettings from '../../components/user/SecuritySettings';
 
 export default function AgentSettings() {
     const [searchParams, setSearchParams] = useSearchParams();

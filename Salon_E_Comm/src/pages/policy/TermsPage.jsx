@@ -100,7 +100,7 @@ const TermsPage = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
                 <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
                     {/* Left Column (1/4) */}
-                    <div className="lg:w-1/4 space-y-8">
+                    <div className="hidden lg:block lg:w-1/4 space-y-8">
                         <div className="space-y-4">
                             <h2 className="text-3xl font-black text-neutral-900 uppercase tracking-tight leading-none">
                                 User <br /> <span className="text-primary">Guidelines.</span>
@@ -155,14 +155,19 @@ const TermsPage = () => {
                         </div>
 
                         {/* Agreement Footer */}
-                        <div className="mt-16 p-12 bg-neutral-50 rounded-[48px] text-center border border-neutral-100 border-dashed relative overflow-hidden">
-                            <h3 className="text-2xl font-black text-neutral-900 uppercase tracking-tight mb-4">Questions about our terms?</h3>
-                            <p className="text-neutral-500 font-medium max-w-xl mx-auto mb-8">
-                                We value transparency. If any part of these terms is unclear, our support team is available to assist your professional salon business.
-                            </p>
-                            <Button asChild className="h-14 px-12 rounded-lg bg-primary hover:bg-primary-hover text-foreground-secondary font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl border-none">
-                                <Link to="/contact">Contact Legal Team</Link>
-                            </Button>
+                        <div className="mt-16 bg-background-secondary rounded-xl p-4 md:p-6 border border-soft relative overflow-hidden group shadow-sm">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                                <div>
+                                    <h3 className="text-2xl font-black text-neutral-900 uppercase">Questions about our terms?</h3>
+                                    <p className="text-neutral-500 font-medium max-w-xl text-sm leading-relaxed">
+                                        We value transparency. If any part of these terms is unclear, our support team is available to assist your professional salon business.
+                                    </p>
+                                </div>
+                                <Button asChild className="h-12 px-10 rounded-lg bg-primary hover:bg-primary-hover text-foreground-secondary font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 whitespace-nowrap border-none">
+                                    <Link to="/contact">Contact Legal Team</Link>
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>

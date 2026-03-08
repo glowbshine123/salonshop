@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import SectionHeader from './SectionHeader';
-import HorizontalProductCard from './HorizontalProductCard';
+import HorizontalProductCard from '../product/HorizontalProductCard';
 
 const FeaturedHorizontalSection = ({ products, loading, onAction }) => {
     if (loading && products.length === 0) {

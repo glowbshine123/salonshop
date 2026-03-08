@@ -1,6 +1,6 @@
 import React from 'react';
-import ProductCard from '../common/ProductCard';
-import ProductCardSkeleton from '../common/ProductCardSkeleton';
+import ProductCard from '../product/ProductCard';
+import ProductCardSkeleton from '../product/ProductCardSkeleton';
 import { Button } from '../ui/button';
 import SectionHeader from './SectionHeader';
 

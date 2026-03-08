@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useSidebar } from '../ui/sidebar';
-import LogoutModal from '../common/LogoutModal';
+import LogoutModal from '../auth/LogoutModal';
 
 export default function Header() {
   const navigate = useNavigate();

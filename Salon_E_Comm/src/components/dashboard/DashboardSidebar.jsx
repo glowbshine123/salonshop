@@ -40,7 +40,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-export function AppSidebar({ role = "ADMIN", ...props }) {
+export function DashboardSidebar({ role = "ADMIN", ...props }) {
     const { logout, user } = useAuth()
     const { unreadCount, unreadOrderCount } = useSocket()
     const location = useLocation()

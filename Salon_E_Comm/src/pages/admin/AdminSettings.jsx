@@ -16,7 +16,7 @@ import ProfileSettings from './settings/ProfileSettings';
 import RewardSettings from './settings/RewardSettings';
 import GatewaySettings from './settings/GatewaySettings';
 import PaymentSettings from './settings/PaymentSettings';
-import SecuritySettings from '../../components/common/SecuritySettings';
+import SecuritySettings from '../../components/user/SecuritySettings';
 
 export default function AdminSettings() {
     const [searchParams, setSearchParams] = useSearchParams();

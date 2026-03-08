@@ -26,7 +26,7 @@ import {
     useSidebar
 } from '../ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import LogoutModal from '../common/LogoutModal';
+import LogoutModal from '../auth/LogoutModal';
 import { Button } from '../ui/button';
 
 export default function AppSidebar() {

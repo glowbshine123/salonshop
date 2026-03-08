@@ -22,6 +22,8 @@ export default function Footer() {
   const quickLinks = [
     { label: 'Home', path: '/' },
     { label: 'Shop', path: '/products' },
+    { label: 'About Us', path: '/about' },
+    { label: 'Why Choose Us', path: '/why-choose-us' },
     { label: 'Contact Us', path: '/contact' },
   ];
 
@@ -81,7 +83,7 @@ export default function Footer() {
             <div className="hidden lg:block w-px h-full bg-neutral-200/50 absolute left-1/4" />
 
             {/* Quick Links */}
-            <div className="space-y-6 lg:pl-8">
+            <div className="space-y-2 md:space-y-6 lg:pl-8">
               <div className="space-y-2">
                 <h4 className="text-xl font-bold text-neutral-800">Quick Links</h4>
                 <div className="h-px w-full bg-neutral-200/50" />
@@ -108,7 +110,7 @@ export default function Footer() {
             <div className="hidden lg:block w-px h-full bg-neutral-200/50 absolute left-1/2" />
 
             {/* Customer Service */}
-            <div className="space-y-6 lg:pl-8">
+            <div className="space-y-2 md:space-y-6 lg:pl-8">
               <div className="space-y-2">
                 <h4 className="text-xl font-bold text-neutral-800">Customer Service</h4>
                 <div className="h-px w-full bg-neutral-200/50" />
@@ -135,7 +137,7 @@ export default function Footer() {
             <div className="hidden lg:block w-px h-full bg-neutral-200/50 absolute left-3/4" />
 
             {/* Follow Us */}
-            <div className="space-y-6 lg:pl-8">
+            <div className="space-y-2 md:space-y-6 lg:pl-8">
               <div className="space-y-2">
                 <h4 className="text-xl font-bold text-neutral-800">Follow Us</h4>
                 <div className="h-px w-full bg-neutral-200/50" />
@@ -166,7 +168,7 @@ export default function Footer() {
             <div className="flex flex-col md:flex-row items-center gap-2 text-sm font-medium text-neutral-500">
               <span>© {new Date().getFullYear()} {settings?.appName || 'Glow B Shine'}. All Rights Reserved.</span>
               <div className="hidden md:block w-px h-4 bg-neutral-300 mx-2" />
-              <div className="flex gap-4">
+              <div className="hidden md:flex gap-4">
                 <Link to="/privacy" className="hover:text-pink-500 transition-colors">Privacy Policy</Link>
                 <Link to="/shipping-policy" className="hover:text-primary transition-colors">Shipping & Returns</Link>
                 <Link to="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>

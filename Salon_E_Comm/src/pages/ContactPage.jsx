@@ -109,28 +109,6 @@ const ContactPage = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Quick Links Overlay (Similar to other help pages) */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Link to="/faq" className="p-6 rounded-2xl border border-neutral-100 text-center hover:border-primary/20 hover:bg-primary/5 transition-all space-y-2">
-                        <span className="block text-[10px] font-black text-primary uppercase tracking-widest opacity-50">Quick Answer</span>
-                        <span className="text-sm font-black text-neutral-900 uppercase">View FAQ</span>
-                    </Link>
-                    <Link to="/shipping-policy" className="p-6 rounded-2xl border border-neutral-100 text-center hover:border-primary/20 hover:bg-primary/5 transition-all space-y-2">
-                        <span className="block text-[10px] font-black text-primary uppercase tracking-widest opacity-50">Delivery Info</span>
-                        <span className="text-sm font-black text-neutral-900 uppercase">Shipping</span>
-                    </Link>
-                    <Link to="/terms" className="p-6 rounded-2xl border border-neutral-100 text-center hover:border-primary/20 hover:bg-primary/5 transition-all space-y-2">
-                        <span className="block text-[10px] font-black text-primary uppercase tracking-widest opacity-50">Usage Rules</span>
-                        <span className="text-sm font-black text-neutral-900 uppercase">Terms</span>
-                    </Link>
-                    <Link to="/products" className="p-6 rounded-2xl border border-neutral-100 text-center hover:border-primary/20 hover:bg-primary/5 transition-all space-y-2">
-                        <span className="block text-[10px] font-black text-primary uppercase tracking-widest opacity-50">Collection</span>
-                        <span className="text-sm font-black text-neutral-900 uppercase">Shop Now</span>
-                    </Link>
-                </div>
-            </div>
         </div>
     );
 };

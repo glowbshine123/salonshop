@@ -7,7 +7,7 @@ import AgentPayouts from './AgentPayouts';
 import AgentOrders from './AgentOrders';
 import AgentRewards from './AgentRewards';
 import AgentSettings from './AgentSettings';
-import NotificationsPage from '../NotificationsPage';
+import NotificationsPage from '../user/NotificationsPage';
 
 export default function AgentRoutes() {
     return (

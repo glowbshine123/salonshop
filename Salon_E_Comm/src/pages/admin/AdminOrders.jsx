@@ -31,7 +31,7 @@ import { useLoading } from '../../context/LoadingContext';
 import { useSocket } from '../../context/SocketContext';
 import { toast } from 'react-hot-toast';
 import { Skeleton } from "@/components/ui/skeleton";
-import TableRowSkeleton from '../../components/common/TableRowSkeleton';
+import TableRowSkeleton from '../../components/dashboard/TableRowSkeleton';
 import OrderInvoiceModal from '../../components/admin/OrderInvoiceModal';
 import { Button } from '@/components/ui/button';
 

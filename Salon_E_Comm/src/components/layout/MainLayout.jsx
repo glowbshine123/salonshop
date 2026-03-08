@@ -4,7 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import Breadcrumbs from '../common/Breadcrumbs';
 import { SidebarProvider } from '../ui/sidebar';
-import AppSidebar from './AppSidebar';
+import AppSidebar from './MobileSidebar';
 import './MainLayout.css';
 
 export default function MainLayout({ children }) {

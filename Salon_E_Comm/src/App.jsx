@@ -1,23 +1,25 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import ProductsPage from './pages/ProductsPage';
-import CheckoutPage from './pages/CheckoutPage';
-import CartPage from './pages/CartPage';
-import MyOrdersPage from './pages/MyOrdersPage';
-import RewardPage from './pages/RewardPage';
-import ProfilePage from './pages/ProfilePage';
-import NotificationsPage from './pages/NotificationsPage';
-import FAQPage from './pages/FAQPage';
-import RewardPolicyPage from './pages/RewardPolicyPage';
-import TermsPage from './pages/TermsPage';
-import PrivacyPage from './pages/PrivacyPage';
-import ShippingPolicyPage from './pages/ShippingPolicyPage';
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import ProductDetailPage from './pages/product/ProductDetailPage';
+import ProductsPage from './pages/product/ProductsPage';
+import CheckoutPage from './pages/product/CheckoutPage';
+import CartPage from './pages/product/CartPage';
+import MyOrdersPage from './pages/product/MyOrdersPage';
+import RewardPage from './pages/product/RewardPage';
+import ProfilePage from './pages/user/ProfilePage';
+import NotificationsPage from './pages/user/NotificationsPage';
+import FAQPage from './pages/policy/FAQPage';
+import RewardPolicyPage from './pages/policy/RewardPolicyPage';
+import TermsPage from './pages/policy/TermsPage';
+import PrivacyPage from './pages/policy/PrivacyPage';
+import ShippingPolicyPage from './pages/policy/ShippingPolicyPage';
 import ContactPage from './pages/ContactPage';
+import AboutUsPage from './pages/policy/AboutUsPage';
+import WhyChooseUsPage from './pages/policy/WhyChooseUsPage';
 import MainLayout from './components/layout/MainLayout';
-import ScrollToTop from './components/ScrollToTop';
+
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -36,7 +38,7 @@ const App = () => {
           <CartProvider>
             <BrowserRouter>
               <PageLoader />
-              <ScrollToTop />
+
               <Routes>
                 <Route element={<MainLayout />}>
                   <Route path="/" element={<HomePage />} />
@@ -48,6 +50,8 @@ const App = () => {
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                  <Route path="/about" element={<AboutUsPage />} />
+                  <Route path="/why-choose-us" element={<WhyChooseUsPage />} />
                   <Route path="/contact" element={<ContactPage />} />
 
                   <Route
