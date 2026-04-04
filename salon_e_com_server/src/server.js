@@ -36,14 +36,10 @@ try {
 
 import { corsOptions } from "./config/cors.js";
 
-/* =======================
-   CORS (PRODUCTION ONLY)
-======================= */
 app.use(cors(corsOptions));
 
-// Preflight
-// app.options("*", cors());
-
+// ✅ IMPORTANT
+app.options("*", cors(corsOptions));
 
 
 /* =======================
