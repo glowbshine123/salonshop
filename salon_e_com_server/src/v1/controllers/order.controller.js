@@ -95,3 +95,12 @@ export const markOrdersAsViewed = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const cancelOrder = async (req, res) => {
+    try {
+        await orderService.cancelPendingOrder(req.params.id);
+        res.json({ message: 'Order cancelled and stock released' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

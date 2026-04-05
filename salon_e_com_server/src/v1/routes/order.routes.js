@@ -10,6 +10,7 @@ const router = express.Router();
 // Public/User routes
 router.post('/', protect, orderController.createOrder); // Customer or Agent can buy
 router.get('/me', protect, orderController.getMyOrders);
+router.post('/:id/cancel', protect, orderController.cancelOrder);
 // Agent assigned orders
 router.get('/assigned', protect, authorize('AGENT'), orderController.getAssignedOrders);
 

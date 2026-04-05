@@ -1,7 +1,7 @@
 import razorpay from '../../config/razorpay.js';
 import crypto from 'crypto';
 import Order from '../models/Order.js';
-import { updateOrderStatus } from '../services/order.service.js';
+import { updateOrderStatus, finalizeOrder } from '../services/order.service.js';
 
 export const createRazorpayOrder = async (req, res) => {
     try {
@@ -86,7 +86,7 @@ export const verifyPayment = async (req, res) => {
                     order.paymentDetails.razorpay_signature = razorpay_signature;
                     await order.save();
 
-                    await updateOrderStatus(orderId, 'PAID');
+                    await finalizeOrder(orderId);
                 }
             }
             return res.status(200).json({ message: 'Payment verified successfully', status: 'success' });

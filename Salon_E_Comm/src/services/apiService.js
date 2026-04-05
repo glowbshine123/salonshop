@@ -125,6 +125,7 @@ export const orderAPI = {
     assignAgent: (orderId, agentId) => api.patch(`/orders/${orderId}/assign-agent`, { agentId }),
     getById: (id) => api.get(`/orders/${id}`),
     create: (orderData) => api.post('/orders', orderData),
+    cancel: (id) => api.post(`/orders/${id}/cancel`),
     updateStatus: (id, status) => api.patch(`/orders/${id}/status`, { status }),
     getUnreadCount: () => api.get('/orders/unread-count'),
     markAsViewed: () => api.patch('/orders/mark-as-viewed'),

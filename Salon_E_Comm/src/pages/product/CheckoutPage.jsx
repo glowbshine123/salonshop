@@ -265,10 +265,30 @@ export default function CheckoutPage() {
         theme: { color: '#059669' }
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (response) {
+      const rzp = new window.Razorpay({
+        ...options,
+        modal: {
+          ondismiss: async function () {
+            setPaymentProcessing(false);
+            setLoading(false);
+            try {
+              await orderAPI.cancel(createdOrder._id);
+            } catch (err) {
+              console.error("Error cancelling order on dismissal:", err);
+            }
+          }
+        }
+      });
+
+      rzp.on('payment.failed', async function (response) {
         setError('Payment failed: ' + (response.error?.description || 'Unknown error'));
         setPaymentProcessing(false);
+        setLoading(false);
+        try {
+          await orderAPI.cancel(createdOrder._id);
+        } catch (err) {
+          console.error("Error cancelling order on failure:", err);
+        }
       });
 
       rzp.open();
@@ -277,8 +297,17 @@ export default function CheckoutPage() {
       const msg = err.response?.data?.message || err.message || 'Failed to place order. Please try again.';
       setError(msg);
       toast.error(msg);
+      
+      // Cleanup if order was created but payment flow failed
+      if (createdOrder && createdOrder._id && paymentMethod === 'ONLINE') {
+        try {
+          await orderAPI.cancel(createdOrder._id);
+        } catch (cancelErr) {
+          console.error("Error cleaning up order after failure:", cancelErr);
+        }
+      }
+
       setPaymentProcessing(false);
-    } finally {
       setLoading(false);
     }
   };

@@ -7,6 +7,12 @@ import * as notificationService from './notification.service.js';
 export const createOrder = async (userId, orderData) => {
     const { items, referralCode, shippingAddress, paymentMethod } = orderData;
 
+    // --- PREVENT STOCK LEAKAGE (Cancel existing pending orders for this user) ---
+    const existingPending = await Order.find({ customerId: userId, status: 'PAYMENT_PENDING' });
+    for (const oldOrder of existingPending) {
+        await cancelPendingOrder(oldOrder._id);
+    }
+
     let subtotal = 0;
     const orderItems = [];
 
@@ -131,9 +137,9 @@ export const createOrder = async (userId, orderData) => {
         total: finalTotalWithDiscount,
         pointsUsed,
         shippingAddress: shippingAddress || null,
-        paymentMethod: paymentMethod || 'COD', // Default to COD for zero-total or if not specified
+        paymentMethod: paymentMethod || 'COD', 
         paymentStatus: finalTotalWithDiscount === 0 ? 'PAID' : 'UNPAID',
-        status: finalTotalWithDiscount === 0 ? 'PAID' : 'PENDING',
+        status: (finalTotalWithDiscount > 0 && paymentMethod === 'ONLINE') ? 'PAYMENT_PENDING' : (finalTotalWithDiscount === 0 ? 'PAID' : 'PENDING'),
         agentCommission: {
             rate: commissionRate,
             amount: agentCommissionAmount,
@@ -144,8 +150,12 @@ export const createOrder = async (userId, orderData) => {
             redeemed: pointsUsed,
             isCredited: false
         },
-        timeline: [{ status: 'PENDING', note: `Order created - ${pointsUsed > 0 ? `Redeemed ${pointsUsed} points. ` : ''}Payment Method: ${paymentMethod || 'ONLINE'}` }]
+        timeline: [{ status: (finalTotalWithDiscount > 0 && paymentMethod === 'ONLINE') ? 'PAYMENT_PENDING' : 'PENDING', note: `Order created - ${pointsUsed > 0 ? `Redeemed ${pointsUsed} points. ` : ''}Payment Method: ${paymentMethod || 'ONLINE'}` }]
     });
+
+    if (order.status === 'PAYMENT_PENDING') {
+        return order;
+    }
 
     if (salonRewardPointsAmount > 0) {
         const rewardService = await import('./reward.service.js');
@@ -197,7 +207,7 @@ export const createOrder = async (userId, orderData) => {
 export const getMyOrders = async (userId, filters = {}) => {
     const page = parseInt(filters.page, 10) || 1;
     const limit = parseInt(filters.limit, 10) || 20;
-    const query = { customerId: userId };
+    const query = { customerId: userId, status: { $ne: 'PAYMENT_PENDING' } };
 
     const total = await Order.countDocuments(query);
     const orders = await Order.find(query)
@@ -217,7 +227,7 @@ export const getMyOrders = async (userId, filters = {}) => {
 export const getAssignedOrders = async (agentId, filters = {}) => {
     const page = parseInt(filters.page, 10) || 1;
     const limit = parseInt(filters.limit, 10) || 20;
-    const query = { agentId };
+    const query = { agentId, status: { $ne: 'PAYMENT_PENDING' } };
 
     const total = await Order.countDocuments(query);
     const orders = await Order.find(query)
@@ -260,6 +270,8 @@ export const getAllOrders = async (filters = {}) => {
     const query = {};
     if (filters.status && filters.status !== 'All') {
         query.status = filters.status;
+    } else {
+        query.status = { $ne: 'PAYMENT_PENDING' };
     }
     if (filters.search) {
         query.orderNumber = new RegExp(filters.search, 'i');
@@ -284,6 +296,82 @@ export const getAllOrders = async (filters = {}) => {
         page: page,
         limit: limit
     };
+};
+
+export const finalizeOrder = async (orderId) => {
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('Order not found');
+
+    if (order.status !== 'PAYMENT_PENDING') return order;
+
+    order.status = 'PENDING';
+    order.paymentStatus = 'PAID';
+    order.timeline.push({ status: 'PAID', note: 'Online payment verified. Order finalized.' });
+
+    // Clear Cart
+    try {
+        const cartService = await import('./cart.service.js');
+        await cartService.clearCart(order.customerId, true);
+    } catch (cartErr) {
+        console.warn('Failed to clear cart after order finalization:', cartErr.message);
+    }
+
+    // Notifications
+    await notificationService.createNotification({
+        userId: order.customerId,
+        title: 'Order Confirmed',
+        description: `Your order ${order.orderNumber} has been successfully placed and paid.`,
+        type: 'ORDER'
+    });
+
+    if (order.agentId) {
+        await notificationService.createNotification({
+            userId: order.agentId,
+            title: 'New Order Confirmed',
+            description: `A new order ${order.orderNumber} has been placed via your referral.`,
+            type: 'ORDER'
+        });
+    }
+
+    await notificationService.notifyAdmins({
+        title: 'New Online Order Received',
+        description: `Order ${order.orderNumber} for ₹${order.total} has been paid and confirmed.`,
+        type: 'ORDER',
+        priority: 'MEDIUM',
+        metadata: { orderId: order._id }
+    });
+
+    await order.save();
+    return order;
+};
+
+export const cancelPendingOrder = async (orderId) => {
+    const order = await Order.findById(orderId);
+    if (!order || order.status !== 'PAYMENT_PENDING') return;
+
+    // Restore reward points if used
+    if (order.pointsUsed > 0) {
+        try {
+            const rewardService = await import('./reward.service.js');
+            await rewardService.reverseRedemption(order._id);
+        } catch (err) {
+            console.error("Error reversing points for pending order:", err);
+        }
+    }
+
+    // Restore stock
+    if (!order.stockRestored) {
+        for (const item of order.items) {
+            const product = await (await import('../models/Product.js')).default.findById(item.productId);
+            if (product) {
+                product.inventoryCount += item.quantity;
+                await product.save();
+            }
+        }
+    }
+
+    // Delete the order entirely so it doesn't show in history
+    await Order.findByIdAndDelete(order._id);
 };
 
 export const updateOrderStatus = async (orderId, status) => {
