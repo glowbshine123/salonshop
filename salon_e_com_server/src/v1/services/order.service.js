@@ -74,7 +74,7 @@ export const createOrder = async (userId, orderData) => {
     }
 
     const tax = 0; // Tax removed as per requirement
-    const shippingCost = subtotal > 50 ? 0 : 10;
+    const shippingCost = 0; // Shipping removed as per requirement
     const total = subtotal + tax + shippingCost;
 
     const SalonOwnerProfile = (await import('../models/SalonOwnerProfile.js')).default;
