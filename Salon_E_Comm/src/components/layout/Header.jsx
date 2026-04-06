@@ -120,8 +120,8 @@ export default function Header() {
           {/* Center Section: Mobile Logo Only */}
           <div className="flex-1 flex items-center justify-center md:hidden">
             <Link to="/" className="flex items-center group">
-              <div className="w-fit h-10 bg-primary/10 rounded-xl flex items-center justify-center transition-transform overflow-hidden">
-                <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-contain" />
+              <div className="w-fit h-10 flex items-center justify-center transition-transform overflow-hidden">
+                <img src="/logo_white_2.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
             </Link>
           </div>

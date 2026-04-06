@@ -106,7 +106,7 @@ export default function AppSidebar() {
                 <SidebarHeader className="w-full border-b border-border-soft/50">
                     <Link to="/" onClick={closeSidebar} className="w-full flex items-center group">
                         <div className="w-full h-16 flex items-center justify-center p-2">
-                            <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-contain" />
+                            <img src="/logo_white_2.png" alt="Logo" className="w-full h-full object-contain" />
                         </div>
                     </Link>
                 </SidebarHeader>

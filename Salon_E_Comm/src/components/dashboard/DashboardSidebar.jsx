@@ -102,7 +102,7 @@ export function DashboardSidebar({ role = "ADMIN", ...props }) {
         <Sidebar collapsible="icon" className="border-r border-neutral-100 bg-white" {...props}>
             <SidebarHeader className="h-16 flex items-center px-6 border-b border-neutral-50 bg-white">
                 <Link to="/" className="flex items-center gap-3 group w-full h-full justify-center">
-                    <img src="/logo.jpeg" className="w-fit h-full" alt="" />
+                    <img src="/logo_white_2.png" className="w-fit h-full" alt="" />
                 </Link>
             </SidebarHeader>
             <SidebarContent className="px-2 py-4 scrollbar-hide bg-white dark:bg-white">
