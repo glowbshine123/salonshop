@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -29,104 +30,108 @@ import { SocketProvider } from './context/SocketContext';
 import { LoadingProvider } from './context/LoadingContext';
 import { Toaster } from 'react-hot-toast';
 import PageLoader from './components/common/PageLoader';
+import WhatsAppBubble from './components/common/WhatsAppBubble';
 
 const App = () => {
   return (
-    <AuthProvider>
-      <LoadingProvider>
-        <SocketProvider>
-          <CartProvider>
-            <BrowserRouter>
-              <PageLoader />
+    <HelmetProvider>
+      <AuthProvider>
+        <LoadingProvider>
+          <SocketProvider>
+            <CartProvider>
+              <BrowserRouter>
+                <PageLoader />
 
-              <Routes>
-                <Route element={<MainLayout />}>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/products/:id" element={<ProductDetailPage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/faq" element={<FAQPage />} />
-                  <Route path="/reward-policy" element={<RewardPolicyPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
-                  <Route path="/about" element={<AboutUsPage />} />
-                  <Route path="/why-choose-us" element={<WhyChooseUsPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
+                <Routes>
+                  <Route element={<MainLayout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/products/:id" element={<ProductDetailPage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/faq" element={<FAQPage />} />
+                    <Route path="/reward-policy" element={<RewardPolicyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                    <Route path="/about" element={<AboutUsPage />} />
+                    <Route path="/why-choose-us" element={<WhyChooseUsPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+
+                    <Route
+                      path="/checkout"
+                      element={
+                        <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
+                          <CheckoutPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/my-orders"
+                      element={
+                        <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
+                          <MyOrdersPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/my-rewards"
+                      element={
+                        <ProtectedRoute roles={['SALON_OWNER']}>
+                          <RewardPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={
+                        <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
+                          <ProfilePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/notifications"
+                      element={
+                        <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
+                          <NotificationsPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
 
                   <Route
-                    path="/checkout"
+                    path="/admin/*"
                     element={
-                      <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
-                        <CheckoutPage />
+                      <ProtectedRoute roles={['ADMIN']}>
+                        <AdminRoutes />
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
-                    path="/my-orders"
+                    path="/agent-dashboard/*"
                     element={
-                      <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
-                        <MyOrdersPage />
+                      <ProtectedRoute roles={['AGENT']}>
+                        <AgentRoutes />
                       </ProtectedRoute>
                     }
                   />
-                  <Route
-                    path="/my-rewards"
-                    element={
-                      <ProtectedRoute roles={['SALON_OWNER']}>
-                        <RewardPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
-                        <ProfilePage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/notifications"
-                    element={
-                      <ProtectedRoute roles={['SALON_OWNER', 'AGENT', 'ADMIN']}>
-                        <NotificationsPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Route>
-
-                <Route
-                  path="/admin/*"
-                  element={
-                    <ProtectedRoute roles={['ADMIN']}>
-                      <AdminRoutes />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/agent-dashboard/*"
-                  element={
-                    <ProtectedRoute roles={['AGENT']}>
-                      <AgentRoutes />
-                    </ProtectedRoute>
-                  }
-                />
 
 
-                {/* Auth Routes (No Header/Footer) */}
-                <Route path="/auth/signin" element={<LoginPage />} />
-                <Route path="/auth/signup" element={<SignupPage />} />
+                  {/* Auth Routes (No Header/Footer) */}
+                  <Route path="/auth/signin" element={<LoginPage />} />
+                  <Route path="/auth/signup" element={<SignupPage />} />
 
 
-              </Routes>
-            </BrowserRouter>
-          </CartProvider>
-        </SocketProvider>
-        <Toaster position="bottom-right" reverseOrder={false} />
-      </LoadingProvider>
-    </AuthProvider>
+                </Routes>
+                <WhatsAppBubble />
+              </BrowserRouter>
+            </CartProvider>
+          </SocketProvider>
+          <Toaster position="bottom-right" reverseOrder={false} />
+        </LoadingProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 };
 

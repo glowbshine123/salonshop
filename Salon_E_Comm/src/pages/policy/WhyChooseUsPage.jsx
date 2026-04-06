@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import SEO from '../../components/common/SEO';
 import { Target, Award, Clock, Users, ShieldCheck, Heart, ChevronRight, Truck, BadgeCheck, IndianRupee } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,10 @@ const WhyChooseUsPage = () => {
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans animate-in fade-in duration-700">
+            <SEO 
+                title="Why Choose Us" 
+                description="Discover why salon professionals trust Glow B Shine for premium products, direct supply, and unbeatable professional support."
+            />
             {/* Header / Hero Section */}
             <div className="relative py-24 overflow-hidden bg-white text-white">
                 <div className="absolute inset-0 z-0 opacity-25">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '../../components/layout/MainLayout';
 import { useLoading } from '../../context/LoadingContext';
@@ -262,6 +263,10 @@ export default function ProductsPage() {
 
     return (
         <div className="min-h-screen bg-white pb-20 pt-4">
+            <SEO
+                title={currentCategory ? `${currentSearch ? `Search for "${currentSearch}" in ` : ''}${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}` : 'All Products'}
+                description={`Browse our extensive collection of ${currentCategory || 'salon'} products. Find the best tools and supplies for your salon.`}
+            />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Mobile/Compact Layout: Search -> Filters/Sort */}

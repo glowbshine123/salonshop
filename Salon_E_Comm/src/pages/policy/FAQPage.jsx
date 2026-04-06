@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import SEO from '../../components/common/SEO';
 import FAQSection from '../../components/home/FAQSection';
 import { HelpCircle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -11,6 +12,10 @@ const FAQPage = () => {
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans animate-in fade-in duration-700">
+            <SEO 
+                title="FAQ" 
+                description="Frequently asked questions about Glow B Shine's salon products, delivery, and professional services."
+            />
 
             {/* Hero / Header Section */}
             <div className="relative py-20 overflow-hidden bg-white">

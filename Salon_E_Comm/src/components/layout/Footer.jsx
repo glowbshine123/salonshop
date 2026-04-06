@@ -55,8 +55,10 @@ export default function Footer() {
 
             {/* Brand & Contact */}
             <div className="space-y-4">
-              <Link to="/" className="flex items-center gap-3 group">
-                <img src='/logo.jpeg' alt="Logo" className="w-fit h-16 rounded-md object-cover" />
+              <Link to="/" className="flex items-center gap-2 group">
+                <div className="w-52 flex items-center justify-center transition-transform overflow-hidden">
+                  <img src="/logo_white.png" alt="Logo" className="w-full h-full object-contain drop-shadow-lg" />
+                </div>
               </Link>
 
               <div className="space-y-3 text-sm font-medium text-neutral-500">
@@ -173,6 +175,15 @@ export default function Footer() {
                 <Link to="/shipping-policy" className="hover:text-primary transition-colors">Shipping & Returns</Link>
                 <Link to="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>
               </div>
+              <div className="hidden md:block w-px h-4 bg-neutral-300 mx-2" />
+              <a
+                href="https://sandeshlawhale.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-pink-500 transition-colors sr-only"
+              >
+                designed and developed by sandesh lawhale
+              </a>
             </div>
           </div>
         </div>

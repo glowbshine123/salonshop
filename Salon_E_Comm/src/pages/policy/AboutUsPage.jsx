@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import SEO from '../../components/common/SEO';
 import { Info, Target, Eye, Award, Clock, Users, ShieldCheck, Heart, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,10 @@ const AboutUsPage = () => {
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans animate-in fade-in duration-700">
+            <SEO 
+                title="About Us" 
+                description="Learn about Glow B Shine's mission to support salon and beauty parlour professionals with premium products delivered to their doorstep."
+            />
             {/* Header / Hero Section */}
             <div className="relative py-24 overflow-hidden bg-white text-white">
                 <div className="absolute inset-0 z-0 opacity-10">

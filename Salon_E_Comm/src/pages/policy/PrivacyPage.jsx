@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import SEO from '../../components/common/SEO';
 import { ShieldCheck, Eye, ChevronRight, Lock, Database, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,10 @@ const PrivacyPage = () => {
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans animate-in fade-in duration-700">
+            <SEO 
+                title="Privacy Policy" 
+                description="Our commitment to your privacy. Learn how Glow B Shine handles and protects your personal and business information."
+            />
             {/* Header / Hero Section */}
             <div className="relative py-24 overflow-hidden bg-white text-white">
                 <div className="absolute inset-0 z-0 opacity-25">

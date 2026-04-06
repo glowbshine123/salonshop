@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SEO from '../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { productAPI, categoryAPI } from '../services/apiService';
 import { useLoading } from '../context/LoadingContext';
@@ -74,6 +75,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-neutral-50/50">
+      <SEO 
+        title="Home" 
+        description="Discover premium salon products, tools, and professional supplies at Salon E-Comm. Quality products for professional results."
+      />
       <HeroSection navigate={navigate} />
 
       <CategoriesSection

@@ -1,15 +1,91 @@
-import React, { useEffect } from 'react';
-import { Mail, Phone, MapPin, MessageSquare, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import SEO from '../components/common/SEO';
+import { Mail, Phone, MapPin, MessageSquare, Clock, ShieldCheck, ChevronRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { systemSettingsAPI, contactAPI } from '../services/apiService';
+import { toast } from 'react-hot-toast';
 
 const ContactPage = () => {
+    const [settings, setSettings] = useState(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     useEffect(() => {
         window.scrollTo(0, 0);
+
+        const fetchSettings = async () => {
+            try {
+                const data = await systemSettingsAPI.getSystemSettings();
+                setSettings(data);
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+            }
+        };
+
+        fetchSettings();
     }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Basic validation
+        if (!formData.name || !formData.email || !formData.message) {
+            toast.error('Please fill in all required fields.');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            toast.error('Please enter a valid email address.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        const loadingToast = toast.loading('Sending your inquiry...');
+
+        try {
+            const response = await contactAPI.sendInquiry({
+                ...formData,
+                toEmail: settings?.supportEmail
+            });
+            
+            if (response.data.success) {
+                toast.success(response.data.message || 'Thank you! Your message has been sent.', { id: loadingToast });
+                setFormData({
+                    name: '',
+                    email: '',
+                    subject: '',
+                    message: ''
+                });
+            } else {
+                toast.error(response.data.message || 'Failed to send message. Please try again.', { id: loadingToast });
+            }
+        } catch (error) {
+            console.error('Contact Form submission error:', error);
+            const errorMessage = error.response?.data?.message || 'Something went wrong. Please try again later.';
+            toast.error(errorMessage, { id: loadingToast });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans animate-in fade-in duration-700">
+            <SEO 
+                title="Contact Us" 
+                description="Get in touch with Glow B Shine for professional salon product inquiries, order assistance, and support."
+            />
             {/* Header / Hero Section */}
             <div className="relative py-24 overflow-hidden bg-neutral-900 text-white">
                 <div className="absolute inset-0 z-0 opacity-10">
@@ -42,8 +118,8 @@ const ContactPage = () => {
                             </div>
                             <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight mb-2">Email Support</h3>
                             <p className="text-neutral-500 font-medium text-sm mb-4">For general inquiries and professional support.</p>
-                            <a href="mailto:support@glowbshine.com" className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
-                                support@glowbshine.com
+                            <a href={`mailto:${settings?.supportEmail || 'support@glowbshine.com'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
+                                {settings?.supportEmail || 'support@glowbshine.com'}
                             </a>
                         </div>
 
@@ -53,8 +129,8 @@ const ContactPage = () => {
                             </div>
                             <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight mb-2">Call Us</h3>
                             <p className="text-neutral-500 font-medium text-sm mb-4">Available Mon-Sat, 10am-6pm IST.</p>
-                            <a href="tel:+911234567890" className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
-                                +91 123 456 7890
+                            <a href={`tel:${settings?.supportPhone?.replace(/\s/g, '') || '+911234567890'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
+                                {settings?.supportPhone || '+91 123 456 7890'}
                             </a>
                         </div>
 
@@ -71,39 +147,83 @@ const ContactPage = () => {
                                 <ShieldCheck size={16} className="text-primary" />
                                 <span className="text-xs font-black text-neutral-900 uppercase tracking-widest">Verified Seller</span>
                             </div>
-                            <p className="text-neutral-500 text-sm font-medium">Glow B Shine Professional</p>
+                            <p className="text-neutral-500 text-sm font-medium">{settings?.appName || 'Glow B Shine Professional'}</p>
                         </div>
                     </div>
 
-                    {/* Inquiry Form (Simplified Placeholder) */}
+                    {/* Inquiry Form */}
                     <div className="lg:col-span-2 p-10 bg-white rounded-[48px] border border-neutral-100 shadow-2xl shadow-neutral-100/50">
                         <div className="mb-10">
                             <h2 className="text-3xl font-black text-neutral-900 uppercase tracking-tight mb-4">Send a <span className="text-primary">Message.</span></h2>
                             <p className="text-neutral-500 font-medium">Fill out the form below and our professional relations team will get back to you.</p>
                         </div>
 
-                        <form className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Full Name</label>
-                                    <input type="text" placeholder="John Doe" className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" />
+                                    <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Full Name *</label>
+                                    <input 
+                                        type="text" 
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        placeholder="John Doe" 
+                                        required
+                                        className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" 
+                                    />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Email Address</label>
-                                    <input type="email" placeholder="john@salon.com" className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" />
+                                    <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Email Address *</label>
+                                    <input 
+                                        type="email" 
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="john@salon.com" 
+                                        required
+                                        className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" 
+                                    />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Subject</label>
-                                <input type="text" placeholder="Order Inquiry" className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" />
+                                <input 
+                                    type="text" 
+                                    name="subject"
+                                    value={formData.subject}
+                                    onChange={handleChange}
+                                    placeholder="Order Inquiry" 
+                                    className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" 
+                                />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Message</label>
-                                <textarea rows="5" placeholder="How can we help you?" className="w-full p-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900 resize-none"></textarea>
+                                <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Message *</label>
+                                <textarea 
+                                    name="message"
+                                    value={formData.message}
+                                    onChange={handleChange}
+                                    rows="5" 
+                                    placeholder="How can we help you?" 
+                                    required
+                                    className="w-full p-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900 resize-none"
+                                ></textarea>
                             </div>
-                            <Button disabled className="w-full h-16 rounded-lg bg-primary hover:bg-primary-hover text-foreground-secondary font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-primary/10 flex items-center justify-center gap-3 border-none">
-                                Send Inquiry
-                                <ChevronRight size={16} />
+                            <Button 
+                                type="submit"
+                                disabled={isSubmitting} 
+                                className="w-full h-16 rounded-lg bg-primary hover:bg-primary-hover text-foreground-secondary font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-primary/10 flex items-center justify-center gap-3 border-none"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        Sending...
+                                        <Loader2 size={16} className="animate-spin" />
+                                    </>
+                                ) : (
+                                    <>
+                                        Send Inquiry
+                                        <ChevronRight size={16} />
+                                    </>
+                                )}
                             </Button>
                         </form>
                     </div>

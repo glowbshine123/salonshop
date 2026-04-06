@@ -17,6 +17,9 @@ export default function ProfileSettings() {
         lastName: '',
         email: '',
         phone: '',
+        appName: '',
+        supportEmail: '',
+        supportPhone: '',
         logoUrl: '',
         address: {
             street: '',
@@ -41,6 +44,9 @@ export default function ProfileSettings() {
                     setProfileData(prev => ({
                         ...prev,
                         logoUrl: settings.logoUrl || prev.logoUrl,
+                        appName: settings.appName || prev.appName,
+                        supportEmail: settings.supportEmail || prev.supportEmail,
+                        supportPhone: settings.supportPhone || prev.supportPhone,
                         address: {
                             ...prev.address,
                             ...(settings.address || {})
@@ -112,6 +118,9 @@ export default function ProfileSettings() {
 
             // 2. Update System Settings (Logo & Address)
             const settingsPayload = {
+                appName: profileData.appName,
+                supportEmail: profileData.supportEmail,
+                supportPhone: profileData.supportPhone,
                 address: profileData.address,
                 socialLinks: profileData.socialLinks
                 // Logo URL is handled via file upload or preserved
@@ -232,6 +241,47 @@ export default function ProfileSettings() {
                 </div>
 
                 <div className="w-full h-px bg-neutral-100" />
+
+                {/* Platform Settings */}
+                <div className="space-y-6">
+                    <h4 className="font-black text-neutral-900 uppercase tracking-tight text-sm">Platform Settings <span className="text-xs text-neutral-500">(This data will show all over the website.)</span></h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">App Name</label>
+                            <input
+                                type="text"
+                                name="appName"
+                                value={profileData.appName}
+                                onChange={handleChange}
+                                placeholder="Salon E-Comm"
+                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all text-neutral-900"
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Support Email</label>
+                            <input
+                                type="email"
+                                name="supportEmail"
+                                value={profileData.supportEmail}
+                                onChange={handleChange}
+                                placeholder="support@salon.com"
+                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all text-neutral-900"
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Support Phone <span className="text-neutral-500/50 capitalize">(whatsapp number)</span></label>
+                            <input
+                                type="tel"
+                                name="supportPhone"
+                                value={profileData.supportPhone}
+                                onChange={handleChange}
+                                placeholder="+91 1234567890"
+                                className="w-full px-5 py-4 bg-neutral-50/50 border border-neutral-100 rounded-lg text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all text-neutral-900"
+                            />
+                        </div>
+                    </div>
+                </div>
+
 
                 {/* Address Section */}
                 <div className="space-y-6">

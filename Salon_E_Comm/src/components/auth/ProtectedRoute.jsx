@@ -13,14 +13,6 @@ const ProtectedRoute = ({ children, roles }) => {
         return <Navigate to="/auth/signin" state={{ from: location }} replace />;
     }
 
-    // Debugging logs
-    console.log('ProtectedRoute Check:', {
-        currentPath: location.pathname,
-        userRole: user?.role,
-        allowedRoles: roles,
-        userObject: user
-    });
-
     // Normalize role comparison
     const userRole = user?.role?.toUpperCase();
 

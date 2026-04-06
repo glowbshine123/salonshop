@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const systemSettingsSchema = new mongoose.Schema({
-    appName: { type: String, default: 'Salon E-Comm' },
+    appName: { type: String, default: 'Glow B Shine' },
     logoUrl: { type: String },
     supportEmail: { type: String },
     supportPhone: { type: String },

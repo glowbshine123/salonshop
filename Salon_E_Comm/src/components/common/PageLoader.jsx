@@ -38,23 +38,9 @@ const PageLoader = () => {
                                 initial={{ scale: 1, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 transition={{ duration: 0.6, delay: 0.1 }}
-                                className="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-2xl shadow-primary/10 overflow-hidden border border-border"
+                                className=""
                             >
-                                <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-contain" />
-                            </motion.div>
-
-                            <motion.div
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="flex flex-col items-start gap-0"
-                            >
-                                <h2 className="text-2xl font-black tracking-tighter text-foreground uppercase leading-tight">
-                                    Salon E-Comm
-                                </h2>
-                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                                    Professional Inventory
-                                </span>
+                                <img src="/logo_white.png" alt="Logo" className="w-full h-full object-contain" />
                             </motion.div>
                         </div>
                         <div className="w-full space-y-4 mt-4">

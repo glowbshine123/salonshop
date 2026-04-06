@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import SEO from '../../components/common/SEO';
 import { Shield, FileText, ShoppingBag, CreditCard, User, AlertCircle, Truck, Copyright, Gavel, CheckCircle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -73,6 +74,10 @@ const TermsPage = () => {
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans animate-in fade-in duration-700">
+            <SEO 
+                title="Terms & Conditions" 
+                description="Read our terms and conditions for using the Glow B Shine platform for professional salon products and services."
+            />
             {/* Header / Hero Section */}
             <div className="relative py-24 overflow-hidden bg-white text-white">
                 <div className="absolute inset-0 z-0 opacity-10">
