@@ -1,11 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Mail, Phone, MapPin, MessageSquare, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { systemSettingsAPI } from '../services/apiService';
 
 const ContactPage = () => {
+    const [settings, setSettings] = useState(null);
+
     useEffect(() => {
         window.scrollTo(0, 0);
+
+        const fetchSettings = async () => {
+            try {
+                const data = await systemSettingsAPI.getSystemSettings();
+                setSettings(data);
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+            }
+        };
+
+        fetchSettings();
     }, []);
 
     return (
@@ -42,8 +56,8 @@ const ContactPage = () => {
                             </div>
                             <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight mb-2">Email Support</h3>
                             <p className="text-neutral-500 font-medium text-sm mb-4">For general inquiries and professional support.</p>
-                            <a href="mailto:support@glowbshine.com" className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
-                                support@glowbshine.com
+                            <a href={`mailto:${settings?.supportEmail || 'support@glowbshine.com'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
+                                {settings?.supportEmail || 'support@glowbshine.com'}
                             </a>
                         </div>
 
@@ -53,8 +67,8 @@ const ContactPage = () => {
                             </div>
                             <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight mb-2">Call Us</h3>
                             <p className="text-neutral-500 font-medium text-sm mb-4">Available Mon-Sat, 10am-6pm IST.</p>
-                            <a href="tel:+911234567890" className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
-                                +91 123 456 7890
+                            <a href={`tel:${settings?.supportPhone?.replace(/\s/g, '') || '+911234567890'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
+                                {settings?.supportPhone || '+91 123 456 7890'}
                             </a>
                         </div>
 
@@ -71,7 +85,7 @@ const ContactPage = () => {
                                 <ShieldCheck size={16} className="text-primary" />
                                 <span className="text-xs font-black text-neutral-900 uppercase tracking-widest">Verified Seller</span>
                             </div>
-                            <p className="text-neutral-500 text-sm font-medium">Glow B Shine Professional</p>
+                            <p className="text-neutral-500 text-sm font-medium">{settings?.appName || 'Glow B Shine Professional'}</p>
                         </div>
                     </div>
 
