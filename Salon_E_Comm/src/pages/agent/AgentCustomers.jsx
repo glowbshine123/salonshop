@@ -206,7 +206,9 @@ export default function AgentCustomers() {
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center gap-2 text-neutral-400">
                                                     <Phone size={10} />
-                                                    <span className="text-[9px] font-bold uppercase tracking-widest">{customer.shippingAddress?.phone || 'No Phone'}</span>
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest">
+                                                        {customer.shippingAddress?.phone ? `${customer.shippingAddress?.countryCode || customer.countryCode || '91'} ${customer.shippingAddress.phone}` : 'No Phone'}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-5">

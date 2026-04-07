@@ -211,7 +211,7 @@ const OrderInvoiceModal = ({ isOpen, onClose, order }) => {
                                         {fullAddress}
                                     </p>
                                     <p className="text-[10px] font-black text-neutral-900 mt-1.5">
-                                        Phone: {order.shippingAddress?.phone}
+                                        Phone: {order.shippingAddress?.phone ? `${order.shippingAddress?.countryCode || '91'} ${order.shippingAddress?.phone}` : 'N/A'}
                                     </p>
                                 </div>
                             </div>
