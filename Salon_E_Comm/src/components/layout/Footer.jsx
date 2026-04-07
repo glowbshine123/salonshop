@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { settingsAPI } from '../../utils/apiClient';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Send, MapPin, Phone, Mail } from 'lucide-react';
 import { Button } from '../ui/button';
 
 export default function Footer() {
@@ -61,22 +61,34 @@ export default function Footer() {
                 </div>
               </Link>
 
-              <div className="space-y-3 text-sm font-medium text-neutral-500">
-                {settings?.supportEmail && (
-                  <p className='hover:text-pink-500 transition-colors'>
-                    <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>
-                  </p>
-                )}
+              <div className="space-y-4 text-sm font-medium text-neutral-500">
                 {settings?.address && (
-                  <p className="max-w-xs leading-relaxed">
-                    {[
-                      settings.address.street,
-                      settings.address.city,
-                      settings.address.state,
-                      settings.address.zip,
-                      settings.address.country
-                    ].filter(Boolean).join(', ')}
-                  </p>
+                  <div className="flex gap-3">
+                    <MapPin size={18} className="text-pink-500 shrink-0" />
+                    <p className="max-w-xs leading-relaxed">
+                      {[
+                        settings.address.street,
+                        settings.address.city,
+                        settings.address.state,
+                        settings.address.zip,
+                        settings.address.country
+                      ].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+                )}
+                {(settings?.supportPhone) && (
+                  <div className="flex items-center gap-3">
+                    <Phone size={18} className="text-pink-500 shrink-0" />
+                    <span>
+                      {settings.supportCountryCode || '91'} {settings.supportPhone}
+                    </span>
+                  </div>
+                )}
+                {settings?.supportEmail && (
+                  <div className="flex items-center gap-3">
+                    <Mail size={18} className="text-pink-500 shrink-0" />
+                    <span>{settings.supportEmail}</span>
+                  </div>
                 )}
               </div>
             </div>
