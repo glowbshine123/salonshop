@@ -59,7 +59,7 @@ const ContactPage = () => {
                 ...formData,
                 toEmail: settings?.supportEmail
             });
-            
+
             if (response.data.success) {
                 toast.success(response.data.message || 'Thank you! Your message has been sent.', { id: loadingToast });
                 setFormData({
@@ -82,8 +82,8 @@ const ContactPage = () => {
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans animate-in fade-in duration-700">
-            <SEO 
-                title="Contact Us" 
+            <SEO
+                title="Contact Us"
                 description="Get in touch with Glow B Shine for professional salon product inquiries, order assistance, and support."
             />
             {/* Header / Hero Section */}
@@ -112,29 +112,38 @@ const ContactPage = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     {/* Contact Info Cards */}
                     <div className="space-y-6">
-                        <div className="p-8 bg-neutral-50 rounded-[32px] border border-neutral-100 hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all group">
-                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 border border-neutral-100 shadow-sm group-hover:scale-110 transition-transform">
-                                <Mail className="text-primary" size={20} />
+                        <div className="p-6 bg-neutral-50 rounded-xl border border-neutral-100 hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all group">
+                            <div className='flex gap-4 mb-4'>
+                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center mb-6 border border-neutral-100 shadow-sm group-hover:scale-110 transition-transform">
+                                    <Mail className="text-primary" size={20} />
+                                </div>
+
+                                <div>
+                                    <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight">Email Support</h3>
+                                    <p className="text-neutral-500 font-medium text-sm">For general inquiries and professional support.</p>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight mb-2">Email Support</h3>
-                            <p className="text-neutral-500 font-medium text-sm mb-4">For general inquiries and professional support.</p>
                             <a href={`mailto:${settings?.supportEmail || 'support@glowbshine.com'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
                                 {settings?.supportEmail || 'support@glowbshine.com'}
                             </a>
                         </div>
 
-                        <div className="p-8 bg-neutral-50 rounded-[32px] border border-neutral-100 hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all group">
-                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 border border-neutral-100 shadow-sm group-hover:scale-110 transition-transform">
-                                <Phone className="text-primary" size={20} />
+                        <div className="p-6 bg-neutral-50 rounded-xl border border-neutral-100 hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all group">
+                            <div className='flex gap-4 mb-4'>
+                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center mb-6 border border-neutral-100 shadow-sm group-hover:scale-110 transition-transform">
+                                    <Phone className="text-primary" size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight">Call Us</h3>
+                                    <p className="text-neutral-500 font-medium text-sm">Available Mon-Sat, 10am-6pm IST.</p>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-black text-neutral-900 uppercase tracking-tight mb-2">Call Us</h3>
-                            <p className="text-neutral-500 font-medium text-sm mb-4">Available Mon-Sat, 10am-6pm IST.</p>
-                            <a href={`tel:${settings?.supportPhone?.replace(/\s/g, '') || '+911234567890'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
-                                {settings?.supportPhone || '+91 123 456 7890'}
+                            <a href={`tel:${settings?.supportCountryCode || '91'}${settings?.supportPhone?.replace(/\s/g, '') || '1234567890'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
+                                {settings?.supportCountryCode || '91'} {settings?.supportPhone || '123 456 7890'}
                             </a>
                         </div>
 
-                        <div className="p-8 bg-neutral-50 rounded-[32px] border border-neutral-100 space-y-4">
+                        <div className="p-6 bg-neutral-50 rounded-xl border border-neutral-100 space-y-4">
                             <div className="flex items-center gap-3">
                                 <Clock size={16} className="text-primary" />
                                 <span className="text-xs font-black text-neutral-900 uppercase tracking-widest">Response Time</span>
@@ -162,55 +171,55 @@ const ContactPage = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Full Name *</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         name="name"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        placeholder="John Doe" 
+                                        placeholder="John Doe"
                                         required
-                                        className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" 
+                                        className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900"
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Email Address *</label>
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        placeholder="john@salon.com" 
+                                        placeholder="john@salon.com"
                                         required
-                                        className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" 
+                                        className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Subject</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     name="subject"
                                     value={formData.subject}
                                     onChange={handleChange}
-                                    placeholder="Order Inquiry" 
-                                    className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900" 
+                                    placeholder="Order Inquiry"
+                                    className="w-full h-14 px-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-neutral-900 uppercase tracking-widest pl-1">Message *</label>
-                                <textarea 
+                                <textarea
                                     name="message"
                                     value={formData.message}
                                     onChange={handleChange}
-                                    rows="5" 
-                                    placeholder="How can we help you?" 
+                                    rows="5"
+                                    placeholder="How can we help you?"
                                     required
                                     className="w-full p-6 rounded-2xl bg-neutral-50 border border-neutral-100 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-neutral-900 resize-none"
                                 ></textarea>
                             </div>
-                            <Button 
+                            <Button
                                 type="submit"
-                                disabled={isSubmitting} 
+                                disabled={isSubmitting}
                                 className="w-full h-16 rounded-lg bg-primary hover:bg-primary-hover text-foreground-secondary font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-primary/10 flex items-center justify-center gap-3 border-none"
                             >
                                 {isSubmitting ? (
