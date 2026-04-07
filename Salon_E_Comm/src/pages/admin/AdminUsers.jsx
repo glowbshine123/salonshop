@@ -194,6 +194,7 @@ export default function AdminUsers() {
                                 <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Email Address</th>
                                 <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Phone Number</th>
                                 <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Full Address</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Agent</th>
                                 <th className="px-6 py-5 text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 whitespace-nowrap">Status</th>
                             </tr>
                         </thead>
@@ -201,14 +202,14 @@ export default function AdminUsers() {
                             {loading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <tr key={i}>
-                                        <td colSpan="5" className="px-6 py-8">
+                                        <td colSpan="6" className="px-6 py-8">
                                             <div className="h-10 w-full bg-neutral-50 animate-pulse rounded-md" />
                                         </td>
                                     </tr>
                                 ))
                             ) : salons.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-24 text-center">
+                                    <td colSpan="6" className="px-6 py-24 text-center">
                                         <div className="w-16 h-16 bg-neutral-50 rounded-md flex items-center justify-center text-neutral-200 mx-auto mb-6">
                                             <SearchX size={32} />
                                         </div>
@@ -261,6 +262,23 @@ export default function AdminUsers() {
                                                             </>
                                                         );
                                                     })()}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-2 text-neutral-600">
+                                                <ShieldCheck size={12} className={cn("shrink-0", salon.salonOwnerProfile?.agentId ? "text-primary" : "text-neutral-300")} />
+                                                <div className="flex flex-col">
+                                                    {salon.salonOwnerProfile?.agentId ? (
+                                                        <>
+                                                            <span className="text-[10px] font-black uppercase tracking-tight text-neutral-900">
+                                                                {salon.salonOwnerProfile.agentId.firstName} {salon.salonOwnerProfile.agentId.lastName}
+                                                            </span>
+                                                            <span className="text-[8px] font-bold text-neutral-400 uppercase tracking-widest">ASSIGNED PARTNER</span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest italic text-center">UNASSIGNED</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
