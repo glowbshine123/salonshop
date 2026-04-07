@@ -40,6 +40,7 @@ export default function ProfilePage() {
         firstName: '',
         lastName: '',
         phone: '',
+        countryCode: '91',
         email: '',
         address: {
             street: '',
@@ -111,6 +112,7 @@ export default function ProfilePage() {
                     firstName: freshUser.firstName || '',
                     lastName: freshUser.lastName || '',
                     phone: extractedPhone,
+                    countryCode: freshUser.countryCode || '91',
                     email: freshUser.email || '',
                     address: addressData,
                     bankDetails: {
@@ -164,6 +166,7 @@ export default function ProfilePage() {
                         firstName: user.firstName || '',
                         lastName: user.lastName || '',
                         phone: extractedPhone,
+                        countryCode: user.countryCode || '91',
                         email: user.email || '',
                         address: addressData,
                         bankDetails: {
@@ -202,6 +205,7 @@ export default function ProfilePage() {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 phone: formData.phone,
+                countryCode: formData.countryCode,
                 email: formData.email, // email usually read-only but sent for consistency if needed
                 address: formData.address
             };
@@ -357,30 +361,43 @@ export default function ProfilePage() {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="md:col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Email Address</label>
-                                            <div className="relative">
-                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-                                                <input
-                                                    type="email"
-                                                    disabled
-                                                    name="email"
-                                                    value={formData.email}
-                                                    className="w-full bg-muted border border-border rounded-md p-3 pl-12 text-sm font-bold text-muted-foreground cursor-not-allowed"
-                                                />
+                                        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Email Address</label>
+                                                <div className="relative">
+                                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
+                                                    <input
+                                                        type="email"
+                                                        disabled
+                                                        name="email"
+                                                        value={formData.email}
+                                                        className="w-full bg-muted border border-border rounded-md p-3 pl-12 text-sm font-bold text-muted-foreground cursor-not-allowed"
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="md:col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Phone Number</label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-                                                <input
-                                                    type="tel"
-                                                    name="phone"
-                                                    value={formData.phone}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-muted/30 border border-border rounded-md p-3 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
-                                                />
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Phone Number</label>
+                                                <div className="flex gap-2">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="text"
+                                                            name="countryCode"
+                                                            value={formData.countryCode}
+                                                            onChange={handleChange}
+                                                            className="w-16 bg-muted/30 border border-border rounded-md p-3 text-center text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                    <div className="relative flex-1">
+                                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
+                                                        <input
+                                                            type="tel"
+                                                            name="phone"
+                                                            value={formData.phone}
+                                                            onChange={handleChange}
+                                                            className="w-full bg-muted/30 border border-border rounded-md p-3 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -34,7 +34,7 @@ export default function CheckoutPage() {
   const { startLoading, finishLoading } = useLoading();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [shippingAddress, setShippingAddress] = useState({ name: '', street: '', city: '', state: '', zip: '', phone: '' });
+  const [shippingAddress, setShippingAddress] = useState({ name: '', street: '', city: '', state: '', zip: '', phone: '', countryCode: '91' });
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
 
@@ -80,7 +80,8 @@ export default function CheckoutPage() {
           city: defaultAddr.city || '',
           state: defaultAddr.state || '',
           zip: defaultAddr.zip || '',
-          phone: defaultAddr.phone || user.phone || ''
+          phone: defaultAddr.phone || user.phone || '',
+          countryCode: defaultAddr.countryCode || user.countryCode || '91'
         });
       }
     }
@@ -106,7 +107,8 @@ export default function CheckoutPage() {
           city: currentUser.salonOwnerProfile?.shippingAddresses?.find(a => a.isDefault)?.city || '',
           state: currentUser.salonOwnerProfile?.shippingAddresses?.find(a => a.isDefault)?.state || '',
           zip: currentUser.salonOwnerProfile?.shippingAddresses?.find(a => a.isDefault)?.zip || '',
-          phone: currentUser.salonOwnerProfile?.shippingAddresses?.find(a => a.isDefault)?.phone || user.phone || ''
+          phone: currentUser.salonOwnerProfile?.shippingAddresses?.find(a => a.isDefault)?.phone || user.phone || '',
+          countryCode: currentUser.salonOwnerProfile?.shippingAddresses?.find(a => a.isDefault)?.countryCode || user.countryCode || '91'
         })
 
         // Fetch Reward Wallet
@@ -161,7 +163,8 @@ export default function CheckoutPage() {
           state: shippingAddress.state,
           zip: shippingAddress.zip
         },
-        phone: shippingAddress.phone
+        phone: shippingAddress.phone,
+        countryCode: shippingAddress.countryCode
       };
 
       await userAPI.updateProfile(updateData);
@@ -394,15 +397,27 @@ export default function CheckoutPage() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-foreground-muted capitalize tracking-wide ml-1">Contact Phone</label>
-                        <div className="relative">
-                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                          <input
-                            type="tel"
-                            placeholder="+91 00000 00000"
-                            value={shippingAddress.phone}
-                            onChange={e => setShippingAddress(s => ({ ...s, phone: e.target.value }))}
-                            className="w-full bg-input-bg border border-border-strong rounded-md p-2 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
-                          />
+                        <div className="flex gap-2">
+                          <div className="relative w-16 shrink-0">
+                            <input
+                              type="text"
+                              placeholder="91"
+                              value={shippingAddress.countryCode}
+                              onChange={e => setShippingAddress(s => ({ ...s, countryCode: e.target.value.replace(/\D/g, '') }))}
+                              className="w-full bg-input-bg border border-border-strong rounded-md p-2 text-center text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                              maxLength={4}
+                            />
+                          </div>
+                          <div className="relative flex-1">
+                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                            <input
+                              type="tel"
+                              placeholder="00000 00000"
+                              value={shippingAddress.phone}
+                              onChange={e => setShippingAddress(s => ({ ...s, phone: e.target.value }))}
+                              className="w-full bg-input-bg border border-border-strong rounded-md p-2 pl-12 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="md:col-span-2 space-y-2">
@@ -467,7 +482,7 @@ export default function CheckoutPage() {
                     <p className="text-sm font-semibold text-muted-foreground">{shippingAddress.state}, {shippingAddress.zip}</p>
                     <p className="text-sm font-semibold text-muted-foreground mt-2 flex items-center gap-2">
                       <Phone size={14} className="text-primary" />
-                      {shippingAddress.phone}
+                      {shippingAddress.countryCode} {shippingAddress.phone}
                     </p>
                   </div>
                 )}

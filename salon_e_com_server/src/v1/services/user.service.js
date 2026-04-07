@@ -35,6 +35,7 @@ export const updateUserProfile = async (userId, updateData) => {
     if (updateData.lastName) user.lastName = updateData.lastName;
     if (updateData.email) user.email = updateData.email;
     if (updateData.phone) user.phone = updateData.phone;
+    if (updateData.countryCode) user.countryCode = updateData.countryCode;
     if (updateData.avatarUrl) user.avatarUrl = updateData.avatarUrl;
 
     // Handle Profile updates based on Role
@@ -103,7 +104,7 @@ export const updateUserProfile = async (userId, updateData) => {
 };
 
 export const createInternalUser = async (creatorRole, creatorId, userData) => {
-    const { email, password, firstName, lastName, role, phone, agentId, categories, panCard, aadharCard, address } = userData;
+    const { email, password, firstName, lastName, role, phone, agentId, categories, panCard, aadharCard, address, countryCode } = userData;
 
     const userExists = await User.findOne({ email });
     if (userExists) throw new Error('User already exists');
@@ -127,6 +128,8 @@ export const createInternalUser = async (creatorRole, creatorId, userData) => {
         firstName,
         lastName,
         phone,
+        countryCode: countryCode || '91',
+        countryCode,
         role,
         status: 'ACTIVE'
     };

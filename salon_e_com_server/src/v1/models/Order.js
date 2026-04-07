@@ -43,7 +43,8 @@ const orderSchema = new mongoose.Schema({
         city: String,
         state: String,
         zip: String,
-        phone: String
+        phone: String,
+        countryCode: { type: String, default: '91' }
     },
 
     timeline: [{

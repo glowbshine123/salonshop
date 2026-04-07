@@ -17,7 +17,8 @@ export default function SalonRegistrationModal({ isOpen, onClose, onSuccess }) {
         state: '',
         pincode: '',
         categories: '',
-        password: ''
+        password: '',
+        countryCode: '91'
     });
 
     if (!isOpen) return null;
@@ -159,17 +160,31 @@ export default function SalonRegistrationModal({ isOpen, onClose, onSuccess }) {
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Phone Number</label>
-                                    <div className="relative">
-                                        <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                                        <input
-                                            required
-                                            type="tel"
-                                            name="phoneNumber"
-                                            value={formData.phoneNumber}
-                                            onChange={handleChange}
-                                            className="w-full h-11 pl-10 pr-4 rounded-xl border border-neutral-200 bg-neutral-50/30 text-sm font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
-                                            placeholder="+91 98765 43210"
-                                        />
+                                    <div className="flex gap-2">
+                                        <div className="relative w-16 shrink-0">
+                                            <input
+                                                required
+                                                type="text"
+                                                name="countryCode"
+                                                value={formData.countryCode}
+                                                onChange={handleChange}
+                                                className="w-full h-11 rounded-xl border border-neutral-200 bg-neutral-50/30 text-sm font-medium text-center focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
+                                                placeholder="91"
+                                                maxLength={4}
+                                            />
+                                        </div>
+                                        <div className="relative flex-1">
+                                            <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                                            <input
+                                                required
+                                                type="tel"
+                                                name="phoneNumber"
+                                                value={formData.phoneNumber}
+                                                onChange={handleChange}
+                                                className="w-full h-11 pl-10 pr-4 rounded-xl border border-neutral-200 bg-neutral-50/30 text-sm font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
+                                                placeholder="98765 43210"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="space-y-1.5 md:col-span-2">
