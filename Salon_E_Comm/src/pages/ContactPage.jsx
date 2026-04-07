@@ -138,9 +138,13 @@ const ContactPage = () => {
                                     <p className="text-neutral-500 font-medium text-sm">Available Mon-Sat, 10am-6pm IST.</p>
                                 </div>
                             </div>
-                            <a href={`tel:${settings?.supportCountryCode || '91'}${settings?.supportPhone?.replace(/\s/g, '') || '1234567890'}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
-                                {settings?.supportCountryCode || '91'} {settings?.supportPhone || '123 456 7890'}
-                            </a>
+                            {settings?.supportPhone ? (
+                                <a href={`tel:${settings?.supportCountryCode || '91'}${settings?.supportPhone?.replace(/\s/g, '')}`} className="text-primary font-bold text-lg hover:underline decoration-2 underline-offset-4">
+                                    {settings?.supportCountryCode || '91'} {settings?.supportPhone}
+                                </a>
+                            ) : (
+                                <span className="text-neutral-400 font-bold text-lg italic uppercase">NOT PROVIDED</span>
+                            )}
                         </div>
 
                         <div className="p-6 bg-neutral-50 rounded-xl border border-neutral-100 space-y-4">

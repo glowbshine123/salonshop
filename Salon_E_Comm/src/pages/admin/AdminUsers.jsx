@@ -242,7 +242,9 @@ export default function AdminUsers() {
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2 text-neutral-600">
                                                 <Phone size={12} className="text-neutral-300 shrink-0" />
-                                                <span className="text-[10px] font-bold uppercase tracking-widest">{salon.phone || 'N/A'}</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">
+                                                    {salon.phone ? `${salon.countryCode || '91'} ${salon.phone}` : 'N/A'}
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">

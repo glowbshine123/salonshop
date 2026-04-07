@@ -388,7 +388,9 @@ export default function AdminAgents() {
                                                 </div>
                                                 <div className="flex items-center gap-2 text-neutral-600">
                                                     <Phone size={12} className="text-neutral-300 shrink-0" />
-                                                    <span className="text-xs font-medium">{agent.phone || 'N/A'}</span>
+                                                    <span className="text-xs font-medium">
+                                                        {agent.phone ? `${agent.countryCode || '91'} ${agent.phone}` : 'N/A'}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </td>
@@ -633,16 +635,26 @@ export default function AdminAgents() {
                                 <div className="grid grid-cols-2 gap-4 pt-2 border-t border-neutral-50">
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Phone Number</label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                        <div className="flex gap-2">
                                             <input
-                                                type="tel"
+                                                type="text"
                                                 required
-                                                placeholder="+91..."
-                                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-md text-xs font-bold outline-none focus:border-primary transition-all placeholder:text-neutral-200"
-                                                value={regData.phone}
-                                                onChange={e => setRegData({ ...regData, phone: e.target.value })}
+                                                placeholder="91"
+                                                className="w-16 px-2 py-3 bg-neutral-50 border border-neutral-100 rounded-md text-xs font-bold text-center outline-none focus:border-primary transition-all placeholder:text-neutral-200"
+                                                value={regData.countryCode || '91'}
+                                                onChange={e => setRegData({ ...regData, countryCode: e.target.value })}
                                             />
+                                            <div className="relative flex-1">
+                                                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-300" size={14} />
+                                                <input
+                                                    type="tel"
+                                                    required
+                                                    placeholder="Phone Number"
+                                                    className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-md text-xs font-bold outline-none focus:border-primary transition-all placeholder:text-neutral-200"
+                                                    value={regData.phone}
+                                                    onChange={e => setRegData({ ...regData, phone: e.target.value })}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -739,7 +751,8 @@ export default function AdminAgents() {
                                             </h4>
                                             <p className="text-xs font-bold text-neutral-400 mt-2 uppercase tracking-wider">{selectedAgentForPayout.email}</p>
                                             <p className="text-[10px] font-black text-primary mt-1 uppercase tracking-widest flex items-center gap-1">
-                                                <Phone size={10} className="inline" /> {selectedAgentForPayout.phone || 'N/A'}
+                                                <Phone size={10} className="inline" /> 
+                                                {selectedAgentForPayout.phone ? `${selectedAgentForPayout.countryCode || '91'} ${selectedAgentForPayout.phone}` : 'N/A'}
                                             </p>
                                         </div>
                                     </div>

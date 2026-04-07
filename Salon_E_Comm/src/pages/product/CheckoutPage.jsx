@@ -481,8 +481,8 @@ export default function CheckoutPage() {
                     <p className="text-sm font-semibold text-muted-foreground">{shippingAddress.street}, {shippingAddress.city}</p>
                     <p className="text-sm font-semibold text-muted-foreground">{shippingAddress.state}, {shippingAddress.zip}</p>
                     <p className="text-sm font-semibold text-muted-foreground mt-2 flex items-center gap-2">
-                      <Phone size={14} className="text-primary" />
-                      {shippingAddress.countryCode} {shippingAddress.phone}
+                       <Phone size={14} className="text-primary" />
+                       {shippingAddress.phone ? `${shippingAddress.countryCode || '91'} ${shippingAddress.phone}` : 'NOT PROVIDED'}
                     </p>
                   </div>
                 )}

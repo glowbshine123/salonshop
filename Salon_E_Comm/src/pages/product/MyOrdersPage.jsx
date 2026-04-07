@@ -328,7 +328,7 @@ export default function MyOrdersPage() {
                                 <div className="pt-2 border-t border-border">
                                   <p className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2">
                                     <Phone size={12} />
-                                    {order.shippingAddress?.countryCode || '91'} {order.shippingAddress?.phone}
+                                    {order.shippingAddress?.phone ? `${order.shippingAddress?.countryCode || '91'} ${order.shippingAddress?.phone}` : 'NOT PROVIDED'}
                                   </p>
                                 </div>
                               </div>
