@@ -57,7 +57,7 @@ export default function Footer() {
             <div className="space-y-4">
               <Link to="/" className="flex items-center gap-2 group">
                 <div className="w-52 flex items-center justify-center transition-transform overflow-hidden">
-                  <img src="/logo_white.png" alt="Logo" className="w-full h-full object-contain drop-shadow-lg" />
+                  <img src="/SCRAB%20logo.jpg.jpeg" alt="Logo" className="w-full h-full object-contain drop-shadow-lg" />
                 </div>
               </Link>
 

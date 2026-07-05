@@ -40,7 +40,7 @@ const PageLoader = () => {
                                 transition={{ duration: 0.6, delay: 0.1 }}
                                 className=""
                             >
-                                <img src="/logo_white.png" alt="Logo" className="w-full h-full object-contain" />
+                                <img src="/SCRAB%20LOGO.png" alt="Logo" className="w-full h-full object-contain" />
                             </motion.div>
                         </div>
                         <div className="w-full space-y-4 mt-4">

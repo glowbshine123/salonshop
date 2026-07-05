@@ -13,7 +13,7 @@ const SEO = ({
   const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const siteDescription = description || 'One-stop shop for premium salon products, tools, and professional supplies.';
   const siteKeywords = keywords || 'salon, hair care, beauty products, professional salon tools, salon e-commerce';
-  const siteImage = image || '/og_logo.png'; // Fallback to default OG image
+  const siteImage = image || '/SCRAB%20logo.jpg.jpeg'; // Fallback to default OG image
   const siteUrl = url || 'https://www.glowbshine.com/';
 
   return (
