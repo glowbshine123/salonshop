@@ -44,14 +44,27 @@ const HeroSection = ({ navigate }) => (
                         className="w-full h-full"
                     >
                         {[
-                            "https://orchidlifesciences.com/wp-content/uploads/2024/06/01-14-01-1024x704.jpg",
-                            "https://images.unsplash.com/photo-1625753783470-ec2ab4efeeec?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGJlYXV0eSUyMHByb2R1Y3RzfGVufDB8fDB8fHww",
-                            "https://images.unsplash.com/photo-1631390179406-0bfe17e9f89d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGJlYXV0eSUyMHByb2R1Y3RzfGVufDB8fDB8fHww"
-                        ].map((img, idx) => (
-                            <SwiperSlide key={idx}>
+                            {
+                                src: "/images/slider/glowbshine-rice-water-new.jpg",
+                                alt: "Glow B Shine rice water cream, charcoal scrub, and rice gel products"
+                            },
+                            {
+                                src: "/images/slider/glowbshine-coffee-new.jpg",
+                                alt: "Glow B Shine coffee scrub, gel, and cream products"
+                            },
+                            {
+                                src: "/images/slider/glowbshine-vitamin-c-new.jpeg",
+                                alt: "Glow B Shine vitamin C cream, gel, and scrub products"
+                            },
+                            {
+                                src: "/images/slider/glowbshine-d-tan-new.jpeg",
+                                alt: "Glow B Shine D-Tan scrub, gel, and cream products"
+                            }
+                        ].map((img) => (
+                            <SwiperSlide key={img.src}>
                                 <img
-                                    src={img}
-                                    alt={`Slide ${idx + 1}`}
+                                    src={img.src}
+                                    alt={img.alt}
                                     className="w-full h-full object-cover object-center transition-opacity duration-1000"
                                 />
                             </SwiperSlide>
