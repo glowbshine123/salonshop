@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /agent-dashboard/
+Disallow: /auth/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /my-rewards
+Disallow: /profile
+Disallow: /notifications
+
+Sitemap: https://www.glowbshine.com/sitemap.xml

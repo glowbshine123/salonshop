@@ -1,0 +1,158 @@
+import CommissionTransaction from '../models/CommissionTransaction.js';
+import User from '../models/User.js';
+
+export const calculateCommission = async (order) => {
+    if (!order.agentId || order.commissionCalculated || (order.status !== 'COMPLETED' && order.status !== 'DELIVERED' && order.status !== 'PAID')) {
+        return null;
+    }
+
+    const rewardService = await import('./reward.service.js');
+    const deliveredCount = await rewardService.getDeliveredOrderCount(order.customerId, order._id);
+    const isFirstOrder = deliveredCount === 0;
+
+    const existingTransaction = await CommissionTransaction.findOne({ orderId: order._id });
+    if (existingTransaction) {
+        order.commissionCalculated = true;
+        await order.save();
+        return existingTransaction;
+    }
+
+    const agent = await User.findById(order.agentId);
+    if (!agent || agent.role !== 'AGENT') {
+        return null;
+    }
+
+    const commissionSlabService = await import('./commissionSlab.service.js');
+    const slabRate = await commissionSlabService.getCommissionRate(order.subtotal);
+    const amountEarned = order.subtotal * (slabRate / 100);
+
+    const now = new Date();
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const transaction = await CommissionTransaction.create({
+        agentId: agent._id,
+        orderId: order._id,
+        amount: amountEarned,
+        month,
+        status: 'PENDING'
+    });
+
+    const AgentProfile = (await import('../models/AgentProfile.js')).default;
+    let agentProfile = await AgentProfile.findOne({ userId: agent._id });
+
+    if (!agentProfile) {
+        agentProfile = new AgentProfile({
+            userId: agent._id,
+            totalEarnings: 0,
+            currentMonthEarnings: 0,
+            points: 0
+        });
+    }
+
+    // NOTE: Removed auto-reset logic based on month string lastCommissionMonth.
+    // Resetting currentMonthEarnings now happens ONLY on manual settlement payout.
+
+    agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) + amountEarned;
+    agentProfile.points = (agentProfile.points || 0) + Math.round(amountEarned);
+
+    await agentProfile.save();
+
+    order.commissionCalculated = true;
+    await order.save();
+
+    return transaction;
+};
+
+export const syncAgentStats = async (agentId) => {
+    const AgentProfile = (await import('../models/AgentProfile.js')).default;
+    const agentProfile = await AgentProfile.findOne({ userId: agentId });
+    if (!agentProfile) return null;
+
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // Calculate total from ALL transactions
+    const allTransactions = await CommissionTransaction.find({ agentId });
+
+    const totalEarnings = allTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const monthEarnings = allTransactions
+        .filter(t => t.month === currentMonth)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const Settlement = (await import('../models/Settlement.js')).default;
+    const paidSettlements = await Settlement.find({ agentId, status: 'paid' });
+    const totalLifetimeSettled = paidSettlements.reduce((sum, s) => sum + s.amount, 0);
+
+    agentProfile.currentMonthEarnings = monthEarnings;
+    agentProfile.totalEarnings = totalLifetimeSettled;
+
+    await agentProfile.save();
+    return agentProfile;
+};
+
+export const deductCommission = async (order) => {
+    if (!order.agentId || !order.commissionCalculated) {
+        return null;
+    }
+
+    const transaction = await CommissionTransaction.findOne({ orderId: order._id });
+    if (!transaction || transaction.status === 'SETTLED') {
+        // If already settled, we might need a clawback logic, 
+        // but per requirements, we deduct from currentMonthEarnings.
+        return null;
+    }
+
+    const agent = await User.findById(order.agentId);
+    if (!agent) return null;
+
+    const deductionAmount = transaction.amount;
+
+    const AgentProfile = (await import('../models/AgentProfile.js')).default;
+    const agentProfile = await AgentProfile.findOne({ userId: agent._id });
+
+    if (agentProfile) {
+        agentProfile.currentMonthEarnings = (agentProfile.currentMonthEarnings || 0) - deductionAmount;
+        await agentProfile.save();
+    }
+
+    // Delete or mark transaction as cancelled? 
+    // Requirements say "Update the transaction record accordingly"
+    await CommissionTransaction.deleteOne({ _id: transaction._id });
+
+    order.commissionCalculated = false; // Allow recalculation if it somehow becomes COMPLETED again?
+    await order.save();
+
+    return deductionAmount;
+};
+
+export const listCommissions = async (userId, role, filters = {}) => {
+    const query = {};
+    if (role === 'AGENT') {
+        query.agentId = userId;
+    }
+    if (filters.month) {
+        query.month = filters.month;
+    }
+
+    const page = parseInt(filters.page, 10) || 1;
+    const limit = parseInt(filters.limit, 10) || 20;
+
+    const total = await CommissionTransaction.countDocuments(query);
+    const commissions = await CommissionTransaction.find(query)
+        .populate('orderId', 'orderNumber total')
+        .populate('agentId', 'firstName lastName email')
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+    return { commissions, count: total, page, limit };
+};
+
+export const approveCommission = async (orderId) => {
+    const Commission = (await import('../models/Commission.js')).default;
+    const commission = await Commission.findOne({ orderId });
+    if (commission && commission.status === 'PENDING') {
+        commission.status = 'SETTLED'; // Mapping APPROVED to SETTLED as CommissionTransaction only has PENDING/SETTLED
+        await commission.save();
+    }
+};

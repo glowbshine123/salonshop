@@ -1,0 +1,309 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+
+  /* ========== BACKGROUNDS ========== */
+
+  --color-background: #f7f3f3;
+  /* main page bg */
+  --color-background-secondary: #fff6f8;
+  /* soft pink sections */
+
+  /* ========== PRIMARY COLORS ========== */
+
+  --color-primary: #ff5a8a;
+  /* main pink buttons */
+  --color-primary-hover: #ff3f78;
+  --color-primary-muted: #ffd3df;
+
+  /* ========== SECONDARY COLORS ========== */
+
+  --color-secondary: #f1ebe9;
+  /* category boxes */
+  --color-secondary-hover: #e8e1df;
+
+  /* ========== ACCENT ========== */
+
+  --color-accent: #ff7fa6;
+  /* highlight tags (popular etc) */
+
+  /* ========== CARD COLORS ========== */
+
+  --color-card: #ffffff;
+  /* main product cards */
+  --color-card-secondary: #faf6f6;
+  /* product containers */
+  --color-card-muted: #f2ecec;
+  /* muted blocks */
+
+  /* ========== TEXT COLORS ========== */
+
+  --color-foreground: #2b2b2b;
+  /* main text */
+  --color-foreground-secondary: #6a6a6a;
+  /* subtext */
+  --color-foreground-muted: #9a9a9a;
+  /* labels */
+
+  /* ========== BORDER COLORS ========== */
+
+  --color-border: #ece4e4;
+  --color-border-soft: #f2eded;
+  --color-border-strong: #e3d9d9;
+
+  /* ========== INPUT COLORS ========== */
+
+  --color-input-bg: #ffffff;
+  --color-input-border: #e8e2e2;
+  --color-input-placeholder: #a8a8a8;
+
+  /* ========== TAG COLORS ========== */
+
+  --color-tag-popular-bg: #ffd6e3;
+  --color-tag-popular-text: #ff4a7f;
+
+  --color-tag-new-bg: #dff7e8;
+  --color-tag-new-text: #2f9e62;
+
+  --color-tag-trending-bg: #ffe7d4;
+  --color-tag-trending-text: #ff8a3d;
+
+  /* ================= STATUS COLORS ================= */
+
+  /* Success (soft green) */
+  --color-success: #34c38f;
+  --color-success-bg: #e8f9f2;
+  --color-success-border: #bdf0dd;
+  --color-success-foreground: #1d7f5f;
+
+  /* Destructive / Error (soft red) */
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-bg: #ffe9ea;
+  --color-destructive-border: #ffc9cc;
+  --color-destructive-foreground: #b42330;
+
+  /* Warning (soft yellow) */
+  --color-warning: #f5b942;
+  --color-warning-bg: #fff4dc;
+  --color-warning-border: #ffe3a8;
+  --color-warning-foreground: #9a6a00;
+
+  /* Info (soft blue) */
+  --color-info: #4da3ff;
+  --color-info-bg: #eaf3ff;
+  --color-info-border: #cfe2ff;
+  --color-info-foreground: #1b5fbf;
+  --color-sidebar-ring: var(--color-sidebar-ring);
+  --color-sidebar-border: var(--color-sidebar-border);
+  --color-sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+  --color-sidebar-accent: var(--color-sidebar-accent);
+  --color-sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+  --color-sidebar-primary: var(--color-sidebar-primary);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+
+  /* ========== SHADOWS ========== */
+
+  /* --shadow-card: 0 6px 16px rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.04); */
+
+  /* ========== RADIUS ========== */
+
+  /* --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px; */
+
+}
+
+:root {
+  color-scheme: light !important;
+  --primary-color: #0066cc;
+  --primary-dark: #0052a3;
+  --primary-light: #0080ff;
+  --secondary-color: #00a8cc;
+  --accent-color: #ff6b35;
+  --success-color: #06a77d;
+  --text-primary: #1a1a2e;
+  --text-secondary: #555555;
+  --text-light: #888888;
+  --bg-primary: #f9fafb;
+  --bg-secondary: #f3f4f6;
+  --bg-tertiary: #e5e7eb;
+  --border-color: #e5e7eb;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Inter", "Outfit", sans-serif;
+  --font-secondary: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --radius: 0.625rem;
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+html,
+body {
+  color-scheme: light !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+input,
+textarea {
+  font-family: inherit;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--color-primary-muted) 0%, var(--color-primary) 100%);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-color) 100%);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  /* --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground); */
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  /* --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive); */
+  /* --color-border: var(--border); */
+  /* --color-input: var(--input); */
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.dark {
+
+  --sidebar: hsl(240 5.9% 10%);
+
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+
+  --sidebar-border: hsl(240 3.7% 15.9%);
+
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+}
