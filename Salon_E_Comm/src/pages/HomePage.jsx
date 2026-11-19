@@ -76,9 +76,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-neutral-50/50">
       <SEO 
-        title="Professional Salon & Beauty Products"
-        description="Shop premium salon and beauty parlour products, professional tools and salon supplies at Glowbshine."
-        url="https://www.glowbshine.com/"
+        title="Home" 
+        description="Discover premium salon products, tools, and professional supplies at Salon E-Comm. Quality products for professional results."
       />
       <HeroSection navigate={navigate} />
 

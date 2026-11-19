@@ -266,8 +266,6 @@ export default function ProductsPage() {
             <SEO
                 title={currentCategory ? `${currentSearch ? `Search for "${currentSearch}" in ` : ''}${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}` : 'All Products'}
                 description={`Browse our extensive collection of ${currentCategory || 'salon'} products. Find the best tools and supplies for your salon.`}
-                url={`https://www.glowbshine.com/products${currentCategory ? `?category=${encodeURIComponent(currentCategory)}` : ''}`}
-                noindex={Boolean(currentSearch || currentSubcategory || minPrice || maxPrice || (currentSort && currentSort !== 'newest'))}
             />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 

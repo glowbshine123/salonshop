@@ -7,20 +7,14 @@ const SEO = ({
   keywords,
   image,
   url,
-  type = 'website',
-  noindex = false,
-  structuredData
+  type = 'website'
 }) => {
-  const siteTitle = 'Glowbshine';
+  const siteTitle = 'Glow B Shine';
   const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const siteDescription = description || 'One-stop shop for premium salon products, tools, and professional supplies.';
   const siteKeywords = keywords || 'salon, hair care, beauty products, professional salon tools, salon e-commerce';
-  const siteImage = image
-    ? (image.startsWith('http') ? image : `https://www.glowbshine.com${image.startsWith('/') ? image : `/${image}`}`)
-    : 'https://www.glowbshine.com/og_logo.png';
-  const siteUrl = url || (typeof window !== 'undefined'
-    ? `https://www.glowbshine.com${window.location.pathname}${window.location.search.replace(/[?&](utm_[^=&]+|fbclid|gclid)=[^&]*&?/gi, '')}`
-    : 'https://www.glowbshine.com/');
+  const siteImage = image || '/SCRAB%20logo.jpg.jpeg'; // Fallback to default OG image
+  const siteUrl = url || 'https://www.glowbshine.com/';
 
   return (
     <Helmet>
@@ -28,7 +22,6 @@ const SEO = ({
       <title>{fullTitle}</title>
       <meta name="description" content={siteDescription} />
       <meta name="keywords" content={siteKeywords} />
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
@@ -45,12 +38,6 @@ const SEO = ({
 
       {/* Canonical URL */}
       <link rel="canonical" href={siteUrl} />
-
-      {structuredData && (
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      )}
     </Helmet>
   );
 };

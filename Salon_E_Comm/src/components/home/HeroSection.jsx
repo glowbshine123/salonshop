@@ -44,40 +44,15 @@ const HeroSection = ({ navigate }) => (
                         className="w-full h-full"
                     >
                         {[
-                            {
-                                src: "https://orchidlifesciences.com/wp-content/uploads/2024/06/01-14-01-1024x704.jpg",
-                                alt: "Salon and beauty products"
-                            },
-                            {
-                                src: "https://images.unsplash.com/photo-1625753783470-ec2ab4efeeec?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGJlYXV0eSUyMHByb2R1Y3RzfGVufDB8fDB8fHww",
-                                alt: "Professional beauty products"
-                            },
-                            {
-                                src: "https://images.unsplash.com/photo-1631390179406-0bfe17e9f89d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGJlYXV0eSUyMHByb2R1Y3RzfGVufDB8fDB8fHww",
-                                alt: "Beauty care products"
-                            },
-                            {
-                                src: "/images/slider/glowbshine-rice-water-products.jpg",
-                                alt: "Glow B Shine rice water cream, charcoal scrub, and rice water gel"
-                            },
-                            {
-                                src: "/images/slider/glowbshine-coffee-products.jpg",
-                                alt: "Glow B Shine coffee scrub, coffee gel, and coffee cream"
-                            },
-                            {
-                                src: "/images/slider/glowbshine-vitamin-c-products.jpg",
-                                alt: "Glow B Shine vitamin C cream, gel, and scrub"
-                            },
-                            {
-                                src: "/images/slider/glowbshine-d-tan-products.jpg",
-                                alt: "Glow B Shine D-tan scrub, gel, and cream"
-                            }
+                            "https://orchidlifesciences.com/wp-content/uploads/2024/06/01-14-01-1024x704.jpg",
+                            "https://images.unsplash.com/photo-1625753783470-ec2ab4efeeec?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGJlYXV0eSUyMHByb2R1Y3RzfGVufDB8fDB8fHww",
+                            "https://images.unsplash.com/photo-1631390179406-0bfe17e9f89d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGJlYXV0eSUyMHByb2R1Y3RzfGVufDB8fDB8fHww"
                         ].map((img, idx) => (
                             <SwiperSlide key={idx}>
                                 <img
-                                    src={img.src}
-                                    alt={img.alt}
-                                    className={`w-full h-full ${img.src.startsWith('/images/slider/') ? 'object-contain' : 'object-cover'} object-center transition-opacity duration-1000`}
+                                    src={img}
+                                    alt={`Slide ${idx + 1}`}
+                                    className="w-full h-full object-cover object-center transition-opacity duration-1000"
                                 />
                             </SwiperSlide>
                         ))}

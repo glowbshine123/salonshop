@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -32,13 +32,6 @@ import { Toaster } from 'react-hot-toast';
 import PageLoader from './components/common/PageLoader';
 import WhatsAppBubble from './components/common/WhatsAppBubble';
 
-const PrivatePageSEO = () => {
-  const { pathname } = useLocation();
-  const privateRoute = /^\/(admin|agent-dashboard|auth|cart|checkout|my-orders|my-rewards|profile|notifications)(\/|$)/.test(pathname);
-
-  return privateRoute ? <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet> : null;
-};
-
 const App = () => {
   return (
     <HelmetProvider>
@@ -48,7 +41,6 @@ const App = () => {
             <CartProvider>
               <BrowserRouter>
                 <PageLoader />
-                <PrivatePageSEO />
 
                 <Routes>
                   <Route element={<MainLayout />}>

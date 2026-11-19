@@ -144,28 +144,6 @@ export default function ProductDetailPage() {
   if (error || !product) return <ErrorState error={error} navigate={navigate} />;
   const images = product.images && product.images.length > 0 ? product.images : [product.image || 'https://via.placeholder.com/500'];
   const discount = calculateDiscount(product.originalPrice, product.price);
-  const productUrl = `https://www.glowbshine.com/products/${product._id || id}`;
-  const productSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: product.name,
-    description: product.description,
-    image: images,
-    sku: product.sku || product._id,
-    brand: product.brand ? {
-      '@type': 'Brand',
-      name: product.brand
-    } : undefined,
-    offers: {
-      '@type': 'Offer',
-      url: productUrl,
-      priceCurrency: 'INR',
-      price: product.price,
-      availability: product.inventoryCount > 0
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock'
-    }
-  };
 
   return (
     <div className="bg-white min-h-screen pb-24 font-sans">
@@ -173,9 +151,7 @@ export default function ProductDetailPage() {
         title={product.name} 
         description={product.description.slice(0, 160)} 
         image={images[0]} 
-        type="product"
-        url={productUrl}
-        structuredData={productSchema}
+        type="product" 
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
