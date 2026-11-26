@@ -13,6 +13,7 @@ import cron from "node-cron";
 import { processMonthlySettlement } from "./v1/services/settlement.service.js";
 import http from 'http';
 import socketService from './v1/services/socket.service.js';
+import razorpayWebhookRawBody from './v1/middleware/razorpayWebhookRawBody.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,10 +42,12 @@ app.use(cors(corsOptions));
 // ✅ IMPORTANT
 app.options("*", cors(corsOptions));
 
-
 /* =======================
    MIDDLEWARE
 ======================= */
+// Razorpay verifies the exact bytes received. Keep this route's raw body
+// ahead of JSON parsing.
+app.use("/api/v1/payments/webhook", razorpayWebhookRawBody);
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 

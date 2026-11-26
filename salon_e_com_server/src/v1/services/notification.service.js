@@ -7,17 +7,44 @@ export const notifyAdmins = async (data) => {
     const promises = admins.map(admin =>
         createNotification({
             ...data,
-            userId: admin._id
+            userId: admin._id,
+            dedupeKey: data.dedupeKey ? `${data.dedupeKey}:${admin._id}` : undefined
         })
     );
     return Promise.all(promises);
 };
 
 export const createNotification = async (data) => {
-    const notification = await Notification.create(data);
+    let notification;
+    let shouldEmit = true;
+
+    if (data.dedupeKey) {
+        let result;
+        try {
+            result = await Notification.updateOne(
+                { dedupeKey: data.dedupeKey },
+                { $setOnInsert: data },
+                { upsert: true }
+            );
+        } catch (error) {
+            if (error?.code !== 11000) throw error;
+            shouldEmit = false;
+        }
+        notification = await Notification.findOne({ dedupeKey: data.dedupeKey });
+        if (!notification) {
+            throw new Error(`Notification could not be loaded for dedupe key ${data.dedupeKey}`);
+        }
+        if (result) {
+            shouldEmit = result.upsertedCount === 1;
+        }
+    } else {
+        notification = await Notification.create(data);
+    }
 
     // Emit real-time update
-    socketService.emitToUser(data.userId, 'new-notification', notification);
+    if (shouldEmit) {
+        socketService.emitToUser(data.userId, 'new-notification', notification);
+    }
 
     return notification;
 };

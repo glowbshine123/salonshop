@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/create-order', protect, paymentController.createRazorpayOrder);
 
 // Verify payment signature (Razorpay will call frontend -> backend after checkout)
-router.post('/verify', paymentController.verifyPayment);
+router.post('/verify', protect, paymentController.verifyPayment);
 
 // Razorpay Webhook
 import * as webhookController from '../controllers/webhook.controller.js';

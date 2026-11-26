@@ -14,7 +14,7 @@ const orderSchema = new mongoose.Schema({
     currency: { type: String, default: 'INR' },
     paymentStatus: {
         type: String,
-        enum: ['UNPAID', 'PAID', 'FAILED'],
+        enum: ['UNPAID', 'AUTHORIZED', 'PAID', 'PARTIALLY_REFUNDED', 'FAILED', 'REFUNDED', 'CANCELLED'],
         default: 'UNPAID'
     },
     paymentMethod: {
@@ -68,7 +68,20 @@ const orderSchema = new mongoose.Schema({
 
     commissionCalculated: { type: Boolean, default: false },
     stockRestored: { type: Boolean, default: false },
-    isAdminViewed: { type: Boolean, default: false }
+    isAdminViewed: { type: Boolean, default: false },
+
+    paymentDetails: {
+        paymentGatewayOrderId: { type: String, index: true },
+        razorpay_order_id: { type: String },
+        razorpay_payment_id: { type: String, index: true },
+        razorpay_signature: { type: String },
+        signatureVerified: { type: Boolean, default: false },
+        capturedAt: { type: Date },
+        failedAt: { type: Date },
+        failureReason: { type: String },
+        refundedAmount: { type: Number, default: 0 },
+        refundFailureReason: { type: String }
+    }
 
 }, { timestamps: true });
 

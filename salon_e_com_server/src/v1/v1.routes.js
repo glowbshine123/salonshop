@@ -14,7 +14,8 @@ import { isCloudinaryConfigured } from '../config/cloudinary.js';
 router.get('/health/config', (req, res) => {
     res.json({
         cloudinaryConfigured: Boolean(isCloudinaryConfigured),
-        razorpayEnabled: Boolean(razorpay && razorpay.isEnabled)
+        razorpayEnabled: Boolean(razorpay && razorpay.isEnabled),
+        razorpayWebhookConfigured: Boolean(process.env.RAZORPAY_WEBHOOK_SECRET)
     });
 });
 

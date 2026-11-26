@@ -26,6 +26,7 @@ const notificationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Mixed,
         default: {}
     },
+    dedupeKey: { type: String },
     priority: {
         type: String,
         enum: ['LOW', 'MEDIUM', 'HIGH'],
@@ -41,5 +42,6 @@ const notificationSchema = new mongoose.Schema({
 });
 
 notificationSchema.index({ createdAt: -1 });
+notificationSchema.index({ dedupeKey: 1 }, { unique: true, sparse: true });
 
 export default mongoose.models.Notification || mongoose.model('Notification', notificationSchema);

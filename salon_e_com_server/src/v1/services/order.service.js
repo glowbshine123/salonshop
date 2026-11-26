@@ -361,14 +361,18 @@ export const getAllOrders = async (filters = {}) => {
 };
 
 export const finalizeOrder = async (orderId) => {
-    const order = await Order.findById(orderId);
+    const order = await Order.findOneAndUpdate(
+        { _id: orderId, status: 'PAYMENT_PENDING' },
+        {
+            $set: { status: 'PENDING', paymentStatus: 'PAID' },
+            $push: { timeline: { status: 'PAID', note: 'Online payment verified. Order finalized.' } }
+        },
+        { new: true }
+    ) || await Order.findById(orderId);
     if (!order) throw new Error('Order not found');
-
-    if (order.status !== 'PAYMENT_PENDING') return order;
-
-    order.status = 'PENDING';
-    order.paymentStatus = 'PAID';
-    order.timeline.push({ status: 'PAID', note: 'Online payment verified. Order finalized.' });
+    if (order.paymentStatus !== 'PAID' || !['PAYMENT_PENDING', 'PENDING'].includes(order.status)) {
+        return order;
+    }
 
     // Clear Cart
     try {
@@ -383,7 +387,8 @@ export const finalizeOrder = async (orderId) => {
         userId: order.customerId,
         title: 'Order Confirmed',
         description: `Your order ${order.orderNumber} has been successfully placed and paid.`,
-        type: 'ORDER'
+        type: 'ORDER',
+        dedupeKey: `order-confirmed:${order._id}:customer`
     });
 
     if (order.agentId) {
@@ -391,7 +396,8 @@ export const finalizeOrder = async (orderId) => {
             userId: order.agentId,
             title: 'New Order Confirmed',
             description: `A new order ${order.orderNumber} has been placed via your referral.`,
-            type: 'ORDER'
+            type: 'ORDER',
+            dedupeKey: `order-confirmed:${order._id}:agent`
         });
     }
 
@@ -400,10 +406,10 @@ export const finalizeOrder = async (orderId) => {
         description: `Order ${order.orderNumber} for ₹${order.total} has been paid and confirmed.`,
         type: 'ORDER',
         priority: 'MEDIUM',
-        metadata: { orderId: order._id }
+        metadata: { orderId: order._id },
+        dedupeKey: `order-confirmed:${order._id}:admin`
     });
 
-    await order.save();
     return order;
 };
 

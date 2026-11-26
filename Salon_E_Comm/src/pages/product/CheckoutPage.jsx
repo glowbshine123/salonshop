@@ -247,7 +247,7 @@ export default function CheckoutPage() {
       }
 
       setPaymentProcessing(true);
-      const razorOrderRes = await paymentAPI.createOrder({ amount: total, orderId: createdOrder._id, currency: 'INR' });
+      const razorOrderRes = await paymentAPI.createOrder({ orderId: createdOrder._id, currency: 'INR' });
       const razorOrder = razorOrderRes.data;
 
       const loaded = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
@@ -255,7 +255,10 @@ export default function CheckoutPage() {
         throw new Error('Failed to load Razorpay SDK');
       }
 
-      const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || window?.__RAZORPAY_KEY_ID || '';
+      const keyId = razorOrder.keyId;
+      if (!keyId) {
+        throw new Error('Razorpay public key is not configured');
+      }
 
       const options = {
         key: keyId,
@@ -278,6 +281,8 @@ export default function CheckoutPage() {
                 await clearCart();
               } catch (clearErr) { }
               navigate('/my-orders');
+            } else if (verifyRes?.data?.status === 'authorized') {
+              setError('Payment authorized. Waiting for capture confirmation.');
             } else {
               setError('Payment verification failed. Please contact support.');
             }
@@ -288,8 +293,9 @@ export default function CheckoutPage() {
           }
         },
         prefill: {
-          name: '',
-          email: ''
+          name: shippingAddress.name,
+          email: user?.email || '',
+          contact: shippingAddress.phone
         },
         notes: { orderId: createdOrder._id },
         theme: { color: '#059669' }
@@ -301,11 +307,7 @@ export default function CheckoutPage() {
           ondismiss: async function () {
             setPaymentProcessing(false);
             setLoading(false);
-            try {
-              await orderAPI.cancel(createdOrder._id);
-            } catch (err) {
-              console.error("Error cancelling order on dismissal:", err);
-            }
+            setError('Payment was cancelled. You can retry checkout from My Orders.');
           }
         }
       });
@@ -314,11 +316,7 @@ export default function CheckoutPage() {
         setError('Payment failed: ' + (response.error?.description || 'Unknown error'));
         setPaymentProcessing(false);
         setLoading(false);
-        try {
-          await orderAPI.cancel(createdOrder._id);
-        } catch (err) {
-          console.error("Error cancelling order on failure:", err);
-        }
+        setError('Payment failed. No amount was confirmed paid.');
       });
 
       rzp.open();
@@ -328,15 +326,6 @@ export default function CheckoutPage() {
       setError(msg);
       toast.error(msg);
       
-      // Cleanup if order was created but payment flow failed
-      if (createdOrder && createdOrder._id && paymentMethod === 'ONLINE') {
-        try {
-          await orderAPI.cancel(createdOrder._id);
-        } catch (cancelErr) {
-          console.error("Error cleaning up order after failure:", cancelErr);
-        }
-      }
-
       setPaymentProcessing(false);
       setLoading(false);
     }
@@ -748,11 +737,14 @@ export default function CheckoutPage() {
               className="w-full h-12 bg-primary text-white rounded-md font-black hover:bg-primary-hover transition-all shadow-xl shadow-primary/10 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs disabled:opacity-50"
             >
               {loading || paymentProcessing ? (
-                <Loader2 className="animate-spin" size={20} />
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  PROCESSING PAYMENT...
+                </>
               ) : (
                 <>
                   <ShieldCheck size={20} />
-                  AUTHORIZE PAYMENT
+                  PAY SECURELY WITH RAZORPAY
                 </>
               )}
             </button>

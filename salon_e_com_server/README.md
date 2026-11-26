@@ -55,5 +55,16 @@ Follow these steps to set up and run the backend server locally.
 
 The server will start on `http://localhost:5000` (or your defined PORT).
 
+### Razorpay webhooks
+
+The production webhook endpoint is `https://api.glowbshine.com/api/v1/payments/webhook`.
+Set `RAZORPAY_WEBHOOK_SECRET` in the backend deployment and use the same value in the Razorpay Dashboard; keep it separate from `RAZORPAY_KEY_SECRET`.
+The endpoint verifies the signature against the original request bytes before parsing the payload.
+
+The application handles `payment.authorized`, `payment.captured`, `payment.failed`, `order.paid`, `refund.processed`, `refund.failed`, and the payout events `payout.processed`, `payout.failed`, `payout.rejected`, and `payout.reversed`.
+Other events are acknowledged without payment or order changes. Do not enable unrelated payment-link, account, or general settlement events for this endpoint.
+
+Run the webhook unit and controller tests with `npm test`.
+
 ### API Documentation
 Refer to `API_DOCUMENTATION.md` for detailed endpoint descriptions.
